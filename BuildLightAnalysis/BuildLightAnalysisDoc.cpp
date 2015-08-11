@@ -1,15 +1,15 @@
 
-// BuildLightDoc.cpp : implementation of the CBuildLightDoc class
+// BuildLightAnalysisDoc.cpp : implementation of the CBuildLightAnalysisDoc class
 //
 
 #include "stdafx.h"
 // SHARED_HANDLERS can be defined in an ATL project implementing preview, thumbnail
 // and search filter handlers and allows sharing of document code with that project.
 #ifndef SHARED_HANDLERS
-#include "BuildLight.h"
+#include "BuildLightAnalysis.h"
 #endif
 
-#include "BuildLightDoc.h"
+#include "BuildLightAnalysisDoc.h"
 
 #include <propkey.h>
 
@@ -17,27 +17,27 @@
 #define new DEBUG_NEW
 #endif
 
-// CBuildLightDoc
+// CBuildLightAnalysisDoc
 
-IMPLEMENT_DYNCREATE(CBuildLightDoc, CDocument)
+IMPLEMENT_DYNCREATE(CBuildLightAnalysisDoc, CDocument)
 
-BEGIN_MESSAGE_MAP(CBuildLightDoc, CDocument)
+BEGIN_MESSAGE_MAP(CBuildLightAnalysisDoc, CDocument)
 END_MESSAGE_MAP()
 
 
-// CBuildLightDoc construction/destruction
+// CBuildLightAnalysisDoc construction/destruction
 
-CBuildLightDoc::CBuildLightDoc()
+CBuildLightAnalysisDoc::CBuildLightAnalysisDoc()
 {
 	// TODO: add one-time construction code here
 
 }
 
-CBuildLightDoc::~CBuildLightDoc()
+CBuildLightAnalysisDoc::~CBuildLightAnalysisDoc()
 {
 }
 
-BOOL CBuildLightDoc::OnNewDocument()
+BOOL CBuildLightAnalysisDoc::OnNewDocument()
 {
 	if (!CDocument::OnNewDocument())
 		return FALSE;
@@ -51,9 +51,9 @@ BOOL CBuildLightDoc::OnNewDocument()
 
 
 
-// CBuildLightDoc serialization
+// CBuildLightAnalysisDoc serialization
 
-void CBuildLightDoc::Serialize(CArchive& ar)
+void CBuildLightAnalysisDoc::Serialize(CArchive& ar)
 {
 	if (ar.IsStoring())
 	{
@@ -68,7 +68,7 @@ void CBuildLightDoc::Serialize(CArchive& ar)
 #ifdef SHARED_HANDLERS
 
 // Support for thumbnails
-void CBuildLightDoc::OnDrawThumbnail(CDC& dc, LPRECT lprcBounds)
+void CBuildLightAnalysisDoc::OnDrawThumbnail(CDC& dc, LPRECT lprcBounds)
 {
 	// Modify this code to draw the document's data
 	dc.FillSolidRect(lprcBounds, RGB(255, 255, 255));
@@ -89,7 +89,7 @@ void CBuildLightDoc::OnDrawThumbnail(CDC& dc, LPRECT lprcBounds)
 }
 
 // Support for Search Handlers
-void CBuildLightDoc::InitializeSearchContent()
+void CBuildLightAnalysisDoc::InitializeSearchContent()
 {
 	CString strSearchContent;
 	// Set search contents from document's data. 
@@ -99,7 +99,7 @@ void CBuildLightDoc::InitializeSearchContent()
 	SetSearchContent(strSearchContent);
 }
 
-void CBuildLightDoc::SetSearchContent(const CString& value)
+void CBuildLightAnalysisDoc::SetSearchContent(const CString& value)
 {
 	if (value.IsEmpty())
 	{
@@ -119,19 +119,19 @@ void CBuildLightDoc::SetSearchContent(const CString& value)
 
 #endif // SHARED_HANDLERS
 
-// CBuildLightDoc diagnostics
+// CBuildLightAnalysisDoc diagnostics
 
 #ifdef _DEBUG
-void CBuildLightDoc::AssertValid() const
+void CBuildLightAnalysisDoc::AssertValid() const
 {
 	CDocument::AssertValid();
 }
 
-void CBuildLightDoc::Dump(CDumpContext& dc) const
+void CBuildLightAnalysisDoc::Dump(CDumpContext& dc) const
 {
 	CDocument::Dump(dc);
 }
 #endif //_DEBUG
 
 
-// CBuildLightDoc commands
+// CBuildLightAnalysisDoc commands

@@ -1,73 +1,54 @@
 
-// BuildLight.cpp : Defines the class behaviors for the application.
+// BuildLightAnalysis.cpp : Defines the class behaviors for the application.
 //
 
 #include "stdafx.h"
 #include "afxwinappex.h"
 #include "afxdialogex.h"
-#include "BuildLight.h"
+#include "BuildLightAnalysis.h"
 #include "MainFrm.h"
 
-#include "BuildLightDoc.h"
-#include "BuildLightView.h"
+#include "BuildLightAnalysisDoc.h"
+#include "BuildLightAnalysisView.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
-// CBuildLightApp
+// CBuildLightAnalysisApp
 
-BEGIN_MESSAGE_MAP(CBuildLightApp, CWinAppEx)
-	ON_COMMAND(ID_APP_ABOUT, &CBuildLightApp::OnAppAbout)
+BEGIN_MESSAGE_MAP(CBuildLightAnalysisApp, CWinAppEx)
+	ON_COMMAND(ID_APP_ABOUT, &CBuildLightAnalysisApp::OnAppAbout)
 	// Standard file based document commands
 	ON_COMMAND(ID_FILE_NEW, &CWinAppEx::OnFileNew)
 	ON_COMMAND(ID_FILE_OPEN, &CWinAppEx::OnFileOpen)
 END_MESSAGE_MAP()
 
 
-// CBuildLightApp construction
+// CBuildLightAnalysisApp construction
 
-CBuildLightApp::CBuildLightApp()
+CBuildLightAnalysisApp::CBuildLightAnalysisApp()
 {
 	m_bHiColorIcons = TRUE;
 
-	// support Restart Manager
-	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_ALL_ASPECTS;
-#ifdef _MANAGED
-	// If the application is built using Common Language Runtime support (/clr):
-	//     1) This additional setting is needed for Restart Manager support to work properly.
-	//     2) In your project, you must add a reference to System.Windows.Forms in order to build.
-	System::Windows::Forms::Application::SetUnhandledExceptionMode(System::Windows::Forms::UnhandledExceptionMode::ThrowException);
-#endif
-
 	// TODO: replace application ID string below with unique ID string; recommended
 	// format for string is CompanyName.ProductName.SubProduct.VersionInformation
-	SetAppID(_T("BuildLight.AppID.NoVersion"));
+	SetAppID(_T("BuildLightAnalysis.AppID.NoVersion"));
 
 	// TODO: add construction code here,
 	// Place all significant initialization in InitInstance
 }
 
-// The one and only CBuildLightApp object
+// The one and only CBuildLightAnalysisApp object
 
-CBuildLightApp theApp;
+CBuildLightAnalysisApp theApp;
 
 
-// CBuildLightApp initialization
+// CBuildLightAnalysisApp initialization
 
-BOOL CBuildLightApp::InitInstance()
+BOOL CBuildLightAnalysisApp::InitInstance()
 {
-	// InitCommonControlsEx() is required on Windows XP if an application
-	// manifest specifies use of ComCtl32.dll version 6 or later to enable
-	// visual styles.  Otherwise, any window creation will fail.
-	INITCOMMONCONTROLSEX InitCtrls;
-	InitCtrls.dwSize = sizeof(InitCtrls);
-	// Set this to include all the common control classes you want to use
-	// in your application.
-	InitCtrls.dwICC = ICC_WIN95_CLASSES;
-	InitCommonControlsEx(&InitCtrls);
-
 	CWinAppEx::InitInstance();
 
 
@@ -111,9 +92,9 @@ BOOL CBuildLightApp::InitInstance()
 	CSingleDocTemplate* pDocTemplate;
 	pDocTemplate = new CSingleDocTemplate(
 		IDR_MAINFRAME,
-		RUNTIME_CLASS(CBuildLightDoc),
+		RUNTIME_CLASS(CBuildLightAnalysisDoc),
 		RUNTIME_CLASS(CMainFrame),       // main SDI frame window
-		RUNTIME_CLASS(CBuildLightView));
+		RUNTIME_CLASS(CBuildLightAnalysisView));
 	if (!pDocTemplate)
 		return FALSE;
 	AddDocTemplate(pDocTemplate);
@@ -138,7 +119,7 @@ BOOL CBuildLightApp::InitInstance()
 	return TRUE;
 }
 
-int CBuildLightApp::ExitInstance()
+int CBuildLightAnalysisApp::ExitInstance()
 {
 	//TODO: handle additional resources you may have added
 	AfxOleTerm(FALSE);
@@ -146,7 +127,7 @@ int CBuildLightApp::ExitInstance()
 	return CWinAppEx::ExitInstance();
 }
 
-// CBuildLightApp message handlers
+// CBuildLightAnalysisApp message handlers
 
 
 // CAboutDlg dialog used for App About
@@ -180,35 +161,32 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
 END_MESSAGE_MAP()
 
 // App command to run the dialog
-void CBuildLightApp::OnAppAbout()
+void CBuildLightAnalysisApp::OnAppAbout()
 {
 	CAboutDlg aboutDlg;
 	aboutDlg.DoModal();
 }
 
-// CBuildLightApp customization load/save methods
+// CBuildLightAnalysisApp customization load/save methods
 
-void CBuildLightApp::PreLoadState()
+void CBuildLightAnalysisApp::PreLoadState()
 {
 	BOOL bNameValid;
 	CString strName;
 	bNameValid = strName.LoadString(IDS_EDIT_MENU);
 	ASSERT(bNameValid);
 	GetContextMenuManager()->AddMenu(strName, IDR_POPUP_EDIT);
-	bNameValid = strName.LoadString(IDS_EXPLORER);
-	ASSERT(bNameValid);
-	GetContextMenuManager()->AddMenu(strName, IDR_POPUP_EXPLORER);
 }
 
-void CBuildLightApp::LoadCustomState()
+void CBuildLightAnalysisApp::LoadCustomState()
 {
 }
 
-void CBuildLightApp::SaveCustomState()
+void CBuildLightAnalysisApp::SaveCustomState()
 {
 }
 
-// CBuildLightApp message handlers
+// CBuildLightAnalysisApp message handlers
 
 
 

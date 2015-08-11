@@ -1,5 +1,5 @@
 
-// BuildLight.h : main header file for the BuildLight application
+// BuildLightAnalysis.h : main header file for the BuildLightAnalysis application
 //
 #pragma once
 
@@ -10,14 +10,14 @@
 #include "resource.h"       // main symbols
 
 
-// CBuildLightApp:
-// See BuildLight.cpp for the implementation of this class
+// CBuildLightAnalysisApp:
+// See BuildLightAnalysis.cpp for the implementation of this class
 //
 
-class CBuildLightApp : public CWinAppEx
+class CBuildLightAnalysisApp : public CWinAppEx
 {
 public:
-	CBuildLightApp();
+	CBuildLightAnalysisApp();
 
 
 // Overrides
@@ -36,4 +36,4 @@ public:
 	DECLARE_MESSAGE_MAP()
 };
 
-extern CBuildLightApp theApp;
+extern CBuildLightAnalysisApp theApp;

@@ -12,11 +12,11 @@ public:
 	virtual BOOL AllowShowOnList() const { return FALSE; }
 };
 
-class CPropertiesWnd : public CDockablePane
+class COutWallWnd : public CDockablePane
 {
 // Construction
 public:
-	CPropertiesWnd();
+	COutWallWnd();
 
 	void AdjustLayout();
 
@@ -30,13 +30,13 @@ public:
 
 protected:
 	CFont m_fntPropList;
-	CComboBox m_wndObjectCombo;
-	CPropertiesToolBar m_wndToolBar;
+	CButton m_insertButton;
+	CButton m_deleteButton;
 	CMFCPropertyGridCtrl m_wndPropList;
 
 // Implementation
 public:
-	virtual ~CPropertiesWnd();
+	virtual ~COutWallWnd();
 
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);

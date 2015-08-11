@@ -3,10 +3,7 @@
 //
 
 #pragma once
-#include "FileView.h"
-#include "ClassView.h"
-#include "OutputWnd.h"
-#include "PropertiesWnd.h"
+#include "OutWallWnd.h"
 
 class CMainFrame : public CFrameWndEx
 {
@@ -24,7 +21,6 @@ public:
 // Overrides
 public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-	virtual BOOL LoadFrame(UINT nIDResource, DWORD dwDefaultStyle = WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, CWnd* pParentWnd = NULL, CCreateContext* pContext = NULL);
 
 // Implementation
 public:
@@ -38,18 +34,13 @@ protected:  // control bar embedded members
 	CMFCMenuBar       m_wndMenuBar;
 	CMFCToolBar       m_wndToolBar;
 	CMFCStatusBar     m_wndStatusBar;
-	CMFCToolBarImages m_UserImages;
-	CFileView         m_wndFileView;
-	CClassView        m_wndClassView;
-	COutputWnd        m_wndOutput;
-	CPropertiesWnd    m_wndProperties;
+	COutWallWnd    m_wndProperties;
 
 // Generated message map functions
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnViewCustomize();
 	afx_msg LRESULT OnToolbarCreateNew(WPARAM wp, LPARAM lp);
-	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 	DECLARE_MESSAGE_MAP()
 
 	BOOL CreateDockingWindows();

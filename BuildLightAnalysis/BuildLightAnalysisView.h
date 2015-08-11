@@ -1,19 +1,19 @@
 
-// BuildLightView.h : interface of the CBuildLightView class
+// BuildLightAnalysisView.h : interface of the CBuildLightAnalysisView class
 //
 
 #pragma once
 
 
-class CBuildLightView : public CView
+class CBuildLightAnalysisView : public CView
 {
 protected: // create from serialization only
-	CBuildLightView();
-	DECLARE_DYNCREATE(CBuildLightView)
+	CBuildLightAnalysisView();
+	DECLARE_DYNCREATE(CBuildLightAnalysisView)
 
 // Attributes
 public:
-	CBuildLightDoc* GetDocument() const;
+	CBuildLightAnalysisDoc* GetDocument() const;
 
 // Operations
 public:
@@ -26,7 +26,7 @@ protected:
 
 // Implementation
 public:
-	virtual ~CBuildLightView();
+	virtual ~CBuildLightAnalysisView();
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
@@ -42,8 +42,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 };
 
-#ifndef _DEBUG  // debug version in BuildLightView.cpp
-inline CBuildLightDoc* CBuildLightView::GetDocument() const
-   { return reinterpret_cast<CBuildLightDoc*>(m_pDocument); }
+#ifndef _DEBUG  // debug version in BuildLightAnalysisView.cpp
+inline CBuildLightAnalysisDoc* CBuildLightAnalysisView::GetDocument() const
+   { return reinterpret_cast<CBuildLightAnalysisDoc*>(m_pDocument); }
 #endif
 

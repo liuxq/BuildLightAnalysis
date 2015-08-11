@@ -11,8 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{D94BE687-E371-40CF-8C31-CDF21DDCD1A5}</ProjectGuid>
-    <RootNamespace>BuildLight</RootNamespace>
+    <ProjectGuid>{94CCABAA-A546-408A-9A8D-0BDA9D730FD7}</ProjectGuid>
+    <RootNamespace>BuildLightAnalysis</RootNamespace>
     <Keyword>MFCProj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -95,64 +95,40 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
-    <None Include="res\BuildLight.ico" />
-    <None Include="res\BuildLight.rc2" />
-    <None Include="res\BuildLightDoc.ico" />
-    <None Include="res\classview.bmp" />
-    <None Include="res\classview_hc.bmp" />
-    <None Include="res\class_view.ico" />
-    <None Include="res\class_view_hc.ico" />
-    <None Include="res\explorer.bmp" />
-    <None Include="res\explorer_hc.bmp" />
-    <None Include="res\fileview.bmp" />
-    <None Include="res\fileview_hc.bmp" />
-    <None Include="res\file_view.ico" />
-    <None Include="res\file_view_hc.ico" />
-    <None Include="res\menuimages.bmp" />
-    <None Include="res\menuimages_hc.bmp" />
-    <None Include="res\output_wnd.ico" />
-    <None Include="res\output_wnd_hc.ico" />
+    <None Include="res\BuildLightAnalysis.ico" />
+    <None Include="res\BuildLightAnalysis.rc2" />
+    <None Include="res\BuildLightAnalysisDoc.ico" />
     <None Include="res\properties.bmp" />
     <None Include="res\properties_hc.bmp" />
     <None Include="res\properties_wnd.ico" />
     <None Include="res\properties_wnd_hc.ico" />
-    <None Include="res\sort.bmp" />
-    <None Include="res\sort_hc.bmp" />
     <None Include="res\Toolbar.bmp" />
     <None Include="res\Toolbar256.bmp" />
     <None Include="UserImages.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BuildLight.h" />
-    <ClInclude Include="BuildLightDoc.h" />
-    <ClInclude Include="BuildLightView.h" />
-    <ClInclude Include="ClassView.h" />
-    <ClInclude Include="FileView.h" />
+    <ClInclude Include="BuildLightAnalysis.h" />
+    <ClInclude Include="BuildLightAnalysisDoc.h" />
+    <ClInclude Include="BuildLightAnalysisView.h" />
     <ClInclude Include="MainFrm.h" />
-    <ClInclude Include="OutputWnd.h" />
-    <ClInclude Include="PropertiesWnd.h" />
+    <ClInclude Include="OutWallWnd.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="ViewTree.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BuildLight.cpp" />
-    <ClCompile Include="BuildLightDoc.cpp" />
-    <ClCompile Include="BuildLightView.cpp" />
-    <ClCompile Include="ClassView.cpp" />
-    <ClCompile Include="FileView.cpp" />
+    <ClCompile Include="BuildLightAnalysis.cpp" />
+    <ClCompile Include="BuildLightAnalysisDoc.cpp" />
+    <ClCompile Include="BuildLightAnalysisView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
-    <ClCompile Include="OutputWnd.cpp" />
-    <ClCompile Include="PropertiesWnd.cpp" />
+    <ClCompile Include="OutWallWnd.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="ViewTree.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="BuildLight.rc" />
+    <ResourceCompile Include="BuildLightAnalysis.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

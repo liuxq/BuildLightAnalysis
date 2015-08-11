@@ -1,16 +1,16 @@
 
-// BuildLightDoc.h : interface of the CBuildLightDoc class
+// BuildLightAnalysisDoc.h : interface of the CBuildLightAnalysisDoc class
 //
 
 
 #pragma once
 
 
-class CBuildLightDoc : public CDocument
+class CBuildLightAnalysisDoc : public CDocument
 {
 protected: // create from serialization only
-	CBuildLightDoc();
-	DECLARE_DYNCREATE(CBuildLightDoc)
+	CBuildLightAnalysisDoc();
+	DECLARE_DYNCREATE(CBuildLightAnalysisDoc)
 
 // Attributes
 public:
@@ -29,7 +29,7 @@ public:
 
 // Implementation
 public:
-	virtual ~CBuildLightDoc();
+	virtual ~CBuildLightAnalysisDoc();
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
