@@ -15,7 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ReadMe.txt" />
     <None Include="res\properties_wnd.ico">
       <Filter>Resource Files</Filter>
     </None>

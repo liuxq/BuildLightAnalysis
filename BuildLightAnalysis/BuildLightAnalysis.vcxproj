@@ -94,7 +94,6 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="ReadMe.txt" />
     <None Include="res\BuildLightAnalysis.ico" />
     <None Include="res\BuildLightAnalysis.rc2" />
     <None Include="res\BuildLightAnalysisDoc.ico" />
