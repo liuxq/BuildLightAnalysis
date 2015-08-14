@@ -30,10 +30,10 @@ BEGIN_MESSAGE_MAP(COutWallWnd, CDockablePane)
 	ON_UPDATE_COMMAND_UI(ID_EXPAND_ALL, OnUpdateExpandAllProperties)
 	ON_COMMAND(ID_SORTPROPERTIES, OnSortProperties)
 	ON_UPDATE_COMMAND_UI(ID_SORTPROPERTIES, OnUpdateSortProperties)
-	ON_COMMAND(ID_PROPERTIES1, OnProperties1)
-	ON_UPDATE_COMMAND_UI(ID_PROPERTIES1, OnUpdateProperties1)
-	ON_COMMAND(IDC_INSERT_BUTTON, OnProperties2)
-	ON_UPDATE_COMMAND_UI(ID_PROPERTIES2, OnUpdateProperties2)
+	ON_COMMAND(IDC_INSERT_BUTTON, OnInsertPos)
+	ON_UPDATE_COMMAND_UI(IDC_INSERT_BUTTON, OnUpdateProperties2)
+	ON_COMMAND(IDC_DELETE_BUTTON, OnDeletePos)
+	ON_UPDATE_COMMAND_UI(IDC_DELETE_BUTTON, OnUpdateProperties2)
 	ON_WM_SETFOCUS()
 	ON_WM_SETTINGCHANGE()
 END_MESSAGE_MAP()
@@ -55,8 +55,9 @@ void COutWallWnd::AdjustLayout()
 
 	int cyBut = 20;//rectButton.Size().cy;
 
-	//m_insertButton.SetWindowPos(NULL, rectClient.left, rectClient.top, rectClient.Width(), cyBut, SWP_NOZORDER);
-	//m_wndPropList.SetWindowPos(NULL, rectClient.left, rectClient.top + cyBut, rectClient.Width(), rectClient.Height() -(cyBut), SWP_NOACTIVATE | SWP_NOZORDER);
+	m_insertButton.SetWindowPos(NULL, rectClient.left, rectClient.top, rectClient.Width()/2, cyBut, SWP_NOZORDER);
+	m_deleteButton.SetWindowPos(NULL, rectClient.left + rectClient.Width()/2, rectClient.top, rectClient.Width()/2, cyBut, SWP_NOZORDER);
+	m_wndPropList.SetWindowPos(NULL, rectClient.left, rectClient.top + cyBut, rectClient.Width(), rectClient.Height() -(cyBut), SWP_NOACTIVATE | SWP_NOZORDER);
 }
 
 int COutWallWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -70,12 +71,14 @@ int COutWallWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Create combo:
 	const DWORD dwViewStyle = WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON;
 
-	if (!m_insertButton.Create(_T("lxq"),dwViewStyle, CRect(20,10,80,40), this, IDC_INSERT_BUTTON))
+	if (!m_insertButton.Create(_T("插入坐标"),dwViewStyle, rectDummy, this, IDC_INSERT_BUTTON))
 	{
-		TRACE0("Failed to create Properties Combo \n");
 		return -1;      // fail to create
 	}
-	m_insertButton.EnableWindow(TRUE);
+	if (!m_deleteButton.Create(_T("删除坐标"),dwViewStyle, rectDummy, this, IDC_DELETE_BUTTON))
+	{
+		return -1;      // fail to create
+	}
 
 	if (!m_wndPropList.Create(WS_VISIBLE | WS_CHILD, rectDummy, this, 2))
 	{
@@ -114,9 +117,21 @@ void COutWallWnd::OnUpdateSortProperties(CCmdUI* pCmdUI)
 	pCmdUI->SetCheck(m_wndPropList.IsAlphabeticMode());
 }
 
-void COutWallWnd::OnProperties1()
+void COutWallWnd::OnInsertPos()
 {
-	// TODO: Add your command handler code here
+	
+	CMFCPropertyGridProperty* pPos = new CMFCPropertyGridProperty(_T("2"), 0, TRUE);
+
+	CMFCPropertyGridProperty* pProp = new CMFCPropertyGridProperty(_T("X"), (_variant_t) 250l, _T("Specifies the window's height"));
+	pProp->EnableSpinControl(TRUE, 50, 300);
+	pPos->AddSubItem(pProp);
+
+	pProp = new CMFCPropertyGridProperty( _T("Y"), (_variant_t) 150l, _T("Specifies the window's width"));
+	pProp->EnableSpinControl(TRUE, 50, 200);
+	pPos->AddSubItem(pProp);
+
+	m_wndPropList.GetProperty(0)->AddSubItem(pPos);
+	m_wndPropList.AdjustLayout();
 }
 
 void COutWallWnd::OnUpdateProperties1(CCmdUI* /*pCmdUI*/)
@@ -124,9 +139,9 @@ void COutWallWnd::OnUpdateProperties1(CCmdUI* /*pCmdUI*/)
 	// TODO: Add your command update UI handler code here
 }
 
-void COutWallWnd::OnProperties2()
+void COutWallWnd::OnDeletePos()
 {
-	// TODO: Add your command handler code here
+	
 }
 
 void COutWallWnd::OnUpdateProperties2(CCmdUI* /*pCmdUI*/)
@@ -143,17 +158,35 @@ void COutWallWnd::InitPropList()
 	m_wndPropList.SetVSDotNetLook();
 	m_wndPropList.MarkModifiedProperties();
 
-	CMFCPropertyGridProperty* pSize = new CMFCPropertyGridProperty(_T("外墙坐标"), 0, TRUE);
+	CMFCPropertyGridProperty* pGroup = new CMFCPropertyGridProperty(_T("外墙坐标"));
+
+	CMFCPropertyGridProperty* pPos = new CMFCPropertyGridProperty(_T("1"), 0, TRUE);
 
 	CMFCPropertyGridProperty* pProp = new CMFCPropertyGridProperty(_T("X"), (_variant_t) 250l, _T("Specifies the window's height"));
 	pProp->EnableSpinControl(TRUE, 50, 300);
-	pSize->AddSubItem(pProp);
+	pPos->AddSubItem(pProp);
 
 	pProp = new CMFCPropertyGridProperty( _T("Y"), (_variant_t) 150l, _T("Specifies the window's width"));
 	pProp->EnableSpinControl(TRUE, 50, 200);
-	pSize->AddSubItem(pProp);
+	pPos->AddSubItem(pProp);
 
-	m_wndPropList.AddProperty(pSize);
+	pGroup->AddSubItem(pPos);
+
+	m_wndPropList.AddProperty(pGroup);
+
+	CMFCPropertyGridProperty* pPos1 = new CMFCPropertyGridProperty(_T("2"), 0, TRUE);
+
+	CMFCPropertyGridProperty* pProp1 = new CMFCPropertyGridProperty(_T("X"), (_variant_t) 250l, _T("Specifies the window's height"));
+	pProp1->EnableSpinControl(TRUE, 50, 300);
+	pPos1->AddSubItem(pProp1);
+
+	pProp1 = new CMFCPropertyGridProperty( _T("Y"), (_variant_t) 150l, _T("Specifies the window's width"));
+	pProp1->EnableSpinControl(TRUE, 50, 200);
+	pPos1->AddSubItem(pProp1);
+
+	m_wndPropList.GetProperty(0)->AddSubItem(pPos1);
+	//m_wndPropList.AdjustLayout();
+	//m_wndPropList.getsele
 }
 
 void COutWallWnd::OnSetFocus(CWnd* pOldWnd)
@@ -188,5 +221,5 @@ void COutWallWnd::SetPropListFont()
 
 	m_wndPropList.SetFont(&m_fntPropList);
 	m_insertButton.SetFont(&m_fntPropList);
-	//m_deleteButton.SetFont(&m_fntPropList);
+	m_deleteButton.SetFont(&m_fntPropList);
 }
