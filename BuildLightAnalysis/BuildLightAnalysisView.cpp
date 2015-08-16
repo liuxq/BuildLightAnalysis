@@ -55,7 +55,12 @@ void CBuildLightAnalysisView::OnDraw(CDC* /*pDC*/)
 	if (!pDoc)
 		return;
 
-	// TODO: add draw code for native data here
+	CPoint lxq(100,200);
+	CPoint lxq1(200,200);
+	CDC *pDC=GetDC();        //CDC方式创建
+	pDC->MoveTo(lxq);      
+	pDC->LineTo(lxq1);
+	ReleaseDC(pDC);
 }
 
 void CBuildLightAnalysisView::OnRButtonUp(UINT /* nFlags */, CPoint point)

@@ -34,7 +34,7 @@ protected:  // control bar embedded members
 	CMFCMenuBar       m_wndMenuBar;
 	CMFCToolBar       m_wndToolBar;
 	CMFCStatusBar     m_wndStatusBar;
-	COutWallWnd    m_wndProperties;
+	COutWallWnd		  m_wndOutWallProperties;
 
 // Generated message map functions
 protected:

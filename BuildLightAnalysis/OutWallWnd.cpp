@@ -12,6 +12,8 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+
+const int waiqiangID = 100;
 /////////////////////////////////////////////////////////////////////////////
 // CResourceViewBar
 
@@ -119,8 +121,12 @@ void COutWallWnd::OnUpdateSortProperties(CCmdUI* pCmdUI)
 
 void COutWallWnd::OnInsertPos()
 {
-	
-	CMFCPropertyGridProperty* pPos = new CMFCPropertyGridProperty(_T("2"), 0, TRUE);
+	CMFCPropertyGridProperty* pGroup = getCoodGroup();
+	int count = pGroup->GetSubItemsCount();
+	CString strCount;
+	strCount.Format(_T("%d"),count+1);
+
+	CMFCPropertyGridProperty* pPos = new CMFCPropertyGridProperty(strCount, 0, TRUE);
 
 	CMFCPropertyGridProperty* pProp = new CMFCPropertyGridProperty(_T("X"), (_variant_t) 250l, _T("Specifies the window's height"));
 	pProp->EnableSpinControl(TRUE, 50, 300);
@@ -130,7 +136,8 @@ void COutWallWnd::OnInsertPos()
 	pProp->EnableSpinControl(TRUE, 50, 200);
 	pPos->AddSubItem(pProp);
 
-	m_wndPropList.GetProperty(0)->AddSubItem(pPos);
+	pGroup->AddSubItem(pPos);
+	m_wndPropList.UpdateProperty((PropertyGridProperty*)(pGroup));
 	m_wndPropList.AdjustLayout();
 }
 
@@ -141,6 +148,24 @@ void COutWallWnd::OnUpdateProperties1(CCmdUI* /*pCmdUI*/)
 
 void COutWallWnd::OnDeletePos()
 {
+	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
+	if (selItem && selItem->GetParent() && selItem->GetParent()->GetData() == waiqiangID)
+	{
+		m_wndPropList.DeleteProperty(selItem);
+
+		//重新设置一下坐标编号
+		CMFCPropertyGridProperty* pGroup = getCoodGroup();
+		if (!pGroup)
+			return;
+		
+		int count = pGroup->GetSubItemsCount();
+		CString strName;
+		for (int i = 0; i < count; i++)
+		{
+			strName.Format(_T("%d"),i+1);
+			pGroup->GetSubItem(i)->SetName(strName);
+		}
+	}
 	
 }
 
@@ -158,7 +183,7 @@ void COutWallWnd::InitPropList()
 	m_wndPropList.SetVSDotNetLook();
 	m_wndPropList.MarkModifiedProperties();
 
-	CMFCPropertyGridProperty* pGroup = new CMFCPropertyGridProperty(_T("外墙坐标"));
+	CMFCPropertyGridProperty* pGroup = new CMFCPropertyGridProperty(_T("外墙坐标"),waiqiangID);
 
 	CMFCPropertyGridProperty* pPos = new CMFCPropertyGridProperty(_T("1"), 0, TRUE);
 
@@ -174,19 +199,8 @@ void COutWallWnd::InitPropList()
 
 	m_wndPropList.AddProperty(pGroup);
 
-	CMFCPropertyGridProperty* pPos1 = new CMFCPropertyGridProperty(_T("2"), 0, TRUE);
+	
 
-	CMFCPropertyGridProperty* pProp1 = new CMFCPropertyGridProperty(_T("X"), (_variant_t) 250l, _T("Specifies the window's height"));
-	pProp1->EnableSpinControl(TRUE, 50, 300);
-	pPos1->AddSubItem(pProp1);
-
-	pProp1 = new CMFCPropertyGridProperty( _T("Y"), (_variant_t) 150l, _T("Specifies the window's width"));
-	pProp1->EnableSpinControl(TRUE, 50, 200);
-	pPos1->AddSubItem(pProp1);
-
-	m_wndPropList.GetProperty(0)->AddSubItem(pPos1);
-	//m_wndPropList.AdjustLayout();
-	//m_wndPropList.getsele
 }
 
 void COutWallWnd::OnSetFocus(CWnd* pOldWnd)

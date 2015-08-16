@@ -1,4 +1,4 @@
-
+#include "PropertyGridCtrl.h"
 #pragma once
 
 class CPropertiesToolBar : public CMFCToolBar
@@ -27,12 +27,16 @@ public:
 		m_wndPropList.SetVSDotNetLook(bSet);
 		m_wndPropList.SetGroupNameFullWidth(bSet);
 	}
+	CMFCPropertyGridProperty* getCoodGroup()
+	{
+		return m_wndPropList.GetProperty(0);
+	}
 
 protected:
 	CFont m_fntPropList;
 	CButton m_insertButton;
 	CButton m_deleteButton;
-	CMFCPropertyGridCtrl m_wndPropList;
+	PropertyGridCtrl m_wndPropList;
 
 // Implementation
 public:
