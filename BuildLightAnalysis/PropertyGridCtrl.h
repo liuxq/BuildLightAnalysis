@@ -1,3 +1,4 @@
+#pragma once
 
 class PropertyGridProperty : public CMFCPropertyGridProperty
 {
@@ -12,5 +13,6 @@ class PropertyGridCtrl : public CMFCPropertyGridCtrl
 	// Construction
 public:
 	void UpdateProperty(PropertyGridProperty* pProp);
+	BOOL EndEditItem(BOOL bUpdateData = TRUE);
 };
 

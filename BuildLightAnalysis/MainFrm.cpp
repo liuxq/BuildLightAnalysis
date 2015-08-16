@@ -108,6 +108,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndOutWallProperties.EnableDocking(CBRS_ALIGN_ANY);
 	DockPane(&m_wndOutWallProperties);
 
+	m_wndInWallProperties.EnableDocking(CBRS_ALIGN_ANY);
+	DockPane(&m_wndInWallProperties);
+
 
 	// Enable toolbar and docking window menu replacement
 	EnablePaneMenu(TRUE, ID_VIEW_CUSTOMIZE, strCustomize, ID_VIEW_TOOLBAR);
@@ -133,11 +136,19 @@ BOOL CMainFrame::CreateDockingWindows()
 	BOOL bNameValid;
 	// Create properties window
 	CString strPropertiesWnd;
-	bNameValid = strPropertiesWnd.LoadString(IDS_PROPERTIES_WND);
+	bNameValid = strPropertiesWnd.LoadString(IDS_OUTWALL_PROPERTIES_WND);
 	ASSERT(bNameValid);
-	if (!m_wndOutWallProperties.Create(strPropertiesWnd, this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_PROPERTIESWND, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
+	if (!m_wndOutWallProperties.Create(strPropertiesWnd, this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_OUTWALL_PROPERTIESWND, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
 	{
-		TRACE0("Failed to create Properties window\n");
+		TRACE0("Failed to create outWall window\n");
+		return FALSE; // failed to create
+	}
+
+	bNameValid = strPropertiesWnd.LoadString(IDS_INWALL_PROPERTIES_WND);
+	ASSERT(bNameValid);
+	if (!m_wndInWallProperties.Create(strPropertiesWnd, this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_INWALL_PROPERTIESWND, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
+	{
+		TRACE0("Failed to create InWall window\n");
 		return FALSE; // failed to create
 	}
 

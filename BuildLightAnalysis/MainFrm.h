@@ -4,6 +4,7 @@
 
 #pragma once
 #include "OutWallWnd.h"
+#include "InWallWnd.h"
 
 class CMainFrame : public CFrameWndEx
 {
@@ -17,7 +18,14 @@ public:
 
 // Operations
 public:
-
+	COutWallWnd& GetOutWallProperty()
+	{
+		return m_wndOutWallProperties;
+	}
+	CMFCStatusBar& GetStatusBar()
+	{
+		return m_wndStatusBar;
+	}
 // Overrides
 public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
@@ -35,6 +43,7 @@ protected:  // control bar embedded members
 	CMFCToolBar       m_wndToolBar;
 	CMFCStatusBar     m_wndStatusBar;
 	COutWallWnd		  m_wndOutWallProperties;
+	CInWallWnd		  m_wndInWallProperties;
 
 // Generated message map functions
 protected:

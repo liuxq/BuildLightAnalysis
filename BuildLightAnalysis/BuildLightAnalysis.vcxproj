@@ -109,6 +109,7 @@
     <ClInclude Include="BuildLightAnalysis.h" />
     <ClInclude Include="BuildLightAnalysisDoc.h" />
     <ClInclude Include="BuildLightAnalysisView.h" />
+    <ClInclude Include="InWallWnd.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="OutWallWnd.h" />
     <ClInclude Include="PropertyGridCtrl.h" />
@@ -120,6 +121,7 @@
     <ClCompile Include="BuildLightAnalysis.cpp" />
     <ClCompile Include="BuildLightAnalysisDoc.cpp" />
     <ClCompile Include="BuildLightAnalysisView.cpp" />
+    <ClCompile Include="InWallWnd.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="OutWallWnd.cpp" />
     <ClCompile Include="PropertyGridCtrl.cpp" />

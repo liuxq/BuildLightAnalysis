@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#include "OutWallWnd.h"
+#include "InWallWnd.h"
 #include "Resource.h"
 #include "MainFrm.h"
 #include "BuildLightAnalysis.h"
@@ -19,15 +19,15 @@ const int waiqiangID = 100;
 /////////////////////////////////////////////////////////////////////////////
 // CResourceViewBar
 
-COutWallWnd::COutWallWnd()
+CInWallWnd::CInWallWnd()
 {
 }
 
-COutWallWnd::~COutWallWnd()
+CInWallWnd::~CInWallWnd()
 {
 }
 
-BEGIN_MESSAGE_MAP(COutWallWnd, CDockablePane)
+BEGIN_MESSAGE_MAP(CInWallWnd, CDockablePane)
 	ON_WM_CREATE()
 	ON_WM_SIZE()
 	ON_COMMAND(ID_EXPAND_ALL, OnExpandAllProperties)
@@ -45,7 +45,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CResourceViewBar message handlers
 
-void COutWallWnd::AdjustLayout()
+void CInWallWnd::AdjustLayout()
 {
 	if (GetSafeHwnd() == NULL)
 	{
@@ -64,7 +64,7 @@ void COutWallWnd::AdjustLayout()
 	m_wndPropList.SetWindowPos(NULL, rectClient.left, rectClient.top + cyBut, rectClient.Width(), rectClient.Height() -(cyBut), SWP_NOACTIVATE | SWP_NOZORDER);
 }
 
-int COutWallWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
+int CInWallWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CDockablePane::OnCreate(lpCreateStruct) == -1)
 		return -1;
@@ -96,32 +96,32 @@ int COutWallWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-void COutWallWnd::OnSize(UINT nType, int cx, int cy)
+void CInWallWnd::OnSize(UINT nType, int cx, int cy)
 {
 	CDockablePane::OnSize(nType, cx, cy);
 	AdjustLayout();
 }
 
-void COutWallWnd::OnExpandAllProperties()
+void CInWallWnd::OnExpandAllProperties()
 {
 	m_wndPropList.ExpandAll();
 }
 
-void COutWallWnd::OnUpdateExpandAllProperties(CCmdUI* /* pCmdUI */)
+void CInWallWnd::OnUpdateExpandAllProperties(CCmdUI* /* pCmdUI */)
 {
 }
 
-void COutWallWnd::OnSortProperties()
+void CInWallWnd::OnSortProperties()
 {
 	m_wndPropList.SetAlphabeticMode(!m_wndPropList.IsAlphabeticMode());
 }
 
-void COutWallWnd::OnUpdateSortProperties(CCmdUI* pCmdUI)
+void CInWallWnd::OnUpdateSortProperties(CCmdUI* pCmdUI)
 {
 	pCmdUI->SetCheck(m_wndPropList.IsAlphabeticMode());
 }
 
-void COutWallWnd::OnInsertPos()
+void CInWallWnd::OnInsertPos()
 {
 	CMFCPropertyGridProperty* pGroup = getCoodGroup();
 	int count = pGroup->GetSubItemsCount();
@@ -147,12 +147,12 @@ void COutWallWnd::OnInsertPos()
 	pMain->GetActiveView()->Invalidate(); 
 }
 
-void COutWallWnd::OnUpdateProperties1(CCmdUI* /*pCmdUI*/)
+void CInWallWnd::OnUpdateProperties1(CCmdUI* /*pCmdUI*/)
 {
 	// TODO: Add your command update UI handler code here
 }
 
-void COutWallWnd::OnDeletePos()
+void CInWallWnd::OnDeletePos()
 {
 	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
 	if (selItem && selItem->GetParent() && selItem->GetParent()->GetData() == waiqiangID)
@@ -178,12 +178,12 @@ void COutWallWnd::OnDeletePos()
 	pMain->GetActiveView()->Invalidate(); 
 }
 
-void COutWallWnd::OnUpdateProperties2(CCmdUI* /*pCmdUI*/)
+void CInWallWnd::OnUpdateProperties2(CCmdUI* /*pCmdUI*/)
 {
 	// TODO: Add your command update UI handler code here
 }
 
-void COutWallWnd::InitPropList()
+void CInWallWnd::InitPropList()
 {
 	SetPropListFont();
 
@@ -212,19 +212,19 @@ void COutWallWnd::InitPropList()
 
 }
 
-void COutWallWnd::OnSetFocus(CWnd* pOldWnd)
+void CInWallWnd::OnSetFocus(CWnd* pOldWnd)
 {
 	CDockablePane::OnSetFocus(pOldWnd);
 	m_wndPropList.SetFocus();
 }
 
-void COutWallWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
+void CInWallWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 {
 	CDockablePane::OnSettingChange(uFlags, lpszSection);
 	SetPropListFont();
 }
 
-void COutWallWnd::SetPropListFont()
+void CInWallWnd::SetPropListFont()
 {
 	::DeleteObject(m_fntPropList.Detach());
 
