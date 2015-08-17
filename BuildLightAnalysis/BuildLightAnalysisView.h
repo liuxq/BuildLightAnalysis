@@ -35,6 +35,7 @@ public:
 protected:
 private:
 	int m_selectedOutWallPoint;
+	bool m_isDrawInWall;
 
 // Generated message map functions
 protected:

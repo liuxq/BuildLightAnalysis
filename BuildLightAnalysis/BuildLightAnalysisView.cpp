@@ -33,7 +33,7 @@ END_MESSAGE_MAP()
 
 // CBuildLightAnalysisView construction/destruction
 
-CBuildLightAnalysisView::CBuildLightAnalysisView():m_selectedOutWallPoint(-1)
+CBuildLightAnalysisView::CBuildLightAnalysisView():m_selectedOutWallPoint(-1),m_isDrawInWall(false)
 {
 	// TODO: add construction code here
 
@@ -62,7 +62,8 @@ void CBuildLightAnalysisView::OnDraw(CDC* /*pDC*/)
 
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 	CMFCPropertyGridProperty* outWallPos = pMain->GetOutWallProperty().getCoodGroup();
-	if (!outWallPos)
+	CMFCPropertyGridProperty* inWallPos = pMain->GetInWallProperty().getCoodGroup();
+	if (!outWallPos || !inWallPos)
 		return;
 
 	CDC *pDC=GetDC();        //CDC方式创建
@@ -92,6 +93,19 @@ void CBuildLightAnalysisView::OnDraw(CDC* /*pDC*/)
 		}
 	}
 
+	//画内墙
+	for (int i = 0; i < inWallPos->GetSubItemsCount(); i++)
+	{
+		p.x = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().intVal;
+		p.y = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().intVal;
+		pDC->MoveTo(p);
+
+		p.x = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().intVal;
+		p.y = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().intVal;
+		pDC->LineTo(p);
+		
+	}
+
 	ReleaseDC(pDC);
 }
 
@@ -113,33 +127,65 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 
 		Invalidate();
 	}
+	//如果是内墙模式
+	if (m_isDrawInWall && pMain->GetInWallProperty().IsPaneVisible())
+	{
+		CMFCPropertyGridProperty* inWallPos = pMain->GetInWallProperty().getCoodGroup();
+		if (!inWallPos)
+			return;
+
+		int count = inWallPos->GetSubItemsCount();
+		if (!count)
+			return;
+		inWallPos->GetSubItem(count-1)->GetSubItem(1)->GetSubItem(0)->SetValue(point.x);
+		inWallPos->GetSubItem(count-1)->GetSubItem(1)->GetSubItem(1)->SetValue(point.y);
+		Invalidate();
+	}
 
 }
 void CBuildLightAnalysisView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
-	CMFCPropertyGridProperty* outWallPos = pMain->GetOutWallProperty().getCoodGroup();
-	if (!outWallPos)
-		return;
-
-	for (int i = 0; i < outWallPos->GetSubItemsCount(); i++)
+	
+	//如果是外墙模式
+	if (pMain->GetOutWallProperty().IsPaneVisible())
 	{
-		int x = outWallPos->GetSubItem(i)->GetSubItem(0)->GetValue().intVal;
-		int y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetValue().intVal;
-
-		if (sqrt((double)(x - point.x)*(x - point.x) + (y - point.y)*(y - point.y)) < 10)
+		CMFCPropertyGridProperty* outWallPos = pMain->GetOutWallProperty().getCoodGroup();
+		if (!outWallPos)
+			return;
+		for (int i = 0; i < outWallPos->GetSubItemsCount(); i++)
 		{
-			m_selectedOutWallPoint = i;
-			break;
+			int x = outWallPos->GetSubItem(i)->GetSubItem(0)->GetValue().intVal;
+			int y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetValue().intVal;
+
+			if (sqrt((double)(x - point.x)*(x - point.x) + (y - point.y)*(y - point.y)) < 10)
+			{
+				m_selectedOutWallPoint = i;
+				break;
+			}
 		}
 	}
+
+	//如果是内墙模式
+	if (pMain->GetInWallProperty().IsPaneVisible())
+	{
+		pMain->GetInWallProperty().InsertPos(point.x,point.y,point.x,point.y);
+		m_isDrawInWall = true;
+	}
+	
 }
 void CBuildLightAnalysisView::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	//如果有选中的外墙点，则移动它
-	if (m_selectedOutWallPoint >= 0)
+	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+	//如果是外墙模式，并且有选中的外墙点，则移动它
+	if (pMain->GetOutWallProperty().IsPaneVisible() && m_selectedOutWallPoint >= 0)
 	{
 		m_selectedOutWallPoint = -1;
+	}
+	//如果是内墙模式
+	if (m_isDrawInWall && pMain->GetInWallProperty().IsPaneVisible())
+	{
+		m_isDrawInWall = false;
 	}
 }
 

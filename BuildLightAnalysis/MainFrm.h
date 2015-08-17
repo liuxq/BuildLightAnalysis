@@ -22,6 +22,10 @@ public:
 	{
 		return m_wndOutWallProperties;
 	}
+	CInWallWnd& GetInWallProperty()
+	{
+		return m_wndInWallProperties;
+	}
 	CMFCStatusBar& GetStatusBar()
 	{
 		return m_wndStatusBar;

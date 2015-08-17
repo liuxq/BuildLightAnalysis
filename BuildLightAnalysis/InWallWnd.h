@@ -21,6 +21,7 @@ public:
 	{
 		return m_wndPropList.GetProperty(0);
 	}
+	void InsertPos(long,long,long,long);
 
 protected:
 	CFont m_fntPropList;
