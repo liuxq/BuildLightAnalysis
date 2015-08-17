@@ -54,6 +54,9 @@ protected:
 
 	BOOL CreateDockingWindows();
 	void SetDockingWindowIcons(BOOL bHiColorIcons);
+public:
+	afx_msg void OnEditOutwall();
+	afx_msg void OnEditInwall();
 };
 
 

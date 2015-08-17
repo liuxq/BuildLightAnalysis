@@ -192,18 +192,30 @@ void CInWallWnd::InitPropList()
 	m_wndPropList.SetVSDotNetLook();
 	m_wndPropList.MarkModifiedProperties();
 
-	CMFCPropertyGridProperty* pGroup = new CMFCPropertyGridProperty(_T("外墙坐标"),waiqiangID);
+	CMFCPropertyGridProperty* pGroup = new CMFCPropertyGridProperty(_T("内墙线段"),waiqiangID);
 
 	CMFCPropertyGridProperty* pPos = new CMFCPropertyGridProperty(_T("1"), 0, TRUE);
 
+	CMFCPropertyGridProperty* pStart = new CMFCPropertyGridProperty(_T("Start"), 0, TRUE);
 	CMFCPropertyGridProperty* pProp = new CMFCPropertyGridProperty(_T("X"), (_variant_t) 250l, _T("Specifies the window's height"));
 	pProp->EnableSpinControl(TRUE, 50, 300);
-	pPos->AddSubItem(pProp);
-
+	pStart->AddSubItem(pProp);
 	pProp = new CMFCPropertyGridProperty( _T("Y"), (_variant_t) 150l, _T("Specifies the window's width"));
 	pProp->EnableSpinControl(TRUE, 50, 200);
-	pPos->AddSubItem(pProp);
+	pStart->AddSubItem(pProp);
 
+	CMFCPropertyGridProperty* pEnd = new CMFCPropertyGridProperty(_T("End"), 0, TRUE);
+	pProp = new CMFCPropertyGridProperty(_T("X"), (_variant_t) 250l, _T("Specifies the window's height"));
+	pProp->EnableSpinControl(TRUE, 50, 300);
+	pEnd->AddSubItem(pProp);
+	pProp = new CMFCPropertyGridProperty( _T("Y"), (_variant_t) 150l, _T("Specifies the window's width"));
+	pProp->EnableSpinControl(TRUE, 50, 200);
+	pEnd->AddSubItem(pProp);
+
+	pPos->AddSubItem(pStart);
+	pPos->AddSubItem(pEnd);
+	
+	
 	pGroup->AddSubItem(pPos);
 
 	m_wndPropList.AddProperty(pGroup);

@@ -102,10 +102,9 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 	xy.Format(_T("%d,%d"),point.x, point.y);
 	pMain->GetStatusBar().SetPaneText(0,xy);
 
-	//如果有选中的外墙点，则移动它
-	if (m_selectedOutWallPoint >= 0)
+	//如果是外墙模式，有选中的外墙点，则移动它
+	if (pMain->GetOutWallProperty().IsPaneVisible() && m_selectedOutWallPoint >= 0)
 	{
-		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 		CMFCPropertyGridProperty* outWallPos = pMain->GetOutWallProperty().getCoodGroup();
 		if (!outWallPos)
 			return;

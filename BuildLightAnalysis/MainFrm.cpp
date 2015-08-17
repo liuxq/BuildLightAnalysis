@@ -19,6 +19,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_WM_CREATE()
 	ON_COMMAND(ID_VIEW_CUSTOMIZE, &CMainFrame::OnViewCustomize)
 	ON_REGISTERED_MESSAGE(AFX_WM_CREATETOOLBAR, &CMainFrame::OnToolbarCreateNew)
+	ON_COMMAND(ID_EDIT_OUTWALL, &CMainFrame::OnEditOutwall)
+	ON_COMMAND(ID_EDIT_INWALL, &CMainFrame::OnEditInwall)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -107,9 +109,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	m_wndOutWallProperties.EnableDocking(CBRS_ALIGN_ANY);
 	DockPane(&m_wndOutWallProperties);
-
+	m_wndOutWallProperties.ShowPane(FALSE,FALSE,TRUE);
 	m_wndInWallProperties.EnableDocking(CBRS_ALIGN_ANY);
 	DockPane(&m_wndInWallProperties);
+	m_wndInWallProperties.ShowPane(FALSE,FALSE,TRUE);
 
 
 	// Enable toolbar and docking window menu replacement
@@ -204,4 +207,18 @@ LRESULT CMainFrame::OnToolbarCreateNew(WPARAM wp,LPARAM lp)
 
 	pUserToolbar->EnableCustomizeButton(TRUE, ID_VIEW_CUSTOMIZE, strCustomize);
 	return lres;
+}
+
+
+void CMainFrame::OnEditOutwall()
+{
+	m_wndOutWallProperties.ShowPane(TRUE,FALSE,TRUE);
+	m_wndInWallProperties.ShowPane(FALSE,FALSE,TRUE);
+}
+
+
+void CMainFrame::OnEditInwall()
+{
+	m_wndOutWallProperties.ShowPane(FALSE,FALSE,TRUE);
+	m_wndInWallProperties.ShowPane(TRUE,FALSE,TRUE);
 }
