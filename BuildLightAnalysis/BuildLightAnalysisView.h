@@ -17,7 +17,7 @@ public:
 
 // Operations
 public:
-
+	void optimize();
 // Overrides
 public:
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
@@ -47,6 +47,8 @@ protected:
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnEditOptimize();
 };
 
 #ifndef _DEBUG  // debug version in BuildLightAnalysisView.cpp

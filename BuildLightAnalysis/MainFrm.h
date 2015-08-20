@@ -5,6 +5,7 @@
 #pragma once
 #include "OutWallWnd.h"
 #include "InWallWnd.h"
+#include "OptimizeWallWnd.h"
 
 class CMainFrame : public CFrameWndEx
 {
@@ -25,6 +26,10 @@ public:
 	CInWallWnd& GetInWallProperty()
 	{
 		return m_wndInWallProperties;
+	}
+	COptimizeWallWnd& GetOptimizeWallProperty()
+	{
+		return m_wndOptimizeWallProperties;
 	}
 	CMFCStatusBar& GetStatusBar()
 	{
@@ -48,6 +53,7 @@ protected:  // control bar embedded members
 	CMFCStatusBar     m_wndStatusBar;
 	COutWallWnd		  m_wndOutWallProperties;
 	CInWallWnd		  m_wndInWallProperties;
+	COptimizeWallWnd  m_wndOptimizeWallProperties;
 
 // Generated message map functions
 protected:

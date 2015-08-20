@@ -111,11 +111,14 @@
     <ClInclude Include="BuildLightAnalysisView.h" />
     <ClInclude Include="InWallWnd.h" />
     <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="OptimizeLine.h" />
+    <ClInclude Include="OptimizeWallWnd.h" />
     <ClInclude Include="OutWallWnd.h" />
     <ClInclude Include="PropertyGridCtrl.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="vec2.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BuildLightAnalysis.cpp" />
@@ -123,6 +126,8 @@
     <ClCompile Include="BuildLightAnalysisView.cpp" />
     <ClCompile Include="InWallWnd.cpp" />
     <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="OptimizeLine.cpp" />
+    <ClCompile Include="OptimizeWallWnd.cpp" />
     <ClCompile Include="OutWallWnd.cpp" />
     <ClCompile Include="PropertyGridCtrl.cpp" />
     <ClCompile Include="stdafx.cpp">

@@ -1,11 +1,22 @@
 #include "PropertyGridCtrl.h"
 #pragma once
 
-class COutWallWnd : public CDockablePane
+class CPropertiesToolBar : public CMFCToolBar
+{
+public:
+	virtual void OnUpdateCmdUI(CFrameWnd* /*pTarget*/, BOOL bDisableIfNoHndler)
+	{
+		CMFCToolBar::OnUpdateCmdUI((CFrameWnd*) GetOwner(), bDisableIfNoHndler);
+	}
+
+	virtual BOOL AllowShowOnList() const { return FALSE; }
+};
+
+class COptimizeWallWnd : public CDockablePane
 {
 // Construction
 public:
-	COutWallWnd();
+	COptimizeWallWnd();
 
 	void AdjustLayout();
 
@@ -20,7 +31,8 @@ public:
 	{
 		return m_wndPropList.GetProperty(0);
 	}
-	void InsertPos(double, double);
+	void InsertPos(double,double,double,double);
+	void DeletePos();
 
 protected:
 	CFont m_fntPropList;
@@ -30,7 +42,7 @@ protected:
 
 // Implementation
 public:
-	virtual ~COutWallWnd();
+	virtual ~COptimizeWallWnd();
 
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);

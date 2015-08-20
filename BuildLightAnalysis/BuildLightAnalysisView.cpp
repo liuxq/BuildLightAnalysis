@@ -13,6 +13,7 @@
 #include "BuildLightAnalysisView.h"
 #include "MainFrm.h"
 #include "math.h"
+#include "OptimizeLine.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -29,6 +30,7 @@ BEGIN_MESSAGE_MAP(CBuildLightAnalysisView, CView)
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
+	ON_COMMAND(ID_EDIT_OPTIMIZE, &CBuildLightAnalysisView::OnEditOptimize)
 END_MESSAGE_MAP()
 
 // CBuildLightAnalysisView construction/destruction
@@ -51,6 +53,58 @@ BOOL CBuildLightAnalysisView::PreCreateWindow(CREATESTRUCT& cs)
 	return CView::PreCreateWindow(cs);
 }
 
+//进行处理
+void CBuildLightAnalysisView::optimize()
+{
+	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+	CMFCPropertyGridProperty* outWallPos = pMain->GetOutWallProperty().getCoodGroup();
+	CMFCPropertyGridProperty* inWallPos = pMain->GetInWallProperty().getCoodGroup();
+	if (!outWallPos || !inWallPos)
+		return;
+
+	vector<sLine> sLines;
+	Vec2d ps, pe, pFirst;
+	//外墙
+	for (int i = 0; i < outWallPos->GetSubItemsCount()-1; i++)
+	{
+		ps.x = outWallPos->GetSubItem(i)->GetSubItem(0)->GetValue().dblVal;
+		ps.y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetValue().dblVal;
+
+		pe.x = outWallPos->GetSubItem(i+1)->GetSubItem(0)->GetValue().dblVal;
+		pe.y = outWallPos->GetSubItem(i+1)->GetSubItem(1)->GetValue().dblVal;
+
+		if (i == 0)
+		{
+			pFirst = ps;
+		}
+		sLines.push_back(sLine(ps,pe));
+	}
+	if (outWallPos->GetSubItemsCount() > 2)
+		sLines.push_back(sLine(pe,pFirst));
+
+	//内墙
+	for (int i = 0; i < inWallPos->GetSubItemsCount(); i++)
+	{
+		ps.x = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+		ps.y = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+
+		pe.x = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+		pe.y = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+
+		sLines.push_back(sLine(ps,pe));
+	}
+
+	OptimizeLine(sLines,sLines);
+
+	//设置处理后的墙
+	pMain->GetOptimizeWallProperty().DeletePos();
+	for (int i = 0; i < sLines.size(); i++)
+	{
+		pMain->GetOptimizeWallProperty().InsertPos(sLines[i].s.x,sLines[i].s.y,sLines[i].e.x,sLines[i].e.y);
+	}
+	
+
+}
 // CBuildLightAnalysisView drawing
 
 void CBuildLightAnalysisView::OnDraw(CDC* /*pDC*/)
@@ -66,47 +120,76 @@ void CBuildLightAnalysisView::OnDraw(CDC* /*pDC*/)
 	if (!outWallPos || !inWallPos)
 		return;
 
-	CDC *pDC=GetDC();        //CDC方式创建
+	if (!pMain->GetOptimizeWallProperty().IsPaneVisible())
+	{
+		CDC *pDC=GetDC();        //CDC方式创建
 
-	CPen pen(PS_SOLID,8,RGB(100,100,100));    //定义画笔
+		CPen pen(PS_SOLID,8,RGB(100,100,100));    //定义画笔
+
+		CPen *pOldPen=pDC->SelectObject(&pen);
+
+		CPoint p, startP;
+		for (int i = 0; i < outWallPos->GetSubItemsCount(); i++)
+		{
+			p.x = outWallPos->GetSubItem(i)->GetSubItem(0)->GetValue().dblVal;
+			p.y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetValue().dblVal;
+			if (i == 0)
+			{
+				startP = p;
+				pDC->MoveTo(p); 
+			}
+			else if (i == outWallPos->GetSubItemsCount() -1)//连成环
+			{
+				pDC->LineTo(p);
+				pDC->LineTo(startP);
+			}
+			else
+			{
+				pDC->LineTo(p);
+			}
+		}
+
+		//画内墙
+		CPen pen1(PS_SOLID,4,RGB(100,100,100));    //定义画笔
+		pOldPen=pDC->SelectObject(&pen1);
+		for (int i = 0; i < inWallPos->GetSubItemsCount(); i++)
+		{
+			p.x = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+			p.y = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+			pDC->MoveTo(p);
+
+			p.x = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+			p.y = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+			pDC->LineTo(p);
+
+		}
+
+		ReleaseDC(pDC);
+	}
+	else
+	{
+		//画处理后的墙
+		CMFCPropertyGridProperty* optimizeWallPos = pMain->GetOptimizeWallProperty().getCoodGroup();
+		if (!optimizeWallPos)
+			return;
+
+		CDC *pDC=GetDC();						  //CDC方式创建
+		CPen pen(PS_SOLID,6,RGB(100,100,100));    //定义画笔
+		CPen* pOldPen=pDC->SelectObject(&pen);
+		CPoint p;
+		for (int i = 0; i < optimizeWallPos->GetSubItemsCount(); i++)
+		{
+			p.x = optimizeWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+			p.y = optimizeWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+			pDC->MoveTo(p);
+
+			p.x = optimizeWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+			p.y = optimizeWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+			pDC->LineTo(p);
+		}
+	}
 	
-	CPen *pOldPen=pDC->SelectObject(&pen);
-
-	CPoint p, startP;
-	for (int i = 0; i < outWallPos->GetSubItemsCount(); i++)
-	{
-		p.x = outWallPos->GetSubItem(i)->GetSubItem(0)->GetValue().intVal;
-		p.y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetValue().intVal;
-		if (i == 0)
-		{
-			startP = p;
-			pDC->MoveTo(p); 
-		}
-		else if (i == outWallPos->GetSubItemsCount() -1)//连成环
-		{
-			pDC->LineTo(p);
-			pDC->LineTo(startP);
-		}
-		else
-		{
-			pDC->LineTo(p);
-		}
-	}
-
-	//画内墙
-	for (int i = 0; i < inWallPos->GetSubItemsCount(); i++)
-	{
-		p.x = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().intVal;
-		p.y = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().intVal;
-		pDC->MoveTo(p);
-
-		p.x = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().intVal;
-		p.y = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().intVal;
-		pDC->LineTo(p);
-		
-	}
-
-	ReleaseDC(pDC);
+	
 }
 
 void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
@@ -122,8 +205,8 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 		CMFCPropertyGridProperty* outWallPos = pMain->GetOutWallProperty().getCoodGroup();
 		if (!outWallPos)
 			return;
-		outWallPos->GetSubItem(m_selectedOutWallPoint)->GetSubItem(0)->SetValue(point.x);
-		outWallPos->GetSubItem(m_selectedOutWallPoint)->GetSubItem(1)->SetValue(point.y);
+		outWallPos->GetSubItem(m_selectedOutWallPoint)->GetSubItem(0)->SetValue((double)point.x);
+		outWallPos->GetSubItem(m_selectedOutWallPoint)->GetSubItem(1)->SetValue((double)point.y);
 
 		Invalidate();
 	}
@@ -137,8 +220,8 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 		int count = inWallPos->GetSubItemsCount();
 		if (!count)
 			return;
-		inWallPos->GetSubItem(count-1)->GetSubItem(1)->GetSubItem(0)->SetValue(point.x);
-		inWallPos->GetSubItem(count-1)->GetSubItem(1)->GetSubItem(1)->SetValue(point.y);
+		inWallPos->GetSubItem(count-1)->GetSubItem(1)->GetSubItem(0)->SetValue((double)point.x);
+		inWallPos->GetSubItem(count-1)->GetSubItem(1)->GetSubItem(1)->SetValue((double)point.y);
 		Invalidate();
 	}
 
@@ -155,10 +238,10 @@ void CBuildLightAnalysisView::OnLButtonDown(UINT nFlags, CPoint point)
 			return;
 		for (int i = 0; i < outWallPos->GetSubItemsCount(); i++)
 		{
-			int x = outWallPos->GetSubItem(i)->GetSubItem(0)->GetValue().intVal;
-			int y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetValue().intVal;
+			double x = outWallPos->GetSubItem(i)->GetSubItem(0)->GetValue().dblVal;
+			double y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetValue().dblVal;
 
-			if (sqrt((double)(x - point.x)*(x - point.x) + (y - point.y)*(y - point.y)) < 10)
+			if (sqrt((x - point.x)*(x - point.x) + (y - point.y)*(y - point.y)) < 10)
 			{
 				m_selectedOutWallPoint = i;
 				break;
@@ -225,3 +308,16 @@ CBuildLightAnalysisDoc* CBuildLightAnalysisView::GetDocument() const // non-debu
 
 
 // CBuildLightAnalysisView message handlers
+
+
+void CBuildLightAnalysisView::OnEditOptimize()
+{
+	optimize();
+
+	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+
+	pMain->GetOutWallProperty().ShowPane(FALSE,FALSE,TRUE);
+	pMain->GetInWallProperty().ShowPane(FALSE,FALSE,TRUE);
+	pMain->GetOptimizeWallProperty().ShowPane(TRUE,FALSE,TRUE);
+	
+}

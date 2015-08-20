@@ -77,6 +77,15 @@
     <ClInclude Include="InWallWnd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="OptimizeLine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vec2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OptimizeWallWnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BuildLightAnalysis.cpp">
@@ -101,6 +110,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InWallWnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OptimizeLine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OptimizeWallWnd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

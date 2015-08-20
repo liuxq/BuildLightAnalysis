@@ -110,9 +110,14 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndOutWallProperties.EnableDocking(CBRS_ALIGN_ANY);
 	DockPane(&m_wndOutWallProperties);
 	m_wndOutWallProperties.ShowPane(FALSE,FALSE,TRUE);
+	
 	m_wndInWallProperties.EnableDocking(CBRS_ALIGN_ANY);
 	DockPane(&m_wndInWallProperties);
 	m_wndInWallProperties.ShowPane(FALSE,FALSE,TRUE);
+
+	m_wndOptimizeWallProperties.EnableDocking(CBRS_ALIGN_ANY);
+	DockPane(&m_wndOptimizeWallProperties);
+	m_wndOptimizeWallProperties.ShowPane(FALSE,FALSE,TRUE);
 
 
 	// Enable toolbar and docking window menu replacement
@@ -152,6 +157,14 @@ BOOL CMainFrame::CreateDockingWindows()
 	if (!m_wndInWallProperties.Create(strPropertiesWnd, this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_INWALL_PROPERTIESWND, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
 	{
 		TRACE0("Failed to create InWall window\n");
+		return FALSE; // failed to create
+	}
+
+	bNameValid = strPropertiesWnd.LoadString(IDS_OPTIMIZEWALL_PROPERTIES_WND);
+	ASSERT(bNameValid);
+	if (!m_wndOptimizeWallProperties.Create(strPropertiesWnd, this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_INWALL_PROPERTIESWND, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
+	{
+		TRACE0("Failed to create OptimizeWall window\n");
 		return FALSE; // failed to create
 	}
 

@@ -120,29 +120,25 @@ void CInWallWnd::OnUpdateSortProperties(CCmdUI* pCmdUI)
 {
 	pCmdUI->SetCheck(m_wndPropList.IsAlphabeticMode());
 }
-void CInWallWnd::InsertPos(long x, long y, long x1, long y1)
+void CInWallWnd::InsertPos(double x, double y, double x1, double y1)
 {
 	CMFCPropertyGridProperty* pGroup = getCoodGroup();
 	int count = pGroup->GetSubItemsCount();
 	CString strCount;
 	strCount.Format(_T("%d"),count+1);
 
-	CMFCPropertyGridProperty* pPos = new CMFCPropertyGridProperty(strCount, 0, TRUE);
+	PropertyGridProperty* pPos = new PropertyGridProperty(strCount, 0, TRUE);
 
-	CMFCPropertyGridProperty* pStart = new CMFCPropertyGridProperty(_T("Start"), 0, TRUE);
-	CMFCPropertyGridProperty* pProp = new CMFCPropertyGridProperty(_T("X"), (_variant_t) x, _T("Specifies the window's height"));
-	pProp->EnableSpinControl(TRUE, 50, 300);
+	PropertyGridProperty* pStart = new PropertyGridProperty(_T("Start"), 0, TRUE);
+	PropertyGridProperty* pProp = new PropertyGridProperty(_T("X"), (_variant_t) x, _T("Specifies the window's height"));
 	pStart->AddSubItem(pProp);
-	pProp = new CMFCPropertyGridProperty( _T("Y"), (_variant_t) y, _T("Specifies the window's width"));
-	pProp->EnableSpinControl(TRUE, 50, 200);
+	pProp = new PropertyGridProperty( _T("Y"), (_variant_t) y, _T("Specifies the window's width"));
 	pStart->AddSubItem(pProp);
 
-	CMFCPropertyGridProperty* pEnd = new CMFCPropertyGridProperty(_T("End"), 0, TRUE);
-	pProp = new CMFCPropertyGridProperty(_T("X"), (_variant_t) x1, _T("Specifies the window's height"));
-	pProp->EnableSpinControl(TRUE, 50, 300);
+	PropertyGridProperty* pEnd = new PropertyGridProperty(_T("End"), 0, TRUE);
+	pProp = new PropertyGridProperty(_T("X"), (_variant_t) x1, _T("Specifies the window's height"));
 	pEnd->AddSubItem(pProp);
-	pProp = new CMFCPropertyGridProperty( _T("Y"), (_variant_t) y1, _T("Specifies the window's width"));
-	pProp->EnableSpinControl(TRUE, 50, 200);
+	pProp = new PropertyGridProperty( _T("Y"), (_variant_t) y1, _T("Specifies the window's width"));
 	pEnd->AddSubItem(pProp);
 
 	pPos->AddSubItem(pStart);
