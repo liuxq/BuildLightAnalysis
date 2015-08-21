@@ -36,8 +36,6 @@ public:
 
 protected:
 	CFont m_fntPropList;
-	CButton m_insertButton;
-	CButton m_deleteButton;
 	PropertyGridCtrl m_wndPropList;
 
 // Implementation

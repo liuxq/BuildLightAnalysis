@@ -62,7 +62,7 @@ void CBuildLightAnalysisView::optimize()
 	if (!outWallPos || !inWallPos)
 		return;
 
-	vector<sLine> sLines;
+	vector<sLine> sLines, outLines;
 	Vec2d ps, pe, pFirst;
 	//外墙
 	for (int i = 0; i < outWallPos->GetSubItemsCount()-1; i++)
@@ -94,13 +94,13 @@ void CBuildLightAnalysisView::optimize()
 		sLines.push_back(sLine(ps,pe));
 	}
 
-	OptimizeLine(sLines,sLines);
+	OptimizeLine(sLines,outLines);
 
 	//设置处理后的墙
 	pMain->GetOptimizeWallProperty().DeletePos();
-	for (int i = 0; i < sLines.size(); i++)
+	for (int i = 0; i < outLines.size(); i++)
 	{
-		pMain->GetOptimizeWallProperty().InsertPos(sLines[i].s.x,sLines[i].s.y,sLines[i].e.x,sLines[i].e.y);
+		pMain->GetOptimizeWallProperty().InsertPos(outLines[i].s.x,outLines[i].s.y,outLines[i].e.x,outLines[i].e.y);
 	}
 	
 
@@ -319,5 +319,7 @@ void CBuildLightAnalysisView::OnEditOptimize()
 	pMain->GetOutWallProperty().ShowPane(FALSE,FALSE,TRUE);
 	pMain->GetInWallProperty().ShowPane(FALSE,FALSE,TRUE);
 	pMain->GetOptimizeWallProperty().ShowPane(TRUE,FALSE,TRUE);
+
+	Invalidate();
 	
 }

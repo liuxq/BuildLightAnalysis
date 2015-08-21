@@ -162,7 +162,7 @@ BOOL CMainFrame::CreateDockingWindows()
 
 	bNameValid = strPropertiesWnd.LoadString(IDS_OPTIMIZEWALL_PROPERTIES_WND);
 	ASSERT(bNameValid);
-	if (!m_wndOptimizeWallProperties.Create(strPropertiesWnd, this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_INWALL_PROPERTIESWND, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
+	if (!m_wndOptimizeWallProperties.Create(strPropertiesWnd, this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_OPTIMIZEWALL_PROPERTIESWND, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
 	{
 		TRACE0("Failed to create OptimizeWall window\n");
 		return FALSE; // failed to create
@@ -227,6 +227,7 @@ void CMainFrame::OnEditOutwall()
 {
 	m_wndOutWallProperties.ShowPane(TRUE,FALSE,TRUE);
 	m_wndInWallProperties.ShowPane(FALSE,FALSE,TRUE);
+	m_wndOptimizeWallProperties.ShowPane(FALSE,FALSE,TRUE);
 }
 
 
@@ -234,4 +235,5 @@ void CMainFrame::OnEditInwall()
 {
 	m_wndOutWallProperties.ShowPane(FALSE,FALSE,TRUE);
 	m_wndInWallProperties.ShowPane(TRUE,FALSE,TRUE);
+	m_wndOptimizeWallProperties.ShowPane(FALSE,FALSE,TRUE);
 }

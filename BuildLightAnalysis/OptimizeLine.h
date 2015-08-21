@@ -12,6 +12,11 @@ struct sLine
 		this->s = s;
 		this->e = e;
 	}
+	sLine()
+	{
+		this->s = Vec2d::ZERO;
+		this->e = Vec2d::ZERO;
+	}
 };
 
 void OptimizeLine(vector<sLine>& slines, vector<sLine>& outSlines);

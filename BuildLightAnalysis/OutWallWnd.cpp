@@ -34,10 +34,10 @@ BEGIN_MESSAGE_MAP(COutWallWnd, CDockablePane)
 	ON_UPDATE_COMMAND_UI(ID_EXPAND_ALL, OnUpdateExpandAllProperties)
 	ON_COMMAND(ID_SORTPROPERTIES, OnSortProperties)
 	ON_UPDATE_COMMAND_UI(ID_SORTPROPERTIES, OnUpdateSortProperties)
-	ON_COMMAND(IDC_INSERT_BUTTON, OnInsertPos)
-	ON_UPDATE_COMMAND_UI(IDC_INSERT_BUTTON, OnUpdateProperties2)
-	ON_COMMAND(IDC_DELETE_BUTTON, OnDeletePos)
-	ON_UPDATE_COMMAND_UI(IDC_DELETE_BUTTON, OnUpdateProperties2)
+	ON_COMMAND(IDC_OUT_INSERT_BUTTON, OnInsertPos)
+	ON_UPDATE_COMMAND_UI(IDC_OUT_INSERT_BUTTON, OnUpdateProperties2)
+	ON_COMMAND(IDC_OUT_DELETE_BUTTON, OnDeletePos)
+	ON_UPDATE_COMMAND_UI(IDC_OUT_DELETE_BUTTON, OnUpdateProperties2)
 	ON_WM_SETFOCUS()
 	ON_WM_SETTINGCHANGE()
 END_MESSAGE_MAP()
@@ -75,16 +75,16 @@ int COutWallWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Create combo:
 	const DWORD dwViewStyle = WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON;
 
-	if (!m_insertButton.Create(_T("²åÈë×ø±ê"),dwViewStyle, rectDummy, this, IDC_INSERT_BUTTON))
+	if (!m_insertButton.Create(_T("²åÈë×ø±ê"),dwViewStyle, rectDummy, this, IDC_OUT_INSERT_BUTTON))
 	{
 		return -1;      // fail to create
 	}
-	if (!m_deleteButton.Create(_T("É¾³ý×ø±ê"),dwViewStyle, rectDummy, this, IDC_DELETE_BUTTON))
+	if (!m_deleteButton.Create(_T("É¾³ý×ø±ê"),dwViewStyle, rectDummy, this, IDC_OUT_DELETE_BUTTON))
 	{
 		return -1;      // fail to create
 	}
 
-	if (!m_wndPropList.Create(WS_VISIBLE | WS_CHILD, rectDummy, this, 2))
+	if (!m_wndPropList.Create(WS_VISIBLE | WS_CHILD, rectDummy, this, IDC_OUT_PROPERTY_CTRL))
 	{
 		TRACE0("Failed to create Properties Grid \n");
 		return -1;      // fail to create
