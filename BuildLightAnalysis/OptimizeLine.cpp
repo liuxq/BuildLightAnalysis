@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "OptimizeLine.h"
 
-double calLenOfLines(sLine& srcLine, sLine& dstLine)
+void calLenOfLines(sLine& srcLine, sLine& dstLine, double& startW, double& endW)
 {
 	Vec2d d1 = srcLine.e - srcLine.s;
 	Vec2d d2 = dstLine.e - dstLine.s;
@@ -11,7 +11,8 @@ double calLenOfLines(sLine& srcLine, sLine& dstLine)
 	double D = d2.y * d1.x - d2.x * d1.y;
 	if (D == 0.0)//平行
 	{
-		return 1.0e8;
+		startW = endW = 1.0e8;
+		return;
 	}
 	double t1 = ((a1.y - a2.y) * d2.x - (a1.x - a2.x) * d2.y)/D;
 	double t2 = ((a1.y - a2.y) * d1.x - (a1.x - a2.x) * d1.y)/D;
@@ -19,21 +20,24 @@ double calLenOfLines(sLine& srcLine, sLine& dstLine)
 	if (t2 > 1 || t2 < 0)//代价要增加line2的修改
 	{
 		//line1代价
-		double w1 = 10000;
+		double d1Length = d1.Length();
 		if (t1 >= 0 && t1 <= 1)
 		{
-			w1 =  t1 > 0.5 ? d1.Length() * (1-t1) : d1.Length() * t1;
+			startW = d1Length * t1;
+			endW = d1Length * (1-t1);
 		}
 		else if (t1 < 0)
 		{
-			w1 =  -t1 * d1.Length();
+			startW = -t1 * d1Length;
+			endW = startW + d1Length;
 		}
 		else
 		{
-			w1 =  (t1 - 1 ) * d1.Length();
+			endW = (t1 - 1 ) * d1Length;
+			startW = endW + d1Length;
 		}
 		//line2代价
-		double w2 = 10000;
+		double w2 = 1.0e8;
 		if (t2 < 0)
 		{
 			w2 =  -t2 * d2.Length();
@@ -42,26 +46,35 @@ double calLenOfLines(sLine& srcLine, sLine& dstLine)
 		{
 			w2 =  (t2 - 1 ) * d2.Length();
 		}
-		return w1 + w2;
+		startW += w2;
+		endW += w2;
+		return;
 	}
 	else//只需要计算line1的修改代价
 	{
+		double d1Length = d1.Length();
 		if (t1 >= 0 && t1 <= 1)
 		{
-			return t1 > 0.5 ? d1.Length() * (1-t1) : d1.Length() * t1;
+			startW = d1Length * t1;
+			endW = d1Length * (1-t1);
+			return;
 		}
 		else if (t1 < 0)
 		{
-			return -t1 * d1.Length();
+			startW = -t1 * d1Length;
+			endW = startW + d1Length;
+			return;
 		}
 		else
 		{
-			return (t1 - 1 ) * d1.Length();
+			endW = (t1 - 1 ) * d1Length;
+			startW = endW + d1Length;
+			return;
 		}
 	}
-	return 10000;
+	return;
 }
-void OptimizeTwoLines(sLine& srcLine, sLine& dstLine)
+void OptimizeTwoLines(sLine& srcLine, sLine& dstLine, bool isStartP)
 {
 	Vec2d d1 = srcLine.e - srcLine.s;
 	Vec2d d2 = dstLine.e - dstLine.s;
@@ -76,76 +89,51 @@ void OptimizeTwoLines(sLine& srcLine, sLine& dstLine)
 	double t1 = ((a1.y - a2.y) * d2.x - (a1.x - a2.x) * d2.y)/D;
 	double t2 = ((a1.y - a2.y) * d1.x - (a1.x - a2.x) * d1.y)/D;
 
-	if (t2 > 1 || t2 < 0)//代价要增加line2的修改
+	Vec2d intersectP = srcLine.s + d1 * t1;
+
+	if (isStartP)
 	{
-		//line1代价
-		if (t1 >= 0 && t1 <= 1)
-		{
-			if (t1 > 0.5)
-			{
-				srcLine.e = srcLine.s + d1 * t1;
-			}
-			else
-			{
-				srcLine.s = srcLine.s + d1 * t1;
-			}
-		}
-		else if (t1 < 0)
-		{
-			srcLine.s = srcLine.s + d1 * t1;
-		}
-		else
-		{
-			srcLine.e = srcLine.s + d1 * t1;
-		}
+		srcLine.s = intersectP;
 	}
-	else//只需要计算line1的修改代价
+	else
 	{
-		if (t1 >= 0 && t1 <= 1)
-		{
-			if (t1 > 0.5)
-			{
-				srcLine.e = srcLine.s + d1 * t1;
-			}
-			else
-			{
-				srcLine.s = srcLine.s + d1 * t1;
-			}
-		}
-		else if (t1 < 0)
-		{
-			srcLine.s = srcLine.s + d1 * t1;
-		}
-		else
-		{
-			srcLine.e = srcLine.s + d1 * t1;
-		}
+		srcLine.e = intersectP;
 	}
 	return;
 }
-const double thW = 40.0;
-void OptimizeLine(vector<sLine>& slines, vector<sLine>& outSlines)
+
+void OptimizeLine(vector<sLine>& slines, vector<sLine>& outSlines, double thW)
 {
 	outSlines = slines;
 	for (int i = 0; i < slines.size(); i++)
 	{
-		double minW = 1.0e8;
-		sLine doLine;
+		double minStartW = 1.0e8, minEndW = 1.0e8;
+		int minStartI = 0, minEndI = 0;
 		for (int j = 0; j < slines.size(); j++)
 		{
 			if (j != i)
 			{
-				double w = calLenOfLines(slines[i],slines[j]);
-				if (w < minW)
+				double startW, endW;
+				calLenOfLines(slines[i],slines[j], startW, endW);
+				if (startW < minStartW)
 				{
-					minW = w;
-					doLine = slines[j];
+					minStartW = startW;
+					minStartI = j;
+				}
+				if (endW < minEndW)
+				{
+					minEndW = endW;
+					minEndI = j;
 				}
 			}
 		}
-		if (minW < thW)//有一个需要修改的
+		if (minStartW < thW)//有一个需要修改的
 		{
-			OptimizeTwoLines(outSlines[i], doLine);
+			OptimizeTwoLines(outSlines[i], slines[minStartI], true);
+		}
+		if (minEndW < thW)//有一个需要修改的
+		{
+			OptimizeTwoLines(outSlines[i], slines[minEndI], false);
 		}
 	}
 }

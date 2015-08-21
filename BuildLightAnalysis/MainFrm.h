@@ -6,6 +6,7 @@
 #include "OutWallWnd.h"
 #include "InWallWnd.h"
 #include "OptimizeWallWnd.h"
+#include "OptionWnd.h"
 
 class CMainFrame : public CFrameWndEx
 {
@@ -31,6 +32,10 @@ public:
 	{
 		return m_wndOptimizeWallProperties;
 	}
+	COptionWnd& GetOptionProperty()
+	{
+		return m_wndOptionProperties;
+	}
 	CMFCStatusBar& GetStatusBar()
 	{
 		return m_wndStatusBar;
@@ -54,6 +59,7 @@ protected:  // control bar embedded members
 	COutWallWnd		  m_wndOutWallProperties;
 	CInWallWnd		  m_wndInWallProperties;
 	COptimizeWallWnd  m_wndOptimizeWallProperties;
+	COptionWnd		  m_wndOptionProperties;
 
 // Generated message map functions
 protected:
@@ -67,6 +73,7 @@ protected:
 public:
 	afx_msg void OnEditOutwall();
 	afx_msg void OnEditInwall();
+	afx_msg void OnEditOption();
 };
 
 

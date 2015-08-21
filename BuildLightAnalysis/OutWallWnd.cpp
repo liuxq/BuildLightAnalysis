@@ -129,10 +129,10 @@ void COutWallWnd::InsertPos(double x, double y)
 
 	PropertyGridProperty* pPos = new PropertyGridProperty(strCount, 0, TRUE);
 
-	PropertyGridProperty* pProp = new PropertyGridProperty(_T("X"), (_variant_t) x, _T("Specifies the window's height"));
+	PropertyGridProperty* pProp = new PropertyGridProperty(_T("X"), (_variant_t) x, _T("内墙坐标X值"));
 	pPos->AddSubItem(pProp);
 
-	pProp = new PropertyGridProperty( _T("Y"), (_variant_t) y, _T("Specifies the window's width"));
+	pProp = new PropertyGridProperty( _T("Y"), (_variant_t) y, _T("内墙坐标Y值"));
 	pPos->AddSubItem(pProp);
 
 	pGroup->AddSubItem(pPos);

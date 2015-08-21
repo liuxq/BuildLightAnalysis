@@ -93,8 +93,9 @@ void CBuildLightAnalysisView::optimize()
 
 		sLines.push_back(sLine(ps,pe));
 	}
+	double wTh = pMain->GetOptionProperty().getProperty(1);
 
-	OptimizeLine(sLines,outLines);
+	OptimizeLine(sLines,outLines, wTh);
 
 	//设置处理后的墙
 	pMain->GetOptimizeWallProperty().DeletePos();

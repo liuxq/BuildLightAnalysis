@@ -19,4 +19,4 @@ struct sLine
 	}
 };
 
-void OptimizeLine(vector<sLine>& slines, vector<sLine>& outSlines);
+void OptimizeLine(vector<sLine>& slines, vector<sLine>& outSlines, double wTh);

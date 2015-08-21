@@ -21,6 +21,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_REGISTERED_MESSAGE(AFX_WM_CREATETOOLBAR, &CMainFrame::OnToolbarCreateNew)
 	ON_COMMAND(ID_EDIT_OUTWALL, &CMainFrame::OnEditOutwall)
 	ON_COMMAND(ID_EDIT_INWALL, &CMainFrame::OnEditInwall)
+	ON_COMMAND(ID_EDIT_OPTION, &CMainFrame::OnEditOption)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -119,6 +120,12 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	DockPane(&m_wndOptimizeWallProperties);
 	m_wndOptimizeWallProperties.ShowPane(FALSE,FALSE,TRUE);
 
+	m_wndOptionProperties.EnableDocking(CBRS_ALIGN_ANY);
+	DockPane(&m_wndOptionProperties);
+	m_wndOptionProperties.ShowPane(FALSE,FALSE,TRUE);
+
+	
+
 
 	// Enable toolbar and docking window menu replacement
 	EnablePaneMenu(TRUE, ID_VIEW_CUSTOMIZE, strCustomize, ID_VIEW_TOOLBAR);
@@ -165,6 +172,14 @@ BOOL CMainFrame::CreateDockingWindows()
 	if (!m_wndOptimizeWallProperties.Create(strPropertiesWnd, this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_OPTIMIZEWALL_PROPERTIESWND, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
 	{
 		TRACE0("Failed to create OptimizeWall window\n");
+		return FALSE; // failed to create
+	}
+
+	bNameValid = strPropertiesWnd.LoadString(IDS_OPTION_PROPERTIES_WND);
+	ASSERT(bNameValid);
+	if (!m_wndOptionProperties.Create(strPropertiesWnd, this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_OPTION_PROPERTIESWND, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
+	{
+		TRACE0("Failed to create Option window\n");
 		return FALSE; // failed to create
 	}
 
@@ -236,4 +251,14 @@ void CMainFrame::OnEditInwall()
 	m_wndOutWallProperties.ShowPane(FALSE,FALSE,TRUE);
 	m_wndInWallProperties.ShowPane(TRUE,FALSE,TRUE);
 	m_wndOptimizeWallProperties.ShowPane(FALSE,FALSE,TRUE);
+}
+
+
+void CMainFrame::OnEditOption()
+{
+	if (m_wndOptionProperties.IsPaneVisible())
+		m_wndOptionProperties.ShowPane(FALSE,FALSE,TRUE);
+	else
+		m_wndOptionProperties.ShowPane(TRUE,FALSE,TRUE);
+	
 }

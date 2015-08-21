@@ -130,15 +130,15 @@ void CInWallWnd::InsertPos(double x, double y, double x1, double y1)
 	PropertyGridProperty* pPos = new PropertyGridProperty(strCount, 0, TRUE);
 
 	PropertyGridProperty* pStart = new PropertyGridProperty(_T("Start"), 0, TRUE);
-	PropertyGridProperty* pProp = new PropertyGridProperty(_T("X"), (_variant_t) x, _T("Specifies the window's height"));
+	PropertyGridProperty* pProp = new PropertyGridProperty(_T("X"), (_variant_t) x, _T("内墙坐标X值"));
 	pStart->AddSubItem(pProp);
-	pProp = new PropertyGridProperty( _T("Y"), (_variant_t) y, _T("Specifies the window's width"));
+	pProp = new PropertyGridProperty( _T("Y"), (_variant_t) y, _T("内墙坐标Y值"));
 	pStart->AddSubItem(pProp);
 
 	PropertyGridProperty* pEnd = new PropertyGridProperty(_T("End"), 0, TRUE);
-	pProp = new PropertyGridProperty(_T("X"), (_variant_t) x1, _T("Specifies the window's height"));
+	pProp = new PropertyGridProperty(_T("X"), (_variant_t) x1, _T("内墙坐标X值"));
 	pEnd->AddSubItem(pProp);
-	pProp = new PropertyGridProperty( _T("Y"), (_variant_t) y1, _T("Specifies the window's width"));
+	pProp = new PropertyGridProperty( _T("Y"), (_variant_t) y1, _T("内墙坐标Y值"));
 	pEnd->AddSubItem(pProp);
 
 	pPos->AddSubItem(pStart);
@@ -200,7 +200,7 @@ void CInWallWnd::InitPropList()
 	SetPropListFont();
 
 	m_wndPropList.EnableHeaderCtrl(FALSE);
-	//m_wndPropList.EnableDescriptionArea();
+	m_wndPropList.EnableDescriptionArea();
 	m_wndPropList.SetVSDotNetLook();
 	m_wndPropList.MarkModifiedProperties();
 
