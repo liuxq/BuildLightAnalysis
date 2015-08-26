@@ -77,10 +77,10 @@ void CBuildLightAnalysisView::optimize()
 		{
 			pFirst = ps;
 		}
-		sLines.push_back(sLine(ps,pe));
+		sLines.push_back(sLine(ps,pe, sLine::OUT_WALL));
 	}
 	if (outWallPos->GetSubItemsCount() > 2)
-		sLines.push_back(sLine(pe,pFirst));
+		sLines.push_back(sLine(pe,pFirst,sLine::OUT_WALL));
 
 	//дзг╫
 	for (int i = 0; i < inWallPos->GetSubItemsCount(); i++)
@@ -91,7 +91,7 @@ void CBuildLightAnalysisView::optimize()
 		pe.x = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
 		pe.y = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
 
-		sLines.push_back(sLine(ps,pe));
+		sLines.push_back(sLine(ps,pe,sLine::IN_WALL));
 	}
 	double wTh = pMain->GetOptionProperty().getProperty(1);
 
