@@ -5,15 +5,15 @@ using namespace std;
 
 struct sLine
 {
-	enum
+	enum W_TYPE
 	{
 		IN_WALL = 0,
 		OUT_WALL
 	};
 	Vec2d s;
 	Vec2d e;
-	int type;
-	sLine(Vec2d s, Vec2d e, int itype = IN_WALL)
+	W_TYPE type;
+	sLine(Vec2d s, Vec2d e, W_TYPE itype = IN_WALL)
 	{
 		this->s = s;
 		this->e = e;

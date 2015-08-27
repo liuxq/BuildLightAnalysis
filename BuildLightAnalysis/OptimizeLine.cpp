@@ -1,5 +1,73 @@
 #include "stdafx.h"
 #include "OptimizeLine.h"
+#include <algorithm>
+
+double calIntersectPointsOfLines(sLine& srcLine, sLine& dstLine)
+{
+	Vec2d d1 = srcLine.e - srcLine.s;
+	Vec2d d2 = dstLine.e - dstLine.s;
+	Vec2d a1 = srcLine.s;
+	Vec2d a2 = dstLine.s;
+
+	double D = d2.y * d1.x - d2.x * d1.y;
+	if (D == 0.0)//平行
+	{
+		return -1.0;
+	}
+	double t1 = ((a1.y - a2.y) * d2.x - (a1.x - a2.x) * d2.y)/D;
+	double t2 = ((a1.y - a2.y) * d1.x - (a1.x - a2.x) * d1.y)/D;
+
+	if (t1 > 0 && t1 < 1 && t2 >= 0 && t2 <= 1)
+	{
+		return t1;
+	}
+	else
+	{
+		return -1.0;
+	}
+}
+
+//分割线段，按照交点分割
+void SegmentLine(vector<sLine>& slines, vector<sLine>& outSlines)
+{	
+	for (int i = 0; i < slines.size(); i++)
+	{
+		vector<double> ts;
+		for (int j = 0; j < slines.size(); j++)
+		{
+			if (j != i)
+			{
+				double t;
+				t = calIntersectPointsOfLines(slines[i],slines[j]);
+				if (t > 0)
+				{
+					ts.push_back(t);
+				}
+			}
+		}
+		std::sort(ts.begin(), ts.end());
+		sLine::W_TYPE type_ = slines[i].type;
+		if (ts.empty())
+		{
+			outSlines.push_back(slines[i]);
+		}
+		else
+		{
+			sLine line = slines[i];
+			Vec2d dir = line.e - line.s;
+			Vec2d p1 = line.s;
+			Vec2d p2;
+			for (int k = 0; k < ts.size(); k++)
+			{
+				p2 = line.s + ts[k] * dir;
+				outSlines.push_back(sLine(p1, p2 ,type_));
+				p1 = p2;
+			}
+			outSlines.push_back(sLine(p1, line.e, type_));
+		}
+	}
+}
+
 
 void calLenOfLines(sLine& srcLine, sLine& dstLine, double& startW, double& endW)
 {
@@ -101,10 +169,10 @@ void OptimizeTwoLines(sLine& srcLine, sLine& dstLine, bool isStartP)
 	}
 	return;
 }
-
+//优化线段，去掉和补充
 void OptimizeLine(vector<sLine>& slines, vector<sLine>& outSlines, double thW)
 {
-	outSlines = slines;
+	vector<sLine> optimizeSlines = slines;
 	for (int i = 0; i < slines.size(); i++)
 	{
 		double minStartW = 1.0e8, minEndW = 1.0e8;
@@ -129,12 +197,14 @@ void OptimizeLine(vector<sLine>& slines, vector<sLine>& outSlines, double thW)
 		}
 		if (minStartW < thW)//有一个需要修改的
 		{
-			OptimizeTwoLines(outSlines[i], slines[minStartI], true);
+			OptimizeTwoLines(optimizeSlines[i], slines[minStartI], true);
 		}
 		if (minEndW < thW)//有一个需要修改的
 		{
-			OptimizeTwoLines(outSlines[i], slines[minEndI], false);
+			OptimizeTwoLines(optimizeSlines[i], slines[minEndI], false);
 		}
 	}
+	SegmentLine(optimizeSlines, outSlines);
 }
+
 
