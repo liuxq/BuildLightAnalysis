@@ -21,8 +21,6 @@
 BEGIN_MESSAGE_MAP(CBuildLightAnalysisApp, CWinAppEx)
 	ON_COMMAND(ID_APP_ABOUT, &CBuildLightAnalysisApp::OnAppAbout)
 	// Standard file based document commands
-	ON_COMMAND(ID_FILE_NEW, &CWinAppEx::OnFileNew)
-	ON_COMMAND(ID_FILE_OPEN, &CWinAppEx::OnFileOpen)
 END_MESSAGE_MAP()
 
 

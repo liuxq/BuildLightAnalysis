@@ -22,6 +22,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_COMMAND(ID_EDIT_OUTWALL, &CMainFrame::OnEditOutwall)
 	ON_COMMAND(ID_EDIT_INWALL, &CMainFrame::OnEditInwall)
 	ON_COMMAND(ID_EDIT_OPTION, &CMainFrame::OnEditOption)
+	ON_COMMAND(ID_FILE_OPEN, &CMainFrame::OnFileOpen)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -261,4 +262,25 @@ void CMainFrame::OnEditOption()
 	else
 		m_wndOptionProperties.ShowPane(TRUE,FALSE,TRUE);
 	
+}
+
+
+void CMainFrame::OnFileOpen()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CString FilePathName;
+	CFileDialog dlg(TRUE, //TRUE为OPEN对话框，FALSE为SAVE AS对话框
+		NULL, 
+		NULL,
+		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+		(LPCTSTR)_TEXT("JPG Files (*.jpg)|*.jpg|All Files (*.*)|*.*||"),
+		NULL);
+	if(dlg.DoModal()==IDOK)
+	{
+		FilePathName=dlg.GetPathName(); //文件名保存在了FilePathName里
+	}
+	else
+	{
+		return;
+	}
 }

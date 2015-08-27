@@ -117,6 +117,7 @@
     <ClInclude Include="OutWallWnd.h" />
     <ClInclude Include="PropertyGridCtrl.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Serializer.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="vec2.h" />
