@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "BuildLightAnalysis.h"
-
+#include "DlgProjectNew.h"
 #include "MainFrm.h"
 
 #ifdef _DEBUG
@@ -23,6 +23,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_COMMAND(ID_EDIT_INWALL, &CMainFrame::OnEditInwall)
 	ON_COMMAND(ID_EDIT_OPTION, &CMainFrame::OnEditOption)
 	ON_COMMAND(ID_FILE_OPEN, &CMainFrame::OnFileOpen)
+	ON_COMMAND(ID_FILE_SAVE, &CMainFrame::OnFileSave)
+	ON_COMMAND(ID_FILE_NEW, &CMainFrame::OnFileNew)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -283,4 +285,47 @@ void CMainFrame::OnFileOpen()
 	{
 		return;
 	}
+}
+
+
+void CMainFrame::OnFileSave()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CString FilePathName;
+	CFileDialog dlg(FALSE, //TRUE为OPEN对话框，FALSE为SAVE AS对话框
+		NULL, 
+		NULL,
+		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+		(LPCTSTR)_TEXT("JPG Files (*.jpg)|*.jpg|All Files (*.*)|*.*||"),
+		NULL);
+	if(dlg.DoModal()==IDOK)
+	{
+		FilePathName=dlg.GetPathName(); //文件名保存在了FilePathName里
+	}
+	else
+	{
+		return;
+	}
+}
+
+
+void CMainFrame::OnFileNew()
+{
+	DlgProjectNew dlgPn;
+	if(dlgPn.DoModal()==IDOK)
+	{
+		if (!PathIsDirectory(dlgPn.m_projectLocation)) 
+		{
+			if (!PathIsDirectory(dlgPn.m_projectLocation) ) 
+			{ 
+				CString strMsg;
+				strMsg.Format (_T("创建路径\"%s\"失败！是否继续?"), dlgPn.m_projectLocation); 
+				if (AfxMessageBox(strMsg, MB_YESNO) == IDYES) 
+					return; 
+			}
+		}
+		
+	}
+	else
+		return;
 }

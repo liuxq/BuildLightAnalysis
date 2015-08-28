@@ -75,6 +75,8 @@ public:
 	afx_msg void OnEditInwall();
 	afx_msg void OnEditOption();
 	afx_msg void OnFileOpen();
+	afx_msg void OnFileSave();
+	afx_msg void OnFileNew();
 };
 
 
