@@ -63,36 +63,9 @@ void CBuildLightAnalysisView::optimize()
 		return;
 
 	vector<sLine> sLines, outLines;
-	Vec2d ps, pe, pFirst;
-	//外墙
-	for (int i = 0; i < outWallPos->GetSubItemsCount()-1; i++)
-	{
-		ps.x = outWallPos->GetSubItem(i)->GetSubItem(0)->GetValue().dblVal;
-		ps.y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetValue().dblVal;
-
-		pe.x = outWallPos->GetSubItem(i+1)->GetSubItem(0)->GetValue().dblVal;
-		pe.y = outWallPos->GetSubItem(i+1)->GetSubItem(1)->GetValue().dblVal;
-
-		if (i == 0)
-		{
-			pFirst = ps;
-		}
-		sLines.push_back(sLine(ps,pe, sLine::OUT_WALL));
-	}
-	if (outWallPos->GetSubItemsCount() > 2)
-		sLines.push_back(sLine(pe,pFirst,sLine::OUT_WALL));
-
-	//内墙
-	for (int i = 0; i < inWallPos->GetSubItemsCount(); i++)
-	{
-		ps.x = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
-		ps.y = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
-
-		pe.x = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
-		pe.y = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
-
-		sLines.push_back(sLine(ps,pe,sLine::IN_WALL));
-	}
+	pMain->GetOutWallProperty().OutputToLines(sLines);
+	pMain->GetInWallProperty().OutputToLines(sLines);
+	
 	double wTh = pMain->GetOptionProperty().getProperty(1);
 
 	OptimizeLine(sLines,outLines, wTh);
@@ -116,6 +89,10 @@ void CBuildLightAnalysisView::OnDraw(CDC* /*pDC*/)
 		return;
 
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+
+	if (pMain && !pMain->m_bIsOpen)//如果没有打开项目则不进行绘制
+		return;
+
 	CMFCPropertyGridProperty* outWallPos = pMain->GetOutWallProperty().getCoodGroup();
 	CMFCPropertyGridProperty* inWallPos = pMain->GetInWallProperty().getCoodGroup();
 	if (!outWallPos || !inWallPos)
@@ -125,6 +102,7 @@ void CBuildLightAnalysisView::OnDraw(CDC* /*pDC*/)
 	{
 		CDC *pDC=GetDC();        //CDC方式创建
 
+		//画外墙
 		CPen pen(PS_SOLID,8,RGB(100,100,100));    //定义画笔
 
 		CPen *pOldPen=pDC->SelectObject(&pen);
@@ -200,6 +178,10 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 	xy.Format(_T("%d,%d"),point.x, point.y);
 	pMain->GetStatusBar().SetPaneText(0,xy);
 
+	//如果项目未打开，则不做什么
+	if (pMain && !pMain->m_bIsOpen)
+		return;
+
 	//如果是外墙模式，有选中的外墙点，则移动它
 	if (pMain->GetOutWallProperty().IsPaneVisible() && m_selectedOutWallPoint >= 0)
 	{
@@ -231,6 +213,11 @@ void CBuildLightAnalysisView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 	
+	if (pMain && !pMain->m_bIsOpen)
+	{
+		AfxMessageBox(_T("项目还未建立，请新建或打开项目"));
+		return; 
+	}
 	//如果是外墙模式
 	if (pMain->GetOutWallProperty().IsPaneVisible())
 	{
@@ -261,6 +248,11 @@ void CBuildLightAnalysisView::OnLButtonDown(UINT nFlags, CPoint point)
 void CBuildLightAnalysisView::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+
+	//如果项目未打开，则不做什么
+	if (pMain && !pMain->m_bIsOpen)
+		return;
+
 	//如果是外墙模式，并且有选中的外墙点，则移动它
 	if (pMain->GetOutWallProperty().IsPaneVisible() && m_selectedOutWallPoint >= 0)
 	{

@@ -7,6 +7,12 @@
 #include "DlgProjectNew.h"
 #include "MainFrm.h"
 
+#include "Serializer.h"
+#include <fstream>
+#include <string>
+
+using namespace std;
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -23,8 +29,9 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_COMMAND(ID_EDIT_INWALL, &CMainFrame::OnEditInwall)
 	ON_COMMAND(ID_EDIT_OPTION, &CMainFrame::OnEditOption)
 	ON_COMMAND(ID_FILE_OPEN, &CMainFrame::OnFileOpen)
-	ON_COMMAND(ID_FILE_SAVE, &CMainFrame::OnFileSave)
+	ON_COMMAND(ID_FILE_SAVE_MINE, &CMainFrame::OnFileSave)
 	ON_COMMAND(ID_FILE_NEW, &CMainFrame::OnFileNew)
+	ON_COMMAND(ID_FILE_SAVE_AS_MINE, &CMainFrame::OnFileSaveAs)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -37,7 +44,7 @@ static UINT indicators[] =
 
 // CMainFrame construction/destruction
 
-CMainFrame::CMainFrame()
+CMainFrame::CMainFrame():m_bIsOpen(false)
 {
 	// TODO: add member initialization code here
 }
@@ -135,6 +142,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// enable quick (Alt+drag) toolbar customization
 	CMFCToolBar::EnableQuickCustomization();
+
 
 	return 0;
 }
@@ -275,11 +283,50 @@ void CMainFrame::OnFileOpen()
 		NULL, 
 		NULL,
 		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
-		(LPCTSTR)_TEXT("JPG Files (*.jpg)|*.jpg|All Files (*.*)|*.*||"),
+		(LPCTSTR)_TEXT("BLA Files (*.bla)|*.bla|All Files (*.*)|*.*||"),
 		NULL);
 	if(dlg.DoModal()==IDOK)
 	{
 		FilePathName=dlg.GetPathName(); //文件名保存在了FilePathName里
+
+
+		int pos = FilePathName.ReverseFind('.');
+		CString lxq = FilePathName.Mid(pos+1);
+		if (pos == -1 || FilePathName.Mid(pos+1) != _T("bla"))
+		{
+			CString strMsg;
+			strMsg.Format (_T("打开项目文件\"%s\"失败，后缀错误"), FilePathName); 
+			AfxMessageBox(strMsg);
+			return; 
+		}
+
+		int pos_ = FilePathName.ReverseFind('\\');
+
+		m_projectLocation = FilePathName.Left(pos_);
+		m_projectName = FilePathName.Mid(pos_+1, pos - 1 - pos_);
+
+		CString cPath;
+		cPath.Format(_T("%s\\%s.bla"), m_projectLocation, m_projectName);
+		CStringA stra(cPath.GetBuffer(0));
+		cPath.ReleaseBuffer();
+		string path=stra.GetBuffer(0);
+		stra.ReleaseBuffer();
+
+		ifstream inFile(path, ios::binary);
+		if (!inFile.is_open())
+		{
+			CString strMsg;
+			strMsg.Format (_T("打开项目文件\"%s\"失败"), cPath); 
+			AfxMessageBox(strMsg);
+			return; 
+		}
+		//写入外墙和内墙内容
+		vector<sLine> sLines;
+		serializer<sLine>::read(inFile, &sLines);
+		m_wndOutWallProperties.inputFromLines(sLines);
+		m_wndInWallProperties.inputFromLines(sLines);
+		m_bIsOpen = true;
+		GetActiveDocument()->SetTitle(m_projectName);//设置文档名称
 	}
 	else
 	{
@@ -290,42 +337,98 @@ void CMainFrame::OnFileOpen()
 
 void CMainFrame::OnFileSave()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	if (m_bIsOpen)
+	{
+		CString cPath;
+		cPath.Format(_T("%s\\%s.bla"), m_projectLocation, m_projectName);
+		CStringA stra(cPath.GetBuffer(0));
+		cPath.ReleaseBuffer();
+		string path=stra.GetBuffer(0);
+		stra.ReleaseBuffer();
+
+		ofstream outFile(path, ios::binary|ios::ate);
+		if (!outFile.is_open())
+		{
+			CString strMsg;
+			strMsg.Format (_T("保存项目文件\"%s\"失败"), cPath); 
+			AfxMessageBox(strMsg);
+			return; 
+		}
+		//写入外墙和内墙内容
+		vector<sLine> sLines;
+		m_wndOutWallProperties.OutputToLines(sLines);
+		m_wndInWallProperties.OutputToLines(sLines);
+		serializer<sLine>::write(outFile, &sLines);
+	}	
+}
+
+void CMainFrame::OnFileSaveAs()
+{
 	CString FilePathName;
-	CFileDialog dlg(FALSE, //TRUE为OPEN对话框，FALSE为SAVE AS对话框
+	CFileDialog dlg(FALSE, //FALSE为SAVE AS对话框
 		NULL, 
 		NULL,
 		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
-		(LPCTSTR)_TEXT("JPG Files (*.jpg)|*.jpg|All Files (*.*)|*.*||"),
+		(LPCTSTR)_TEXT("BLA Files (*.bla)|*.bla|All Files (*.*)|*.*||"),
 		NULL);
 	if(dlg.DoModal()==IDOK)
 	{
 		FilePathName=dlg.GetPathName(); //文件名保存在了FilePathName里
+		int pos = FilePathName.ReverseFind('.');
+		CString lxq = FilePathName.Mid(pos+1);
+		if (pos == -1 || FilePathName.Mid(pos+1) != _T("bla"))
+		{
+			CString strMsg;
+			strMsg.Format (_T("保存项目文件\"%s\"失败，后缀错误"), FilePathName); 
+			AfxMessageBox(strMsg);
+			return; 
+		}
+
+		int pos_ = FilePathName.ReverseFind('\\');
+
+		m_projectLocation = FilePathName.Left(pos_);
+		m_projectName = FilePathName.Mid(pos_+1, pos - 1 - pos_);
+
+		CString cPath;
+		cPath.Format(_T("%s\\%s.bla"), m_projectLocation, m_projectName);
+		CStringA stra(cPath.GetBuffer(0));
+		cPath.ReleaseBuffer();
+		string path=stra.GetBuffer(0);
+		stra.ReleaseBuffer();
+
+		ofstream outFile(path, ios::binary|ios::ate);
+		if (!outFile.is_open())
+		{
+			CString strMsg;
+			strMsg.Format (_T("保存项目文件\"%s\"失败"), cPath); 
+			AfxMessageBox(strMsg);
+			return; 
+		}
+		//写入外墙和内墙内容
+		vector<sLine> sLines;
+		m_wndOutWallProperties.OutputToLines(sLines);
+		m_wndInWallProperties.OutputToLines(sLines);
+		serializer<sLine>::write(outFile, &sLines);
+		GetActiveDocument()->SetTitle(m_projectName);//设置文档名称
 	}
 	else
 	{
 		return;
 	}
 }
-
 
 void CMainFrame::OnFileNew()
 {
 	DlgProjectNew dlgPn;
 	if(dlgPn.DoModal()==IDOK)
 	{
-		if (!PathIsDirectory(dlgPn.m_projectLocation)) 
-		{
-			if (!PathIsDirectory(dlgPn.m_projectLocation) ) 
-			{ 
-				CString strMsg;
-				strMsg.Format (_T("创建路径\"%s\"失败！是否继续?"), dlgPn.m_projectLocation); 
-				if (AfxMessageBox(strMsg, MB_YESNO) == IDYES) 
-					return; 
-			}
-		}
-		
+		m_projectName = dlgPn.m_projectName;
+		m_projectLocation = dlgPn.m_projectLocation;
+		m_bIsOpen = true;
+		GetActiveDocument()->SetTitle(m_projectName);//设置文档名称
 	}
 	else
 		return;
 }
+
+

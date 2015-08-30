@@ -109,6 +109,7 @@
     <ClInclude Include="BuildLightAnalysis.h" />
     <ClInclude Include="BuildLightAnalysisDoc.h" />
     <ClInclude Include="BuildLightAnalysisView.h" />
+    <ClInclude Include="CommonData.h" />
     <ClInclude Include="DlgProjectNew.h" />
     <ClInclude Include="InWallWnd.h" />
     <ClInclude Include="MainFrm.h" />

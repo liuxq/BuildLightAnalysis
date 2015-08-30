@@ -61,6 +61,11 @@ protected:  // control bar embedded members
 	COptimizeWallWnd  m_wndOptimizeWallProperties;
 	COptionWnd		  m_wndOptionProperties;
 
+public:
+	CString m_projectName;
+	CString m_projectLocation;
+	bool m_bIsOpen;
+
 // Generated message map functions
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -77,6 +82,7 @@ public:
 	afx_msg void OnFileOpen();
 	afx_msg void OnFileSave();
 	afx_msg void OnFileNew();
+	afx_msg void OnFileSaveAs();
 };
 
 

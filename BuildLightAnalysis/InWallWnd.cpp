@@ -158,7 +158,50 @@ void CInWallWnd::OnInsertPos()
 {
 	InsertPos(100l,200l,200l,300l);
 }
+void CInWallWnd::DeletePos()
+{
+	CMFCPropertyGridProperty* pGroup = getCoodGroup();
+	for (int i = 0; i < pGroup->GetSubItemsCount(); i++)
+	{
+		CMFCPropertyGridProperty* subItem = pGroup->GetSubItem(i);
+		pGroup->RemoveSubItem(subItem);
+		i--;
+	}
+}
+void CInWallWnd::inputFromLines(vector<sLine>& sLines)
+{
+	DeletePos();
+	vector<sLine> inWallLines;
+	for (int i = 0; i < sLines.size(); i++)
+	{
+		if (sLines[i].type == sLine::IN_WALL)
+		{
+			inWallLines.push_back(sLines[i]);
+		}
+	}
+	
+	for (int i = 0; i < inWallLines.size(); i++)
+	{
+		InsertPos(inWallLines[i].s.x, inWallLines[i].s.y, inWallLines[i].e.x, inWallLines[i].e.y);
+	}
+	
+}
+void CInWallWnd::OutputToLines(vector<sLine>& sLines)
+{
+	CMFCPropertyGridProperty* inWallPos = getCoodGroup();
+	//ÄÚÇ½
+	Vec2d ps, pe;
+	for (int i = 0; i < inWallPos->GetSubItemsCount(); i++)
+	{
+		ps.x = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+		ps.y = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
 
+		pe.x = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+		pe.y = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+
+		sLines.push_back(sLine(ps,pe,sLine::IN_WALL));
+	}
+}
 void CInWallWnd::OnUpdateProperties1(CCmdUI* /*pCmdUI*/)
 {
 	// TODO: Add your command update UI handler code here

@@ -1,5 +1,7 @@
-#include "PropertyGridCtrl.h"
 #pragma once
+
+#include "PropertyGridCtrl.h"
+#include "CommonData.h"
 
 class COutWallWnd : public CDockablePane
 {
@@ -21,6 +23,9 @@ public:
 		return m_wndPropList.GetProperty(0);
 	}
 	void InsertPos(double, double);
+	void DeletePos();
+	void OutputToLines(vector<sLine>& sLines);
+	void inputFromLines(vector<sLine>& sLines);
 
 protected:
 	CFont m_fntPropList;

@@ -95,6 +95,9 @@
     <ClInclude Include="DlgProjectNew.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CommonData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BuildLightAnalysis.cpp">

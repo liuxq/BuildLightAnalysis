@@ -21,4 +21,7 @@ protected:
 public:
 	CString m_projectName;
 	CString m_projectLocation;
+
+	afx_msg void OnBnClickedButtonNewBrowse();
+	afx_msg void OnBnClickedOk();
 };

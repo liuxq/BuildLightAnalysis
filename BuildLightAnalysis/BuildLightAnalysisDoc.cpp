@@ -49,8 +49,6 @@ BOOL CBuildLightAnalysisDoc::OnNewDocument()
 }
 
 
-
-
 // CBuildLightAnalysisDoc serialization
 
 void CBuildLightAnalysisDoc::Serialize(CArchive& ar)
@@ -64,6 +62,7 @@ void CBuildLightAnalysisDoc::Serialize(CArchive& ar)
 		// TODO: add loading code here
 	}
 }
+
 
 #ifdef SHARED_HANDLERS
 
