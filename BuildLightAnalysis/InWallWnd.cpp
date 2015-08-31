@@ -170,19 +170,10 @@ void CInWallWnd::DeletePos()
 }
 void CInWallWnd::inputFromLines(vector<sLine>& sLines)
 {
-	DeletePos();
-	vector<sLine> inWallLines;
+	DeletePos();	
 	for (int i = 0; i < sLines.size(); i++)
 	{
-		if (sLines[i].type == sLine::IN_WALL)
-		{
-			inWallLines.push_back(sLines[i]);
-		}
-	}
-	
-	for (int i = 0; i < inWallLines.size(); i++)
-	{
-		InsertPos(inWallLines[i].s.x, inWallLines[i].s.y, inWallLines[i].e.x, inWallLines[i].e.y);
+		InsertPos(sLines[i].s.x, sLines[i].s.y, sLines[i].e.x, sLines[i].e.y);
 	}
 	
 }

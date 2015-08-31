@@ -147,3 +147,11 @@ void COptionWnd::SetPropListFont()
 
 	m_wndPropList.SetFont(&m_fntPropList);
 }
+void COptionWnd::save(ofstream& out)
+{
+	m_wndPropList.GetProperty(0);
+}
+void COptionWnd::load(ifstream& in)
+{
+
+}

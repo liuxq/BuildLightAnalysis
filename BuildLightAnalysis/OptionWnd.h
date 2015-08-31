@@ -31,6 +31,8 @@ public:
 		}
 		return 0.0;
 	}
+	void save(ofstream& out);
+	void load(ifstream& in);
 
 protected:
 	CFont m_fntPropList;

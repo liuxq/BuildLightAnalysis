@@ -75,6 +75,10 @@ protected:
 
 	BOOL CreateDockingWindows();
 	void SetDockingWindowIcons(BOOL bHiColorIcons);
+
+private:
+	void load(ifstream& in);
+	void save(ofstream& out);
 public:
 	afx_msg void OnEditOutwall();
 	afx_msg void OnEditInwall();

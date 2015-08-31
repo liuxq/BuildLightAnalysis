@@ -274,7 +274,33 @@ void CMainFrame::OnEditOption()
 	
 }
 
+void CMainFrame::load(ifstream& inputFile)
+{
+	//读取外墙
+	vector<sLine> sLines;
+	serializer<sLine>::read(inputFile, &sLines);
+	m_wndOutWallProperties.inputFromLines(sLines);
 
+	//读取内墙
+	serializer<sLine>::read(inputFile, &sLines);
+	m_wndInWallProperties.inputFromLines(sLines);
+}
+void CMainFrame::save(ofstream& outputFile)
+{
+	//写入外墙
+	vector<sLine> sLines;
+	m_wndOutWallProperties.OutputToLines(sLines);
+	serializer<sLine>::write(outputFile, &sLines);
+
+	//写入内墙
+	sLines.clear();
+	m_wndInWallProperties.OutputToLines(sLines);
+	serializer<sLine>::write(outputFile, &sLines);
+
+	//写入选项
+
+
+}
 void CMainFrame::OnFileOpen()
 {
 	// TODO: 在此添加控件通知处理程序代码
@@ -320,11 +346,8 @@ void CMainFrame::OnFileOpen()
 			AfxMessageBox(strMsg);
 			return; 
 		}
-		//写入外墙和内墙内容
-		vector<sLine> sLines;
-		serializer<sLine>::read(inFile, &sLines);
-		m_wndOutWallProperties.inputFromLines(sLines);
-		m_wndInWallProperties.inputFromLines(sLines);
+		//读取文件
+		load(inFile);
 		m_bIsOpen = true;
 		GetActiveDocument()->SetTitle(m_projectName);//设置文档名称
 	}
@@ -354,11 +377,8 @@ void CMainFrame::OnFileSave()
 			AfxMessageBox(strMsg);
 			return; 
 		}
-		//写入外墙和内墙内容
-		vector<sLine> sLines;
-		m_wndOutWallProperties.OutputToLines(sLines);
-		m_wndInWallProperties.OutputToLines(sLines);
-		serializer<sLine>::write(outFile, &sLines);
+		//写入文件
+		save(outFile);
 	}	
 }
 
@@ -404,11 +424,8 @@ void CMainFrame::OnFileSaveAs()
 			AfxMessageBox(strMsg);
 			return; 
 		}
-		//写入外墙和内墙内容
-		vector<sLine> sLines;
-		m_wndOutWallProperties.OutputToLines(sLines);
-		m_wndInWallProperties.OutputToLines(sLines);
-		serializer<sLine>::write(outFile, &sLines);
+		//写入文件
+		save(outFile);
 		GetActiveDocument()->SetTitle(m_projectName);//设置文档名称
 	}
 	else
