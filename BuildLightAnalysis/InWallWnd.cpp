@@ -7,6 +7,7 @@
 #include "BuildLightAnalysis.h"
 #include "BuildLightAnalysisDoc.h"
 #include "BuildLightAnalysisView.h"
+#include "Serializer.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -192,6 +193,18 @@ void CInWallWnd::OutputToLines(vector<sLine>& sLines)
 
 		sLines.push_back(sLine(ps,pe,sLine::IN_WALL));
 	}
+}
+void CInWallWnd::save(ofstream& out)
+{
+	vector<sLine> sLines;
+	OutputToLines(sLines);
+	serializer<sLine>::write(out, &sLines);
+}
+void CInWallWnd::load(ifstream& in)
+{
+	vector<sLine> sLines;
+	serializer<sLine>::read(in, &sLines);
+	inputFromLines(sLines);
 }
 void CInWallWnd::OnUpdateProperties1(CCmdUI* /*pCmdUI*/)
 {

@@ -7,6 +7,7 @@
 #include "BuildLightAnalysis.h"
 #include "BuildLightAnalysisDoc.h"
 #include "BuildLightAnalysisView.h"
+#include "Serializer.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -174,6 +175,19 @@ void COutWallWnd::DeletePos()
 		pGroup->RemoveSubItem(subItem);
 		i--;
 	}
+}
+
+void COutWallWnd::save(ofstream& out)
+{
+	vector<sLine> sLines;
+	OutputToLines(sLines);
+	serializer<sLine>::write(out, &sLines);
+}
+void COutWallWnd::load(ifstream& in)
+{
+	vector<sLine> sLines;
+	serializer<sLine>::read(in, &sLines);
+	inputFromLines(sLines);
 }
 void COutWallWnd::OutputToLines(vector<sLine>& sLines)
 {

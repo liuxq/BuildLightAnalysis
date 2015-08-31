@@ -14,7 +14,9 @@ protected: // create from serialization only
 
 // Attributes
 public:
-
+	CString m_projectName;
+	CString m_projectLocation;
+	bool m_bIsOpen;
 // Operations
 public:
 
@@ -36,7 +38,8 @@ public:
 #endif
 
 protected:
-
+	void load(ifstream& in);
+	void save(ofstream& out);
 // Generated message map functions
 protected:
 	DECLARE_MESSAGE_MAP()
@@ -45,4 +48,9 @@ protected:
 	// Helper function that sets search content for a Search Handler
 	void SetSearchContent(const CString& value);
 #endif // SHARED_HANDLERS
+public:
+	afx_msg void OnFileSave();
+	afx_msg void OnFileSaveAs();
+	afx_msg void OnFileNew();
+	afx_msg void OnFileOpen();
 };

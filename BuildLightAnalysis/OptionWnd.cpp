@@ -8,6 +8,8 @@
 #include "BuildLightAnalysisDoc.h"
 #include "BuildLightAnalysisView.h"
 
+#include "Serializer.h"
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -149,9 +151,17 @@ void COptionWnd::SetPropListFont()
 }
 void COptionWnd::save(ofstream& out)
 {
-	m_wndPropList.GetProperty(0);
+	double d1 = m_wndPropList.GetProperty(0)->GetValue().dblVal;
+	double d2 = m_wndPropList.GetProperty(1)->GetValue().dblVal;
+	serializer<double>::write(out,&d1);
+	serializer<double>::write(out,&d2);
 }
 void COptionWnd::load(ifstream& in)
 {
-
+	double d1;
+	double d2;
+	serializer<double>::read(in,&d1);
+	serializer<double>::read(in,&d2);
+	m_wndPropList.GetProperty(0)->SetValue(d1);
+	m_wndPropList.GetProperty(1)->SetValue(d2);
 }

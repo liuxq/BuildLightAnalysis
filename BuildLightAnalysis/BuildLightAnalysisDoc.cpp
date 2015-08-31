@@ -12,6 +12,13 @@
 #include "BuildLightAnalysisDoc.h"
 
 #include <propkey.h>
+#include "Serializer.h"
+#include "MainFrm.h"
+#include "DlgProjectNew.h"
+#include <fstream>
+#include <string>
+
+using namespace std;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -22,12 +29,16 @@
 IMPLEMENT_DYNCREATE(CBuildLightAnalysisDoc, CDocument)
 
 BEGIN_MESSAGE_MAP(CBuildLightAnalysisDoc, CDocument)
+	ON_COMMAND(ID_FILE_SAVE, &CBuildLightAnalysisDoc::OnFileSave)
+	ON_COMMAND(ID_FILE_SAVE_AS, &CBuildLightAnalysisDoc::OnFileSaveAs)
+	ON_COMMAND(ID_FILE_NEW, &CBuildLightAnalysisDoc::OnFileNew)
+	ON_COMMAND(ID_FILE_OPEN, &CBuildLightAnalysisDoc::OnFileOpen)
 END_MESSAGE_MAP()
 
 
 // CBuildLightAnalysisDoc construction/destruction
 
-CBuildLightAnalysisDoc::CBuildLightAnalysisDoc()
+CBuildLightAnalysisDoc::CBuildLightAnalysisDoc():m_bIsOpen(false)
 {
 	// TODO: add one-time construction code here
 
@@ -134,3 +145,178 @@ void CBuildLightAnalysisDoc::Dump(CDumpContext& dc) const
 
 
 // CBuildLightAnalysisDoc commands
+
+
+void CBuildLightAnalysisDoc::OnFileSave()
+{
+	if (m_bIsOpen)
+	{
+		CString cPath;
+		cPath.Format(_T("%s\\%s.bla"), m_projectLocation, m_projectName);
+		CStringA stra(cPath.GetBuffer(0));
+		cPath.ReleaseBuffer();
+		string path=stra.GetBuffer(0);
+		stra.ReleaseBuffer();
+
+		ofstream outFile(path, ios::binary|ios::ate);
+		if (!outFile.is_open())
+		{
+			CString strMsg;
+			strMsg.Format (_T("保存项目文件\"%s\"失败"), cPath); 
+			AfxMessageBox(strMsg);
+			return; 
+		}
+		//写入文件
+		save(outFile);
+	}	
+}
+
+
+void CBuildLightAnalysisDoc::OnFileSaveAs()
+{
+	CString FilePathName;
+	CFileDialog dlg(FALSE, //FALSE为SAVE AS对话框
+		NULL, 
+		NULL,
+		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+		(LPCTSTR)_TEXT("BLA Files (*.bla)|*.bla|All Files (*.*)|*.*||"),
+		NULL);
+	if(dlg.DoModal()==IDOK)
+	{
+		FilePathName=dlg.GetPathName(); //文件名保存在了FilePathName里
+		int pos = FilePathName.ReverseFind('.');
+		CString lxq = FilePathName.Mid(pos+1);
+		if (pos == -1 || FilePathName.Mid(pos+1) != _T("bla"))
+		{
+			CString strMsg;
+			strMsg.Format (_T("保存项目文件\"%s\"失败，后缀错误"), FilePathName); 
+			AfxMessageBox(strMsg);
+			return; 
+		}
+
+		int pos_ = FilePathName.ReverseFind('\\');
+
+		m_projectLocation = FilePathName.Left(pos_);
+		m_projectName = FilePathName.Mid(pos_+1, pos - 1 - pos_);
+
+		CString cPath;
+		cPath.Format(_T("%s\\%s.bla"), m_projectLocation, m_projectName);
+		CStringA stra(cPath.GetBuffer(0));
+		cPath.ReleaseBuffer();
+		string path=stra.GetBuffer(0);
+		stra.ReleaseBuffer();
+
+		ofstream outFile(path, ios::binary|ios::ate);
+		if (!outFile.is_open())
+		{
+			CString strMsg;
+			strMsg.Format (_T("保存项目文件\"%s\"失败"), cPath); 
+			AfxMessageBox(strMsg);
+			return; 
+		}
+		//写入文件
+		save(outFile);
+		SetTitle(m_projectName);//设置文档名称
+	}
+	else
+	{
+		return;
+	}
+}
+
+
+void CBuildLightAnalysisDoc::OnFileNew()
+{
+	DlgProjectNew dlgPn;
+	if(dlgPn.DoModal()==IDOK)
+	{
+		m_projectName = dlgPn.m_projectName;
+		m_projectLocation = dlgPn.m_projectLocation;
+		m_bIsOpen = true;
+		SetTitle(m_projectName);//设置文档名称
+	}
+	else
+		return;
+}
+
+
+void CBuildLightAnalysisDoc::OnFileOpen()
+{
+	CString FilePathName;
+	CFileDialog dlg(TRUE, //TRUE为OPEN对话框，FALSE为SAVE AS对话框
+		NULL, 
+		NULL,
+		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+		(LPCTSTR)_TEXT("BLA Files (*.bla)|*.bla|All Files (*.*)|*.*||"),
+		NULL);
+	if(dlg.DoModal()==IDOK)
+	{
+		FilePathName=dlg.GetPathName(); //文件名保存在了FilePathName里
+
+
+		int pos = FilePathName.ReverseFind('.');
+		CString lxq = FilePathName.Mid(pos+1);
+		if (pos == -1 || FilePathName.Mid(pos+1) != _T("bla"))
+		{
+			CString strMsg;
+			strMsg.Format (_T("打开项目文件\"%s\"失败，后缀错误"), FilePathName); 
+			AfxMessageBox(strMsg);
+			return; 
+		}
+
+		int pos_ = FilePathName.ReverseFind('\\');
+
+		m_projectLocation = FilePathName.Left(pos_);
+		m_projectName = FilePathName.Mid(pos_+1, pos - 1 - pos_);
+
+		CString cPath;
+		cPath.Format(_T("%s\\%s.bla"), m_projectLocation, m_projectName);
+		CStringA stra(cPath.GetBuffer(0));
+		cPath.ReleaseBuffer();
+		string path=stra.GetBuffer(0);
+		stra.ReleaseBuffer();
+
+		ifstream inFile(path, ios::binary);
+		if (!inFile.is_open())
+		{
+			CString strMsg;
+			strMsg.Format (_T("打开项目文件\"%s\"失败"), cPath); 
+			AfxMessageBox(strMsg);
+			return; 
+		}
+		//读取文件
+		load(inFile);
+		m_bIsOpen = true;
+		SetTitle(m_projectName);//设置文档名称
+	}
+	else
+	{
+		return;
+	}
+}
+
+void CBuildLightAnalysisDoc::load(ifstream& inputFile)
+{
+	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+	//读取外墙
+	pMain->GetOutWallProperty().load(inputFile);
+
+	//读取内墙
+	pMain->GetInWallProperty().load(inputFile);
+
+	//读取选项
+	pMain->GetOptionProperty().load(inputFile);
+}
+void CBuildLightAnalysisDoc::save(ofstream& outputFile)
+{
+	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+	//写入外墙
+	pMain->GetOutWallProperty().save(outputFile);
+
+	//写入内墙
+	pMain->GetInWallProperty().save(outputFile);
+
+	//写入选项
+	pMain->GetOptionProperty().save(outputFile);
+
+}

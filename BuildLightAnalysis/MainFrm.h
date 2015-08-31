@@ -62,9 +62,7 @@ protected:  // control bar embedded members
 	COptionWnd		  m_wndOptionProperties;
 
 public:
-	CString m_projectName;
-	CString m_projectLocation;
-	bool m_bIsOpen;
+	
 
 // Generated message map functions
 protected:
@@ -77,8 +75,7 @@ protected:
 	void SetDockingWindowIcons(BOOL bHiColorIcons);
 
 private:
-	void load(ifstream& in);
-	void save(ofstream& out);
+
 public:
 	afx_msg void OnEditOutwall();
 	afx_msg void OnEditInwall();

@@ -90,7 +90,7 @@ void CBuildLightAnalysisView::OnDraw(CDC* /*pDC*/)
 
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 
-	if (pMain && !pMain->m_bIsOpen)//如果没有打开项目则不进行绘制
+	if (pMain && !pDoc->m_bIsOpen)//如果没有打开项目则不进行绘制
 		return;
 
 	CMFCPropertyGridProperty* outWallPos = pMain->GetOutWallProperty().getCoodGroup();
@@ -174,12 +174,13 @@ void CBuildLightAnalysisView::OnDraw(CDC* /*pDC*/)
 void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 {
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+	CBuildLightAnalysisDoc* pDoc = GetDocument();
 	CString xy;
 	xy.Format(_T("%d,%d"),point.x, point.y);
 	pMain->GetStatusBar().SetPaneText(0,xy);
 
 	//如果项目未打开，则不做什么
-	if (pMain && !pMain->m_bIsOpen)
+	if (pMain && !pDoc->m_bIsOpen)
 		return;
 
 	//如果是外墙模式，有选中的外墙点，则移动它
@@ -211,9 +212,11 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 }
 void CBuildLightAnalysisView::OnLButtonDown(UINT nFlags, CPoint point)
 {
+
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
-	
-	if (pMain && !pMain->m_bIsOpen)
+	CBuildLightAnalysisDoc* pDoc = GetDocument();
+
+	if (pMain && !pDoc->m_bIsOpen)
 	{
 		AfxMessageBox(_T("项目还未建立，请新建或打开项目"));
 		return; 
@@ -248,9 +251,9 @@ void CBuildLightAnalysisView::OnLButtonDown(UINT nFlags, CPoint point)
 void CBuildLightAnalysisView::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
-
+	CBuildLightAnalysisDoc* pDoc = GetDocument();
 	//如果项目未打开，则不做什么
-	if (pMain && !pMain->m_bIsOpen)
+	if (pMain && !pDoc->m_bIsOpen)
 		return;
 
 	//如果是外墙模式，并且有选中的外墙点，则移动它

@@ -26,6 +26,8 @@ public:
 	void DeletePos();
 	void OutputToLines(vector<sLine>& sLines);
 	void inputFromLines(vector<sLine>& sLines);
+	void save(ofstream& out);
+	void load(ifstream& in);
 
 protected:
 	CFont m_fntPropList;
