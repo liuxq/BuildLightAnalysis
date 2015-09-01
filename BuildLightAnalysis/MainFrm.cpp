@@ -131,6 +131,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	DockPane(&m_wndOptionProperties);
 	m_wndOptionProperties.ShowPane(FALSE,FALSE,TRUE);
 
+	m_wndWindowProperties.EnableDocking(CBRS_ALIGN_ANY);
+	DockPane(&m_wndWindowProperties);
+	m_wndWindowProperties.ShowPane(FALSE,FALSE,TRUE);
+
 	
 
 
@@ -186,6 +190,12 @@ BOOL CMainFrame::CreateDockingWindows()
 	bNameValid = strPropertiesWnd.LoadString(IDS_OPTION_PROPERTIES_WND);
 	ASSERT(bNameValid);
 	if (!m_wndOptionProperties.Create(strPropertiesWnd, this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_OPTION_PROPERTIESWND, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
+	{
+		TRACE0("Failed to create Option window\n");
+		return FALSE; // failed to create
+	}
+
+	if (!m_wndWindowProperties.Create(_T("´°»§"), this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_WINDOW_PROPERTIESWND, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
 	{
 		TRACE0("Failed to create Option window\n");
 		return FALSE; // failed to create
@@ -274,5 +284,8 @@ void CMainFrame::OnEditOption()
 
 void CMainFrame::OnEditWindow()
 {
-	// TODO: Add your command handler code here
+	if (m_wndWindowProperties.IsPaneVisible())
+		m_wndWindowProperties.ShowPane(FALSE,FALSE,TRUE);
+	else
+		m_wndWindowProperties.ShowPane(TRUE,FALSE,TRUE);
 }

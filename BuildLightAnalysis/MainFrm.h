@@ -7,6 +7,7 @@
 #include "InWallWnd.h"
 #include "OptimizeWallWnd.h"
 #include "OptionWnd.h"
+#include "WindowWnd.h"
 
 class CMainFrame : public CFrameWndEx
 {
@@ -60,6 +61,7 @@ protected:  // control bar embedded members
 	CInWallWnd		  m_wndInWallProperties;
 	COptimizeWallWnd  m_wndOptimizeWallProperties;
 	COptionWnd		  m_wndOptionProperties;
+	CWindowWnd		  m_wndWindowProperties;
 
 public:
 	
