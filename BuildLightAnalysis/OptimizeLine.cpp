@@ -17,7 +17,7 @@ double calIntersectPointsOfLines(sLine& srcLine, sLine& dstLine)
 	double t1 = ((a1.y - a2.y) * d2.x - (a1.x - a2.x) * d2.y)/D;
 	double t2 = ((a1.y - a2.y) * d1.x - (a1.x - a2.x) * d1.y)/D;
 
-	if (t1 > 0 && t1 < 1 && t2 >= 0 && t2 <= 1)
+	if (t1 > 0 && t1 < 1 && fabs(t1) > 1e-6 && fabs(t1-1) > 1e-6 && (t2 > 0 && t2 < 1 || fabs(t2) < 1e-6 || fabs(t2-1) < 1e-6))
 	{
 		return t1;
 	}
