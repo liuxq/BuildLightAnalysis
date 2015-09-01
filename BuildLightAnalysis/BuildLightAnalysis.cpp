@@ -15,6 +15,11 @@
 #define new DEBUG_NEW
 #endif
 
+#include <Gdiplus.h>
+using namespace Gdiplus;
+
+GdiplusStartupInput    m_Gdistart; 
+ULONG_PTR    m_GdiplusToken;  //保存GDI+被初始化后在应用程序中的GDI+标识,类似于句柄
 
 // CBuildLightAnalysisApp
 
@@ -114,6 +119,9 @@ BOOL CBuildLightAnalysisApp::InitInstance()
 	m_pMainWnd->UpdateWindow();
 	// call DragAcceptFiles only if there's a suffix
 	//  In an SDI app, this should occur after ProcessShellCommand
+
+	GdiplusStartup(&m_GdiplusToken, &m_Gdistart,NULL);
+
 	return TRUE;
 }
 
@@ -121,6 +129,8 @@ int CBuildLightAnalysisApp::ExitInstance()
 {
 	//TODO: handle additional resources you may have added
 	AfxOleTerm(FALSE);
+
+	GdiplusShutdown(m_GdiplusToken);
 
 	return CWinAppEx::ExitInstance();
 }

@@ -93,11 +93,8 @@ class Vec2
     Type operator * (const Vec2& A) const       /// DOT-PRODUCT (*)
       { Type DotProd = x*A.x+y*A.y; 
         return(DotProd); };
-    Vec2 operator / (const Vec2& A) const       /// CROSS-PRODUCT (/)
-      { Vec2 CrossProd(y*A.z-z*A.y, z*A.x-x*A.z);
-        return(CrossProd); };
-    Vec2 operator ^ (const Vec2& A) const       /// ALSO CROSS-PRODUCT (^)
-      { Vec2 CrossProd(y*A.z-z*A.y, z*A.x-x*A.z);
+    Type operator / (const Vec2& A) const       /// CROSS-PRODUCT (/)
+      { Type CrossProd = x*A.y-y*A.x;
         return(CrossProd); };
     Vec2 operator * (const Type s) const        /// MULTIPLY BY SCALAR V*s (*)
       { Vec2 Scaled(x*s, y*s); 

@@ -13,7 +13,10 @@
 #include "BuildLightAnalysisView.h"
 #include "MainFrm.h"
 #include "math.h"
-#include "OptimizeLine.h"
+#include "MathUtility.h"
+#include <Gdiplus.h>
+
+using namespace Gdiplus;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -35,7 +38,8 @@ END_MESSAGE_MAP()
 
 // CBuildLightAnalysisView construction/destruction
 
-CBuildLightAnalysisView::CBuildLightAnalysisView():m_selectedOutWallPoint(-1),m_isDrawInWall(false)
+CBuildLightAnalysisView::CBuildLightAnalysisView():m_selectedOutWallPoint(-1),m_isDrawInWall(false),
+	m_iSelectOutWallIndex(-1), m_iSelectInWallIndex(-1)
 {
 	// TODO: add construction code here
 
@@ -89,7 +93,7 @@ void CBuildLightAnalysisView::optimize()
 }
 // CBuildLightAnalysisView drawing
 
-void CBuildLightAnalysisView::OnDraw(CDC* /*pDC*/)
+void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 {
 	CBuildLightAnalysisDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
@@ -108,7 +112,14 @@ void CBuildLightAnalysisView::OnDraw(CDC* /*pDC*/)
 
 	if (!pMain->GetOptimizeWallProperty().IsPaneVisible())
 	{
-		CDC *pDC=GetDC();        //CDC方式创建
+		Gdiplus::Graphics graphics(pDC->GetSafeHdc());
+		Gdiplus::Pen red(Gdiplus::Color(255,255,0,0), 10); 
+		Gdiplus::Pen blue(Gdiplus::Color(255,0,0,255), 1);  
+		graphics.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality); 
+		graphics.DrawLine(&red, 10, 10, 200, 400);   
+		graphics.DrawLine(&blue, 10, 15, 200, 500); 
+
+		return;
 
 		//画外墙
 		CPen pen(PS_SOLID,8,RGB(100,100,100));    //定义画笔
@@ -163,16 +174,25 @@ void CBuildLightAnalysisView::OnDraw(CDC* /*pDC*/)
 		CDC *pDC=GetDC();						  //CDC方式创建
 		CPen pen(PS_SOLID,6,RGB(100,100,100));    //定义画笔
 		CPen* pOldPen=pDC->SelectObject(&pen);
-		CPoint p;
+		CPoint p,p1;
 		for (int i = 0; i < optimizeWallPos->GetSubItemsCount(); i++)
 		{
 			p.x = optimizeWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
 			p.y = optimizeWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
 			pDC->MoveTo(p);
 
-			p.x = optimizeWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
-			p.y = optimizeWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
-			pDC->LineTo(p);
+			p1.x = optimizeWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+			p1.y = optimizeWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+			pDC->LineTo(p1);
+
+			if (i == m_iSelectOutWallIndex)//如果是拾取的外墙
+			{
+				CPen pen1(PS_SOLID,16,RGB(100,100,100));
+				CPen* pOldPen=pDC->SelectObject(&pen1);
+				pDC->MoveTo(p);
+				pDC->LineTo(p1);
+				pDC->SelectObject(pOldPen);
+			}
 		}
 
 		//画处理后的内墙
@@ -188,9 +208,18 @@ void CBuildLightAnalysisView::OnDraw(CDC* /*pDC*/)
 			p.y = optimizeinWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
 			pDC->MoveTo(p);
 
-			p.x = optimizeinWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
-			p.y = optimizeinWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
-			pDC->LineTo(p);
+			p1.x = optimizeinWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+			p1.y = optimizeinWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+			pDC->LineTo(p1);
+
+			if (i == m_iSelectInWallIndex)//如果是拾取的外墙
+			{
+				CPen pen2(PS_SOLID,16,RGB(100,100,100));
+				CPen* pOldPen=pDC->SelectObject(&pen2);
+				pDC->MoveTo(p);
+				pDC->LineTo(p1);
+				pDC->SelectObject(pOldPen);
+			}
 		}
 	}
 	
@@ -209,14 +238,16 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 	if (pMain && !pDoc->m_bIsOpen)
 		return;
 
+	Vec2d p(point.x, point.y);
+
 	//如果是外墙模式，有选中的外墙点，则移动它
 	if (pMain->GetOutWallProperty().IsPaneVisible() && m_selectedOutWallPoint >= 0)
 	{
 		CMFCPropertyGridProperty* outWallPos = pMain->GetOutWallProperty().getCoodGroup();
 		if (!outWallPos)
 			return;
-		outWallPos->GetSubItem(m_selectedOutWallPoint)->GetSubItem(0)->SetValue((double)point.x);
-		outWallPos->GetSubItem(m_selectedOutWallPoint)->GetSubItem(1)->SetValue((double)point.y);
+		outWallPos->GetSubItem(m_selectedOutWallPoint)->GetSubItem(0)->SetValue(p.x);
+		outWallPos->GetSubItem(m_selectedOutWallPoint)->GetSubItem(1)->SetValue(p.y);
 
 		Invalidate();
 	}
@@ -230,14 +261,52 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 		int count = inWallPos->GetSubItemsCount();
 		if (!count)
 			return;
-		inWallPos->GetSubItem(count-1)->GetSubItem(1)->GetSubItem(0)->SetValue((double)point.x);
-		inWallPos->GetSubItem(count-1)->GetSubItem(1)->GetSubItem(1)->SetValue((double)point.y);
+		inWallPos->GetSubItem(count-1)->GetSubItem(1)->GetSubItem(0)->SetValue(p.x);
+		inWallPos->GetSubItem(count-1)->GetSubItem(1)->GetSubItem(1)->SetValue(p.y);
 		Invalidate();
 	}
 	//如果是处理后模式
 	if (pMain->GetOptimizeWallProperty().IsPaneVisible())
 	{
+		CMFCPropertyGridProperty* outWallPos = pMain->GetOptimizeWallProperty().getCoodOutWallGroup();
+		if (!outWallPos)
+			return;
 
+		sLine line;
+		for (int i = 0; i < outWallPos->GetSubItemsCount(); i++)
+		{
+			line.s.x = outWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+			line.s.y = outWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+
+			line.e.x = outWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+			line.e.y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+
+			if (lenOfLinePoint(line, p) < 10)
+			{
+				m_iSelectOutWallIndex = i;
+				Invalidate();
+				break;
+			}
+		}
+
+		CMFCPropertyGridProperty* inWallPos = pMain->GetOptimizeWallProperty().getCoodInWallGroup();
+		if (!inWallPos)
+			return;
+		for (int i = 0; i < inWallPos->GetSubItemsCount(); i++)
+		{
+			line.s.x = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+			line.s.y = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+
+			line.e.x = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+			line.e.y = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+
+			if (lenOfLinePoint(line, p) < 10)
+			{
+				m_iSelectInWallIndex = i;
+				Invalidate();
+				break;
+			}
+		}
 	}
 
 }

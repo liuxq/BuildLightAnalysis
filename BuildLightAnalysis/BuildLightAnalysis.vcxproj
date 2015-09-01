@@ -113,7 +113,7 @@
     <ClInclude Include="DlgProjectNew.h" />
     <ClInclude Include="InWallWnd.h" />
     <ClInclude Include="MainFrm.h" />
-    <ClInclude Include="OptimizeLine.h" />
+    <ClInclude Include="MathUtility.h" />
     <ClInclude Include="OptimizeWallWnd.h" />
     <ClInclude Include="OptionWnd.h" />
     <ClInclude Include="OutWallWnd.h" />
@@ -131,7 +131,7 @@
     <ClCompile Include="DlgProjectNew.cpp" />
     <ClCompile Include="InWallWnd.cpp" />
     <ClCompile Include="MainFrm.cpp" />
-    <ClCompile Include="OptimizeLine.cpp" />
+    <ClCompile Include="MathUtility.cpp" />
     <ClCompile Include="OptimizeWallWnd.cpp" />
     <ClCompile Include="OptionWnd.cpp" />
     <ClCompile Include="OutWallWnd.cpp" />
