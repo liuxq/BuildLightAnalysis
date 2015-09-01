@@ -101,17 +101,33 @@ void COptimizeWallWnd::OnUpdateSortProperties(CCmdUI* pCmdUI)
 }
 void COptimizeWallWnd::DeletePos()
 {
-	CMFCPropertyGridProperty* pGroup = getCoodGroup();
+	CMFCPropertyGridProperty* pGroup = getCoodOutWallGroup();
 	for (int i = 0; i < pGroup->GetSubItemsCount(); i++)
 	{
 		CMFCPropertyGridProperty* subItem = pGroup->GetSubItem(i);
 		pGroup->RemoveSubItem(subItem);
 		i--;
 	}
+	CMFCPropertyGridProperty* pGroup1 = getCoodInWallGroup();
+	for (int i = 0; i < pGroup1->GetSubItemsCount(); i++)
+	{
+		CMFCPropertyGridProperty* subItem = pGroup1->GetSubItem(i);
+		pGroup1->RemoveSubItem(subItem);
+		i--;
+	}
 }
-void COptimizeWallWnd::InsertPos(double x, double y, double x1, double y1)
+void COptimizeWallWnd::InsertPos(bool isOutWall, double x, double y, double x1, double y1)
 {
-	CMFCPropertyGridProperty* pGroup = getCoodGroup();
+	CMFCPropertyGridProperty* pGroup = NULL;
+	if (isOutWall)
+	{
+		pGroup = getCoodOutWallGroup();
+	}
+	else
+	{
+		pGroup = getCoodInWallGroup();
+	}
+		
 	int count = pGroup->GetSubItemsCount();
 	CString strCount;
 	strCount.Format(_T("%d"),count+1);
@@ -139,14 +155,7 @@ void COptimizeWallWnd::InsertPos(double x, double y, double x1, double y1)
 	m_wndPropList.UpdateProperty((PropertyGridProperty*)(pGroup));
 	m_wndPropList.AdjustLayout();
 }
-void COptimizeWallWnd::OnInsertPos()
-{
-	InsertPos(100l,200l,200l,300l);
 
-	//更新视图
-	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;     
-	pMain->GetActiveView()->Invalidate(); 
-}
 
 void COptimizeWallWnd::OnUpdateProperties1(CCmdUI* /*pCmdUI*/)
 {
@@ -155,28 +164,28 @@ void COptimizeWallWnd::OnUpdateProperties1(CCmdUI* /*pCmdUI*/)
 
 void COptimizeWallWnd::OnDeletePos()
 {
-	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
-	if (selItem && selItem->GetParent() && selItem->GetParent()->GetData() == waiqiangID)
-	{
-		m_wndPropList.DeleteProperty(selItem);
+	//CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
+	//if (selItem && selItem->GetParent() && selItem->GetParent()->GetData() == waiqiangID)
+	//{
+	//	m_wndPropList.DeleteProperty(selItem);
 
-		//重新设置一下坐标编号
-		CMFCPropertyGridProperty* pGroup = getCoodGroup();
-		if (!pGroup)
-			return;
-		
-		int count = pGroup->GetSubItemsCount();
-		CString strName;
-		for (int i = 0; i < count; i++)
-		{
-			strName.Format(_T("%d"),i+1);
-			pGroup->GetSubItem(i)->SetName(strName);
-		}
-	}
-	
-	//更新视图
-	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;     
-	pMain->GetActiveView()->Invalidate(); 
+	//	//重新设置一下坐标编号
+	//	CMFCPropertyGridProperty* pGroup = getCoodGroup();
+	//	if (!pGroup)
+	//		return;
+	//	
+	//	int count = pGroup->GetSubItemsCount();
+	//	CString strName;
+	//	for (int i = 0; i < count; i++)
+	//	{
+	//		strName.Format(_T("%d"),i+1);
+	//		pGroup->GetSubItem(i)->SetName(strName);
+	//	}
+	//}
+	//
+	////更新视图
+	//CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;     
+	//pMain->GetActiveView()->Invalidate(); 
 }
 
 void COptimizeWallWnd::OnUpdateProperties2(CCmdUI* /*pCmdUI*/)
@@ -193,8 +202,10 @@ void COptimizeWallWnd::InitPropList()
 	m_wndPropList.SetVSDotNetLook();
 	m_wndPropList.MarkModifiedProperties();
 
-	CMFCPropertyGridProperty* pGroup = new CMFCPropertyGridProperty(_T("处理后墙坐标"),waiqiangID);
+	CMFCPropertyGridProperty* pGroup = new CMFCPropertyGridProperty(_T("处理后外墙坐标"),0);
+	CMFCPropertyGridProperty* pGroup1 = new CMFCPropertyGridProperty(_T("处理后内墙坐标"),0);
 	m_wndPropList.AddProperty(pGroup);
+	m_wndPropList.AddProperty(pGroup1);
 }
 
 void COptimizeWallWnd::OnSetFocus(CWnd* pOldWnd)

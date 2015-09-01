@@ -28,6 +28,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_COMMAND(ID_EDIT_OUTWALL, &CMainFrame::OnEditOutwall)
 	ON_COMMAND(ID_EDIT_INWALL, &CMainFrame::OnEditInwall)
 	ON_COMMAND(ID_EDIT_OPTION, &CMainFrame::OnEditOption)
+	ON_COMMAND(ID_EDIT_WINDOW, &CMainFrame::OnEditWindow)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -268,4 +269,10 @@ void CMainFrame::OnEditOption()
 	else
 		m_wndOptionProperties.ShowPane(TRUE,FALSE,TRUE);
 	
+}
+
+
+void CMainFrame::OnEditWindow()
+{
+	// TODO: Add your command handler code here
 }

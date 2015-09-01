@@ -74,7 +74,15 @@ void CBuildLightAnalysisView::optimize()
 	pMain->GetOptimizeWallProperty().DeletePos();
 	for (int i = 0; i < outLines.size(); i++)
 	{
-		pMain->GetOptimizeWallProperty().InsertPos(outLines[i].s.x,outLines[i].s.y,outLines[i].e.x,outLines[i].e.y);
+		if (outLines[i].type == sLine::OUT_WALL)
+		{
+			pMain->GetOptimizeWallProperty().InsertPos(true, outLines[i].s.x,outLines[i].s.y,outLines[i].e.x,outLines[i].e.y);
+		}
+		else
+		{
+			pMain->GetOptimizeWallProperty().InsertPos(false, outLines[i].s.x,outLines[i].s.y,outLines[i].e.x,outLines[i].e.y);
+		}
+		
 	}
 	
 
@@ -147,8 +155,8 @@ void CBuildLightAnalysisView::OnDraw(CDC* /*pDC*/)
 	}
 	else
 	{
-		//画处理后的墙
-		CMFCPropertyGridProperty* optimizeWallPos = pMain->GetOptimizeWallProperty().getCoodGroup();
+		//画处理后的外墙
+		CMFCPropertyGridProperty* optimizeWallPos = pMain->GetOptimizeWallProperty().getCoodOutWallGroup();
 		if (!optimizeWallPos)
 			return;
 
@@ -164,6 +172,24 @@ void CBuildLightAnalysisView::OnDraw(CDC* /*pDC*/)
 
 			p.x = optimizeWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
 			p.y = optimizeWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+			pDC->LineTo(p);
+		}
+
+		//画处理后的内墙
+		CMFCPropertyGridProperty* optimizeinWallPos = pMain->GetOptimizeWallProperty().getCoodInWallGroup();
+		if (!optimizeinWallPos)
+			return;
+
+		CPen pen1(PS_SOLID,6,RGB(255,0,255));    //定义画笔
+		pOldPen=pDC->SelectObject(&pen1);
+		for (int i = 0; i < optimizeinWallPos->GetSubItemsCount(); i++)
+		{
+			p.x = optimizeinWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+			p.y = optimizeinWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+			pDC->MoveTo(p);
+
+			p.x = optimizeinWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+			p.y = optimizeinWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
 			pDC->LineTo(p);
 		}
 	}
@@ -207,6 +233,11 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 		inWallPos->GetSubItem(count-1)->GetSubItem(1)->GetSubItem(0)->SetValue((double)point.x);
 		inWallPos->GetSubItem(count-1)->GetSubItem(1)->GetSubItem(1)->SetValue((double)point.y);
 		Invalidate();
+	}
+	//如果是处理后模式
+	if (pMain->GetOptimizeWallProperty().IsPaneVisible())
+	{
+
 	}
 
 }

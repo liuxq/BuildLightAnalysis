@@ -27,11 +27,15 @@ public:
 		m_wndPropList.SetVSDotNetLook(bSet);
 		m_wndPropList.SetGroupNameFullWidth(bSet);
 	}
-	CMFCPropertyGridProperty* getCoodGroup()
+	CMFCPropertyGridProperty* getCoodOutWallGroup()
 	{
 		return m_wndPropList.GetProperty(0);
 	}
-	void InsertPos(double,double,double,double);
+	CMFCPropertyGridProperty* getCoodInWallGroup()
+	{
+		return m_wndPropList.GetProperty(1);
+	}
+	void InsertPos(bool isOutWall, double,double,double,double);
 	void DeletePos();
 
 protected:
@@ -49,7 +53,6 @@ protected:
 	afx_msg void OnUpdateExpandAllProperties(CCmdUI* pCmdUI);
 	afx_msg void OnSortProperties();
 	afx_msg void OnUpdateSortProperties(CCmdUI* pCmdUI);
-	afx_msg void OnInsertPos();
 	afx_msg void OnUpdateProperties1(CCmdUI* pCmdUI);
 	afx_msg void OnDeletePos();
 	afx_msg void OnUpdateProperties2(CCmdUI* pCmdUI);

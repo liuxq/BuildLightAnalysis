@@ -84,6 +84,7 @@ public:
 	afx_msg void OnFileSave();
 	afx_msg void OnFileNew();
 	afx_msg void OnFileSaveAs();
+	afx_msg void OnEditWindow();
 };
 
 
