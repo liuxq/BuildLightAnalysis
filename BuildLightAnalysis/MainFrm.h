@@ -37,6 +37,10 @@ public:
 	{
 		return m_wndOptionProperties;
 	}
+	CWindowWnd& GetWindowProperty()
+	{
+		return m_wndWindowProperties;
+	}
 	CMFCStatusBar& GetStatusBar()
 	{
 		return m_wndStatusBar;

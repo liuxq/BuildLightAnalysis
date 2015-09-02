@@ -421,5 +421,7 @@ void CBuildLightAnalysisView::OnEditOptimize()
 
 void CBuildLightAnalysisView::OnPopAddWindow()
 {
-	// TODO: Add your command handler code here
+	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+	pMain->GetWindowProperty().ShowPane(TRUE,FALSE,TRUE);
+	pMain->GetWindowProperty().InsertWindow(m_iSelectOutWallIndex, m_iSelectInWallIndex);
 }

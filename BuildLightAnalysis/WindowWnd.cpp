@@ -109,12 +109,6 @@ void CWindowWnd::InitPropList()
 	m_wndPropList.EnableDescriptionArea();
 	m_wndPropList.SetVSDotNetLook();
 	m_wndPropList.MarkModifiedProperties();
-
-	CMFCPropertyGridProperty* pLevelHigh = new CMFCPropertyGridProperty(_T("层高"),(_variant_t) 2.8,_T("层高度"), 1);
-	CMFCPropertyGridProperty* pOptimizeTh = new CMFCPropertyGridProperty(_T("处理阈值"),(_variant_t) 40.0,_T("处理内外墙时低于多少距离会进行补足和删除"), 2);
-	
-	m_wndPropList.AddProperty(pLevelHigh);
-	m_wndPropList.AddProperty(pOptimizeTh);
 }
 
 void CWindowWnd::OnSetFocus(CWnd* pOldWnd)
@@ -148,6 +142,45 @@ void CWindowWnd::SetPropListFont()
 	m_fntPropList.CreateFontIndirect(&lf);
 
 	m_wndPropList.SetFont(&m_fntPropList);
+}
+void CWindowWnd::InsertWindow(int outWallIndex, int inWallIndex)
+{
+	int count = m_wndPropList.GetPropertyCount();
+	CString strCount;
+	strCount.Format(_T("窗%d"),count+1);
+
+	CString strWallIndex;
+	if (outWallIndex >= 0)
+	{
+		strWallIndex.Format(_T("外墙%d"),outWallIndex);
+	}
+	if (inWallIndex >= 0)
+	{
+		strWallIndex.Format(_T("内墙%d"),inWallIndex);
+	}
+
+	PropertyGridProperty* pWindow = new PropertyGridProperty(strCount, 0, TRUE);
+
+	PropertyGridProperty* pWallIndex = new PropertyGridProperty(_T("墙号"), (_variant_t) strWallIndex, _T("窗户所在的墙号"));
+	PropertyGridProperty* pPos = new PropertyGridProperty(_T("位置"), (_variant_t) 0.5, _T("窗台中心与墙角的距离占墙的而距离比值"));
+	PropertyGridProperty* pWinUpHeight = new PropertyGridProperty(_T("窗上高"), (_variant_t) 2.8, _T("内墙坐标X值"));
+	PropertyGridProperty* pWinDownHeight = new PropertyGridProperty(_T("窗下高"), (_variant_t) 3.8, _T("内墙坐标X值"));
+	PropertyGridProperty* pWinWidth = new PropertyGridProperty(_T("窗宽"), (_variant_t) 2, _T("内墙坐标X值"));
+	
+	pWindow->AddSubItem(pWallIndex);
+	
+	pWindow->AddSubItem(pPos);
+	pWindow->AddSubItem(pWinUpHeight);
+	pWindow->AddSubItem(pWinDownHeight);
+	pWindow->AddSubItem(pWinWidth);
+
+	m_wndPropList.AddProperty(pWindow);
+	//m_wndPropList.UpdateProperty((PropertyGridProperty*)(pWindow));
+	m_wndPropList.AdjustLayout();
+
+	//更新视图
+	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;     
+	pMain->GetActiveView()->Invalidate(); 
 }
 void CWindowWnd::save(ofstream& out)
 {

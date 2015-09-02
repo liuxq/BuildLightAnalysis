@@ -31,6 +31,8 @@ public:
 		}
 		return 0.0;
 	}
+
+	void InsertWindow(int outWallIndex, int inWallIndex);
 	void save(ofstream& out);
 	void load(ifstream& in);
 
