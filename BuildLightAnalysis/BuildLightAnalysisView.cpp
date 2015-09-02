@@ -129,15 +129,18 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 		{
 			startP.x = outWallPos->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
 			startP.y = outWallPos->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+			graph->DrawEllipse(&outPen, (float)startP.x, (float)startP.y, 10.0,10.0);
 			lastP = startP;
 			for (int i = 1; i < outWallPos->GetSubItemsCount(); i++)
 			{
 				p.x = outWallPos->GetSubItem(i)->GetSubItem(0)->GetValue().dblVal;
 				p.y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetValue().dblVal;
 				
+				graph->DrawEllipse(&outPen, (float)p.x, (float)p.y, 10.0, 10.0);
 				graph->DrawLine(&outPen, (float)lastP.x, (float)lastP.y, (float)p.x, (float)p.y);
 				lastP = p;
 			}
+			graph->DrawLine(&outPen, (float)lastP.x, (float)lastP.y, (float)startP.x, (float)startP.y);
 		}
 		//画内墙
 		Gdiplus::Pen inPen(Gdiplus::Color(255,100,100,100), 10);
@@ -156,19 +159,19 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 	else
 	{
 		//画处理后的外墙
-		CMFCPropertyGridProperty* optimizeWallPos = pMain->GetOptimizeWallProperty().getCoodOutWallGroup();
-		if (!optimizeWallPos)
+		CMFCPropertyGridProperty* optimizeOutWallPos = pMain->GetOptimizeWallProperty().getCoodOutWallGroup();
+		if (!optimizeOutWallPos)
 			return;
 
 		Gdiplus::Pen outPen(Gdiplus::Color(255,100,100,100), 10);
 		CPoint p,p1;
-		for (int i = 0; i < optimizeWallPos->GetSubItemsCount(); i++)
+		for (int i = 0; i < optimizeOutWallPos->GetSubItemsCount(); i++)
 		{
-			p.x = optimizeWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
-			p.y = optimizeWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+			p.x = optimizeOutWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+			p.y = optimizeOutWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
 
-			p1.x = optimizeWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
-			p1.y = optimizeWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+			p1.x = optimizeOutWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+			p1.y = optimizeOutWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
 
 			if (i == m_iSelectOutWallIndex)//如果是拾取的外墙
 			{
@@ -204,6 +207,20 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 			{
 				graph->DrawLine(&inPen, (float)p.x, (float)p.y, (float)p1.x, (float)p1.y);
 			}
+		}
+
+		//画窗户
+		PropertyGridCtrl* list = pMain->GetWindowProperty().getPropList();
+		for (int i = 0; i < list->GetPropertyCount(); i++)
+		{
+			CMFCPropertyGridProperty* pWindow = list->GetProperty(i);
+			CString wallType;
+			wallType = pWindow->GetSubItem(0)->GetValue().bstrVal;
+			int wallIndex = pWindow->GetSubItem(1)->GetValue().intVal;
+			double pos = pWindow->GetSubItem(2)->GetValue().dblVal;
+			double upHeight = pWindow->GetSubItem(3)->GetValue().dblVal;
+			double downHeight = pWindow->GetSubItem(4)->GetValue().dblVal;
+			double width = pWindow->GetSubItem(5)->GetValue().dblVal;
 		}
 	}
 	/*Graphics graphics(pDC->GetSafeHdc());

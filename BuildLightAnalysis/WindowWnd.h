@@ -17,19 +17,9 @@ public:
 		m_wndPropList.SetVSDotNetLook(bSet);
 		m_wndPropList.SetGroupNameFullWidth(bSet);
 	}
-	CMFCPropertyGridProperty* getCoodGroup()
+	PropertyGridCtrl* getPropList()
 	{
-		return m_wndPropList.GetProperty(0);
-	}
-
-	double getProperty(int dataIndex)
-	{
-		CMFCPropertyGridProperty* data = m_wndPropList.GetProperty(dataIndex);
-		if (data)
-		{
-			return data->GetValue().dblVal;
-		}
-		return 0.0;
+		return &m_wndPropList;
 	}
 
 	void InsertWindow(int outWallIndex, int inWallIndex);
@@ -53,6 +43,8 @@ protected:
 	afx_msg void OnUpdateSortProperties(CCmdUI* pCmdUI);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
+
+	afx_msg LRESULT OnPropertyChanged(WPARAM,LPARAM);
 
 	DECLARE_MESSAGE_MAP()
 

@@ -33,6 +33,7 @@ PropertyGridProperty::PropertyGridProperty(const CString& strGroupName, DWORD_PT
 	
 }
 
+
 CString PropertyGridProperty::FormatProperty()
 {
 	COleVariant& var = m_varValue;

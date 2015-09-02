@@ -13,6 +13,8 @@ public:
 	CString FormatProperty();
 };
 
+
+
 class PropertyGridCtrl : public CMFCPropertyGridCtrl
 {
 

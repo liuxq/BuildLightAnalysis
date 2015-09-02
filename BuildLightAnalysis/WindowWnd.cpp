@@ -37,6 +37,7 @@ BEGIN_MESSAGE_MAP(CWindowWnd, CDockablePane)
 	ON_UPDATE_COMMAND_UI(ID_SORTPROPERTIES, OnUpdateSortProperties)
 	ON_WM_SETFOCUS()
 	ON_WM_SETTINGCHANGE()
+	ON_REGISTERED_MESSAGE(AFX_WM_PROPERTY_CHANGED, OnPropertyChanged)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -145,27 +146,52 @@ void CWindowWnd::SetPropListFont()
 }
 void CWindowWnd::InsertWindow(int outWallIndex, int inWallIndex)
 {
+	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;  
+
 	int count = m_wndPropList.GetPropertyCount();
 	CString strCount;
 	strCount.Format(_T("窗%d"),count+1);
 
-	CString strWallIndex;
+	CString strWallType;
+	int wallIndex;
 	if (outWallIndex >= 0)
 	{
-		strWallIndex.Format(_T("外墙%d"),outWallIndex);
+		strWallType = _T("外墙");
+		wallIndex = outWallIndex;
+		count = pMain->GetOptimizeWallProperty().getCoodOutWallGroup()->GetSubItemsCount();
 	}
 	if (inWallIndex >= 0)
 	{
-		strWallIndex.Format(_T("内墙%d"),inWallIndex);
+		strWallType = _T("内墙");
+		wallIndex = inWallIndex;
+		count = pMain->GetOptimizeWallProperty().getCoodInWallGroup()->GetSubItemsCount();
 	}
 
 	PropertyGridProperty* pWindow = new PropertyGridProperty(strCount, 0, TRUE);
 
-	PropertyGridProperty* pWallIndex = new PropertyGridProperty(_T("墙号"), (_variant_t) strWallIndex, _T("窗户所在的墙号"));
+	PropertyGridProperty* pWallType = new PropertyGridProperty(_T("墙类型"), strWallType, _T("窗户所在的墙的类型"),0);
+	pWallType->AddOption(_T("外墙"));
+	pWallType->AddOption(_T("内墙"));
+	pWallType->AllowEdit(FALSE);
+	_variant_t var;
+	var.vt = VT_INT;var = wallIndex;
+	PropertyGridProperty* pWallIndex = new PropertyGridProperty(_T("墙号"), var, _T("窗户所在的墙的编号, -1表示该类型墙的数量为0"),1);
+	
+	CString strItem;
+	for (int i = 0; i < count; i++)
+	{
+		strItem.Format(_T("%d"), i);
+		pWallIndex->AddOption(strItem);
+	}
+	pWallIndex->AddOption(_T("1"));
+	pWallIndex->AddOption(_T("2"));
+	pWallIndex->AllowEdit(FALSE);
 	PropertyGridProperty* pPos = new PropertyGridProperty(_T("位置"), (_variant_t) 0.5, _T("窗台中心与墙角的距离占墙的而距离比值"));
-	PropertyGridProperty* pWinUpHeight = new PropertyGridProperty(_T("窗上高"), (_variant_t) 2.8, _T("内墙坐标X值"));
-	PropertyGridProperty* pWinDownHeight = new PropertyGridProperty(_T("窗下高"), (_variant_t) 3.8, _T("内墙坐标X值"));
-	PropertyGridProperty* pWinWidth = new PropertyGridProperty(_T("窗宽"), (_variant_t) 2, _T("内墙坐标X值"));
+	PropertyGridProperty* pWinUpHeight = new PropertyGridProperty(_T("窗上高"), (_variant_t) 2.8, _T("窗户上高"));
+	PropertyGridProperty* pWinDownHeight = new PropertyGridProperty(_T("窗下高"), (_variant_t) 3.8, _T("窗户下高"));
+	PropertyGridProperty* pWinWidth = new PropertyGridProperty(_T("窗宽"), (_variant_t) 2, _T("窗户宽度"));
+	
+	pWindow->AddSubItem(pWallType);
 	
 	pWindow->AddSubItem(pWallIndex);
 	
@@ -178,10 +204,59 @@ void CWindowWnd::InsertWindow(int outWallIndex, int inWallIndex)
 	//m_wndPropList.UpdateProperty((PropertyGridProperty*)(pWindow));
 	m_wndPropList.AdjustLayout();
 
-	//更新视图
-	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;     
+	//更新视图     
 	pMain->GetActiveView()->Invalidate(); 
 }
+
+LRESULT CWindowWnd::OnPropertyChanged (WPARAM,LPARAM lParam)
+{
+	CMFCPropertyGridProperty* pProp = (CMFCPropertyGridProperty*) lParam;
+
+	if (pProp->GetData() == 0)
+	{
+		CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;     
+		
+		CString d;
+		d = pProp->GetValue().bstrVal;
+		if (d == _T("外墙"))
+		{
+			CMFCPropertyGridProperty* pIndex = pProp->GetParent()->GetSubItem(1);
+			pIndex->RemoveAllOptions();
+
+			int count = pMain->GetOptimizeWallProperty().getCoodOutWallGroup()->GetSubItemsCount();
+			if (count == 0)
+			{
+				pIndex->SetValue((_variant_t)(-1));
+			}
+			CString strItem;
+			for (int i = 0; i < count; i++)
+			{
+				strItem.Format(_T("%d"), i);
+				pIndex->AddOption(strItem);
+			}
+			
+		}
+		else if (d == _T("内墙"))
+		{
+			CMFCPropertyGridProperty* pIndex = pProp->GetParent()->GetSubItem(1);
+			pIndex->RemoveAllOptions();
+
+			int count = pMain->GetOptimizeWallProperty().getCoodInWallGroup()->GetSubItemsCount();
+			if (count == 0)
+			{
+				pIndex->SetValue((_variant_t)(-1));
+			}
+			CString strItem;
+			for (int i = 0; i < count; i++)
+			{
+				strItem.Format(_T("%d"), i);
+				pIndex->AddOption(strItem);
+			}
+		}
+	}
+	return 0;
+}
+
 void CWindowWnd::save(ofstream& out)
 {
 	/*double d1 = m_wndPropList.GetProperty(0)->GetValue().dblVal;
