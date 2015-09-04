@@ -5,6 +5,7 @@
 #include "BuildLightAnalysis.h"
 #include "DlgProjectNew.h"
 #include "afxdialogex.h"
+#include "MathUtility.h"
 
 #include <fstream>
 #include <string>
@@ -91,10 +92,7 @@ void DlgProjectNew::OnBnClickedOk()
 
 	CString cPath;
 	cPath.Format(_T("%s\\%s.bla"), m_projectLocation, m_projectName);
-	CStringA stra(cPath.GetBuffer(0));
-	cPath.ReleaseBuffer();
-	string path=stra.GetBuffer(0);
-	stra.ReleaseBuffer();
+	string path = CStringToString(cPath);
 
 	ofstream outFile(path);
 	if (!outFile.is_open())

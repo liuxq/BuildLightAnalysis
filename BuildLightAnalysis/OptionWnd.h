@@ -31,6 +31,9 @@ public:
 		}
 		return 0.0;
 	}
+	void loadMaterialTemplate();
+	void GetTransform(double s, double centerX, double centerY);
+	void SetTransform();
 	void save(ofstream& out);
 	void load(ifstream& in);
 
@@ -51,6 +54,8 @@ protected:
 	afx_msg void OnUpdateSortProperties(CCmdUI* pCmdUI);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
+
+	afx_msg LRESULT OnPropertyChanged(WPARAM,LPARAM);
 
 	DECLARE_MESSAGE_MAP()
 

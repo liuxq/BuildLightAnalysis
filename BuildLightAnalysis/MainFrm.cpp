@@ -29,6 +29,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_COMMAND(ID_EDIT_INWALL, &CMainFrame::OnEditInwall)
 	ON_COMMAND(ID_EDIT_OPTION, &CMainFrame::OnEditOption)
 	ON_COMMAND(ID_EDIT_WINDOW, &CMainFrame::OnEditWindow)
+	ON_COMMAND(ID_EDIT_ROOM, &CMainFrame::OnEditRoom)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -135,6 +136,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	DockPane(&m_wndWindowProperties);
 	m_wndWindowProperties.ShowPane(FALSE,FALSE,TRUE);
 
+	m_wndRoomProperties.EnableDocking(CBRS_ALIGN_ANY);
+	DockPane(&m_wndRoomProperties);
+	m_wndRoomProperties.ShowPane(FALSE,FALSE,TRUE);
+
 	
 
 
@@ -143,7 +148,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// enable quick (Alt+drag) toolbar customization
 	CMFCToolBar::EnableQuickCustomization();
-
 
 	return 0;
 }
@@ -196,6 +200,12 @@ BOOL CMainFrame::CreateDockingWindows()
 	}
 
 	if (!m_wndWindowProperties.Create(_T("´°»§"), this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_WINDOW_PROPERTIESWND, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
+	{
+		TRACE0("Failed to create Option window\n");
+		return FALSE; // failed to create
+	}
+
+	if (!m_wndRoomProperties.Create(_T("·¿¼ä"), this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_ROOM_PROPERTIESWND, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
 	{
 		TRACE0("Failed to create Option window\n");
 		return FALSE; // failed to create
@@ -288,4 +298,13 @@ void CMainFrame::OnEditWindow()
 		m_wndWindowProperties.ShowPane(FALSE,FALSE,TRUE);
 	else
 		m_wndWindowProperties.ShowPane(TRUE,FALSE,TRUE);
+}
+
+
+void CMainFrame::OnEditRoom()
+{
+	if (m_wndRoomProperties.IsPaneVisible())
+		m_wndRoomProperties.ShowPane(FALSE,FALSE,TRUE);
+	else
+		m_wndRoomProperties.ShowPane(TRUE,FALSE,TRUE);
 }

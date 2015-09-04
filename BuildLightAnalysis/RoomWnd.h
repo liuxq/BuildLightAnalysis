@@ -2,11 +2,11 @@
 #pragma once
 
 
-class CWindowWnd : public CDockablePane
+class CRoomWnd : public CDockablePane
 {
 // Construction
 public:
-	CWindowWnd();
+	CRoomWnd();
 
 	void AdjustLayout();
 
@@ -22,7 +22,8 @@ public:
 		return &m_wndPropList;
 	}
 
-	void InsertWindow(int outWallIndex, int inWallIndex);
+	bool AddToSelectedRoom(CString name, int index);
+
 	void save(ofstream& out);
 	void load(ifstream& in);
 
@@ -31,10 +32,9 @@ protected:
 	PropertyGridCtrl m_wndPropList;
 	CButton m_insertButton;
 	CButton m_deleteButton;
-
 // Implementation
 public:
-	virtual ~CWindowWnd();
+	virtual ~CRoomWnd();
 
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -46,9 +46,10 @@ protected:
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 
-	afx_msg void OnNewWindow();
-	afx_msg void OnDeleteWindow();
+	afx_msg void OnNewRoom();
 	afx_msg void OnUpdateProperties1(CCmdUI* pCmdUI);
+	afx_msg void OnDeleteRoom();
+	afx_msg void OnUpdateProperties2(CCmdUI* pCmdUI);
 
 	afx_msg LRESULT OnPropertyChanged(WPARAM,LPARAM);
 

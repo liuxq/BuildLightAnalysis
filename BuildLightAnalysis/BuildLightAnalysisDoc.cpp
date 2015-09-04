@@ -15,6 +15,7 @@
 #include "Serializer.h"
 #include "MainFrm.h"
 #include "DlgProjectNew.h"
+#include "MathUtility.h"
 #include <fstream>
 #include <string>
 
@@ -201,10 +202,7 @@ void CBuildLightAnalysisDoc::OnFileSaveAs()
 
 		CString cPath;
 		cPath.Format(_T("%s\\%s.bla"), m_projectLocation, m_projectName);
-		CStringA stra(cPath.GetBuffer(0));
-		cPath.ReleaseBuffer();
-		string path=stra.GetBuffer(0);
-		stra.ReleaseBuffer();
+		string path = CStringToString(cPath);
 
 		ofstream outFile(path, ios::binary|ios::ate);
 		if (!outFile.is_open())
@@ -271,10 +269,7 @@ void CBuildLightAnalysisDoc::OnFileOpen()
 
 		CString cPath;
 		cPath.Format(_T("%s\\%s.bla"), m_projectLocation, m_projectName);
-		CStringA stra(cPath.GetBuffer(0));
-		cPath.ReleaseBuffer();
-		string path=stra.GetBuffer(0);
-		stra.ReleaseBuffer();
+		string path = CStringToString(cPath);
 
 		ifstream inFile(path, ios::binary);
 		if (!inFile.is_open())
@@ -285,7 +280,10 @@ void CBuildLightAnalysisDoc::OnFileOpen()
 			return; 
 		}
 		//读取文件
+		loadMaterial();
 		load(inFile);
+		
+
 		m_bIsOpen = true;
 		SetTitle(m_projectName);//设置文档名称
 	}
@@ -293,6 +291,13 @@ void CBuildLightAnalysisDoc::OnFileOpen()
 	{
 		return;
 	}
+}
+
+void CBuildLightAnalysisDoc::loadMaterial()
+{
+	CString path;
+	path.Format(_T("%s\\Template_material.rad"), m_projectLocation);
+	m_material.loadTemplate(path);
 }
 
 void CBuildLightAnalysisDoc::load(ifstream& inputFile)
@@ -306,6 +311,8 @@ void CBuildLightAnalysisDoc::load(ifstream& inputFile)
 
 	//读取选项
 	pMain->GetOptionProperty().load(inputFile);
+	pMain->GetOptionProperty().loadMaterialTemplate();
+	pMain->GetOptionProperty().SetTransform();
 }
 void CBuildLightAnalysisDoc::save(ofstream& outputFile)
 {

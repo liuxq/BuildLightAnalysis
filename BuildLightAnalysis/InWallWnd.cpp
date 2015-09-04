@@ -126,7 +126,7 @@ void CInWallWnd::InsertPos(double x, double y, double x1, double y1)
 	CMFCPropertyGridProperty* pGroup = getCoodGroup();
 	int count = pGroup->GetSubItemsCount();
 	CString strCount;
-	strCount.Format(_T("%d"),count+1);
+	strCount.Format(_T("%d"),count);
 
 	PropertyGridProperty* pPos = new PropertyGridProperty(strCount, 0, TRUE);
 
@@ -227,7 +227,7 @@ void CInWallWnd::OnDeletePos()
 		CString strName;
 		for (int i = 0; i < count; i++)
 		{
-			strName.Format(_T("%d"),i+1);
+			strName.Format(_T("%d"),i);
 			pGroup->GetSubItem(i)->SetName(strName);
 		}
 	}

@@ -2,6 +2,23 @@
 #include "MathUtility.h"
 #include <algorithm>
 
+string CStringToString(CString& str)
+{
+	CStringA stra(str.GetBuffer(0));
+	str.ReleaseBuffer();
+	string strString = stra.GetBuffer(0);
+	stra.ReleaseBuffer();
+	return strString;
+};
+
+CString stringToCString(string& str)
+{
+	CString ss;
+	ss.Format(_T("%s"),str.c_str());
+	return ss;
+};
+
+
 double calIntersectPointsOfLines(sLine& srcLine, sLine& dstLine)
 {
 	Vec2d d1 = srcLine.e - srcLine.s;

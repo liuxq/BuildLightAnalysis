@@ -130,7 +130,7 @@ void COptimizeWallWnd::InsertPos(bool isOutWall, double x, double y, double x1, 
 		
 	int count = pGroup->GetSubItemsCount();
 	CString strCount;
-	strCount.Format(_T("%d"),count+1);
+	strCount.Format(_T("%d"),count);
 
 	PropertyGridProperty* pPos = new PropertyGridProperty(strCount, 0, TRUE);
 
@@ -202,8 +202,8 @@ void COptimizeWallWnd::InitPropList()
 	m_wndPropList.SetVSDotNetLook();
 	m_wndPropList.MarkModifiedProperties();
 
-	CMFCPropertyGridProperty* pGroup = new CMFCPropertyGridProperty(_T("处理后外墙坐标"),0);
-	CMFCPropertyGridProperty* pGroup1 = new CMFCPropertyGridProperty(_T("处理后内墙坐标"),0);
+	CMFCPropertyGridProperty* pGroup = new CMFCPropertyGridProperty(_T("处理后外墙"),0);
+	CMFCPropertyGridProperty* pGroup1 = new CMFCPropertyGridProperty(_T("处理后内墙"),0);
 	m_wndPropList.AddProperty(pGroup);
 	m_wndPropList.AddProperty(pGroup1);
 }

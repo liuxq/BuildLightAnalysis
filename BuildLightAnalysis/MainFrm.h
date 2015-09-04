@@ -8,6 +8,8 @@
 #include "OptimizeWallWnd.h"
 #include "OptionWnd.h"
 #include "WindowWnd.h"
+#include "RoomWnd.h"
+
 
 class CMainFrame : public CFrameWndEx
 {
@@ -41,6 +43,10 @@ public:
 	{
 		return m_wndWindowProperties;
 	}
+	CRoomWnd& GetRoomProperty()
+	{
+		return m_wndRoomProperties;
+	}
 	CMFCStatusBar& GetStatusBar()
 	{
 		return m_wndStatusBar;
@@ -66,6 +72,8 @@ protected:  // control bar embedded members
 	COptimizeWallWnd  m_wndOptimizeWallProperties;
 	COptionWnd		  m_wndOptionProperties;
 	CWindowWnd		  m_wndWindowProperties;
+	CRoomWnd		  m_wndRoomProperties;
+	
 
 public:
 	
@@ -91,6 +99,7 @@ public:
 	afx_msg void OnFileNew();
 	afx_msg void OnFileSaveAs();
 	afx_msg void OnEditWindow();
+	afx_msg void OnEditRoom();
 };
 
 

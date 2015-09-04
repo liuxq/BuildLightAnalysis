@@ -3,7 +3,7 @@
 //
 
 #pragma once
-
+#include "Transform.h"
 
 class CBuildLightAnalysisView : public CView
 {
@@ -18,10 +18,15 @@ public:
 // Operations
 public:
 	void optimize();
+	Transform& GetTransform()
+	{
+		return m_transform;
+	}
 // Overrides
 public:
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+
 protected:
 
 // Implementation
@@ -38,6 +43,10 @@ private:
 	bool m_isDrawInWall;
 	int m_iSelectOutWallIndex;
 	int m_iSelectInWallIndex;
+	int m_iSelectWindowIndex;
+	bool m_bIsPullTranslate;
+	Transform m_transform;
+	CPoint prePoint;
 
 // Generated message map functions
 protected:
@@ -48,11 +57,15 @@ protected:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg BOOL OnEraseBkgnd(CDC*);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg BOOL OnMouseWheel(UINT, short, CPoint);
 
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnEditOptimize();
 	afx_msg void OnPopAddWindow();
+	afx_msg void OnPopAddtoRoom();
+	afx_msg void OnEditTranslate();
 };
 
 #ifndef _DEBUG  // debug version in BuildLightAnalysisView.cpp

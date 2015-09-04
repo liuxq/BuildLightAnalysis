@@ -126,7 +126,7 @@ void COutWallWnd::InsertPos(double x, double y)
 	CMFCPropertyGridProperty* pGroup = getCoodGroup();
 	int count = pGroup->GetSubItemsCount();
 	CString strCount;
-	strCount.Format(_T("%d"),count+1);
+	strCount.Format(_T("%d"),count);
 
 	PropertyGridProperty* pPos = new PropertyGridProperty(strCount, 0, TRUE);
 
@@ -146,7 +146,7 @@ void COutWallWnd::InsertPos(double x, double y)
 }
 void COutWallWnd::OnInsertPos()
 {
-	InsertPos(100, 100);
+	InsertPos(1000.0, 1000.0);
 }
 
 void COutWallWnd::inputFromLines(vector<sLine>& sLines)
@@ -233,7 +233,7 @@ void COutWallWnd::OnDeletePos()
 		CString strName;
 		for (int i = 0; i < count; i++)
 		{
-			strName.Format(_T("%d"),i+1);
+			strName.Format(_T("%d"),i);
 			pGroup->GetSubItem(i)->SetName(strName);
 		}
 	}

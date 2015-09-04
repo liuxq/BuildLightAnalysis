@@ -2,9 +2,9 @@
 // BuildLightAnalysisDoc.h : interface of the CBuildLightAnalysisDoc class
 //
 
-
 #pragma once
 
+#include "Material.h"
 
 class CBuildLightAnalysisDoc : public CDocument
 {
@@ -17,6 +17,13 @@ public:
 	CString m_projectName;
 	CString m_projectLocation;
 	bool m_bIsOpen;
+public:
+	vector<Material>& getMaterials()
+	{
+		return m_material.m_materials;
+	}
+private:
+	MaterialSet m_material;
 // Operations
 public:
 
@@ -39,6 +46,7 @@ public:
 
 protected:
 	void load(ifstream& in);
+	void loadMaterial();
 	void save(ofstream& out);
 // Generated message map functions
 protected:

@@ -113,15 +113,18 @@
     <ClInclude Include="DlgProjectNew.h" />
     <ClInclude Include="InWallWnd.h" />
     <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="MathUtility.h" />
     <ClInclude Include="OptimizeWallWnd.h" />
     <ClInclude Include="OptionWnd.h" />
     <ClInclude Include="OutWallWnd.h" />
     <ClInclude Include="PropertyGridCtrl.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="RoomWnd.h" />
     <ClInclude Include="Serializer.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Transform.h" />
     <ClInclude Include="vec2.h" />
     <ClInclude Include="WindowWnd.h" />
   </ItemGroup>
@@ -132,11 +135,13 @@
     <ClCompile Include="DlgProjectNew.cpp" />
     <ClCompile Include="InWallWnd.cpp" />
     <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="Material.cpp" />
     <ClCompile Include="MathUtility.cpp" />
     <ClCompile Include="OptimizeWallWnd.cpp" />
     <ClCompile Include="OptionWnd.cpp" />
     <ClCompile Include="OutWallWnd.cpp" />
     <ClCompile Include="PropertyGridCtrl.cpp" />
+    <ClCompile Include="RoomWnd.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

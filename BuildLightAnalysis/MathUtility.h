@@ -5,6 +5,8 @@
 
 using namespace std;
 
+string CStringToString(CString& str);
+CString stringToCString(string& str);
 
 
 //按照交点优化线段，去掉多余的，补充缺失的，最后再按照交点分段

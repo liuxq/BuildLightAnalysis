@@ -35,6 +35,12 @@ BEGIN_MESSAGE_MAP(CWindowWnd, CDockablePane)
 	ON_UPDATE_COMMAND_UI(ID_EXPAND_ALL, OnUpdateExpandAllProperties)
 	ON_COMMAND(ID_SORTPROPERTIES, OnSortProperties)
 	ON_UPDATE_COMMAND_UI(ID_SORTPROPERTIES, OnUpdateSortProperties)
+
+	ON_COMMAND(IDC_WINDOW_INSERT_BUTTON, OnNewWindow)
+	ON_UPDATE_COMMAND_UI(IDC_WINDOW_INSERT_BUTTON, OnUpdateProperties1)
+	ON_COMMAND(IDC_WINDOW_DELETE_BUTTON, OnDeleteWindow)
+	ON_UPDATE_COMMAND_UI(IDC_WINDOW_DELETE_BUTTON, OnUpdateProperties1)
+
 	ON_WM_SETFOCUS()
 	ON_WM_SETTINGCHANGE()
 	ON_REGISTERED_MESSAGE(AFX_WM_PROPERTY_CHANGED, OnPropertyChanged)
@@ -53,7 +59,10 @@ void CWindowWnd::AdjustLayout()
 	CRect rectClient,rectButton;
 	GetClientRect(rectClient);
 
-	int cyBut = 0;//rectButton.Size().cy;
+	int cyBut = 20;//rectButton.Size().cy;
+
+	m_insertButton.SetWindowPos(NULL, rectClient.left, rectClient.top, rectClient.Width()/2, cyBut, SWP_NOZORDER);
+	m_deleteButton.SetWindowPos(NULL, rectClient.left + rectClient.Width()/2, rectClient.top, rectClient.Width()/2, cyBut, SWP_NOZORDER);
 	m_wndPropList.SetWindowPos(NULL, rectClient.left, rectClient.top + cyBut, rectClient.Width(), rectClient.Height() -(cyBut), SWP_NOACTIVATE | SWP_NOZORDER);
 }
 
@@ -65,16 +74,55 @@ int CWindowWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	CRect rectDummy;
 	rectDummy.SetRectEmpty();
 
+	const DWORD dwViewStyle = WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON;
+	if (!m_insertButton.Create(_T("新建窗户"),dwViewStyle, rectDummy, this, IDC_WINDOW_INSERT_BUTTON))
+	{
+		return -1;      // fail to create
+	}
+	if (!m_deleteButton.Create(_T("删除窗户"),dwViewStyle, rectDummy, this, IDC_WINDOW_DELETE_BUTTON))
+	{
+		return -1;      // fail to create
+	}
+
+
 	if (!m_wndPropList.Create(WS_VISIBLE | WS_CHILD, rectDummy, this, IDC_WINDOW_CTRL))
 	{
 		TRACE0("Failed to create Option Grid \n");
 		return -1;      // fail to create
 	}
 
+
+
 	InitPropList();
 
 	AdjustLayout();
 	return 0;
+}
+
+void CWindowWnd::OnNewWindow()
+{
+	InsertWindow(0, 0);
+}
+void CWindowWnd::OnDeleteWindow()
+{
+	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
+	if (selItem && !selItem->GetParent())
+	{
+		m_wndPropList.DeleteProperty(selItem);
+
+		//重新设置一下坐标编号
+		int count = m_wndPropList.GetPropertyCount();
+		CString strName;
+		for (int i = 0; i < count; i++)
+		{
+			strName.Format(_T("窗%d"),i);
+			m_wndPropList.GetProperty(i)->SetName(strName);
+		}
+	}
+
+	//更新视图
+	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;     
+	pMain->GetActiveView()->Invalidate(); 
 }
 
 void CWindowWnd::OnSize(UINT nType, int cx, int cy)
@@ -100,6 +148,11 @@ void CWindowWnd::OnSortProperties()
 void CWindowWnd::OnUpdateSortProperties(CCmdUI* pCmdUI)
 {
 	pCmdUI->SetCheck(m_wndPropList.IsAlphabeticMode());
+}
+
+void CWindowWnd::OnUpdateProperties1(CCmdUI* pCmdUI)
+{
+
 }
 
 void CWindowWnd::InitPropList()
@@ -143,14 +196,19 @@ void CWindowWnd::SetPropListFont()
 	m_fntPropList.CreateFontIndirect(&lf);
 
 	m_wndPropList.SetFont(&m_fntPropList);
+	m_insertButton.SetFont(&m_fntPropList);
+	m_deleteButton.SetFont(&m_fntPropList);
 }
 void CWindowWnd::InsertWindow(int outWallIndex, int inWallIndex)
 {
 	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;  
+	CBuildLightAnalysisDoc* pDoc = (CBuildLightAnalysisDoc*)pMain->GetActiveDocument();
+	if (!pMain || !pDoc)
+		return;
 
 	int count = m_wndPropList.GetPropertyCount();
 	CString strCount;
-	strCount.Format(_T("窗%d"),count+1);
+	strCount.Format(_T("窗%d"),count);
 
 	CString strWallType;
 	int wallIndex;
@@ -169,13 +227,13 @@ void CWindowWnd::InsertWindow(int outWallIndex, int inWallIndex)
 
 	PropertyGridProperty* pWindow = new PropertyGridProperty(strCount, 0, TRUE);
 
-	PropertyGridProperty* pWallType = new PropertyGridProperty(_T("墙类型"), strWallType, _T("窗户所在的墙的类型"),0);
+	PropertyGridProperty* pWallType = new PropertyGridProperty(_T("墙类型"), strWallType, _T("窗户所在的墙的类型"),1000);
 	pWallType->AddOption(_T("外墙"));
 	pWallType->AddOption(_T("内墙"));
 	pWallType->AllowEdit(FALSE);
 	_variant_t var;
 	var.vt = VT_INT;var = wallIndex;
-	PropertyGridProperty* pWallIndex = new PropertyGridProperty(_T("墙号"), var, _T("窗户所在的墙的编号, -1表示该类型墙的数量为0"),1);
+	PropertyGridProperty* pWallIndex = new PropertyGridProperty(_T("墙号"), var, _T("窗户所在的墙的编号, -1表示该类型墙的数量为0"),1001);
 	
 	CString strItem;
 	for (int i = 0; i < count; i++)
@@ -189,16 +247,24 @@ void CWindowWnd::InsertWindow(int outWallIndex, int inWallIndex)
 	PropertyGridProperty* pPos = new PropertyGridProperty(_T("位置"), (_variant_t) 0.5, _T("窗台中心与墙角的距离占墙的而距离比值"));
 	PropertyGridProperty* pWinUpHeight = new PropertyGridProperty(_T("窗上高"), (_variant_t) 2.8, _T("窗户上高"));
 	PropertyGridProperty* pWinDownHeight = new PropertyGridProperty(_T("窗下高"), (_variant_t) 3.8, _T("窗户下高"));
-	PropertyGridProperty* pWinWidth = new PropertyGridProperty(_T("窗宽"), (_variant_t) 2, _T("窗户宽度"));
+	PropertyGridProperty* pWinWidth = new PropertyGridProperty(_T("窗宽"), (_variant_t) 20.0, _T("窗户宽度"));
+
+	PropertyGridProperty* pWinMaterial = new PropertyGridProperty(_T("窗材质"), _T("GenericCeiling_80PercentReflectance"), _T("窗户的材质"));
+	CString strMat;
+	vector<Material>& mats = pDoc->getMaterials();
+	for (int i = 0; i < mats.size(); i++)
+	{
+		strMat.Format(_T("%s"), mats[i].name.c_str());
+		pWinMaterial->AddOption(strMat);
+	}
 	
 	pWindow->AddSubItem(pWallType);
-	
 	pWindow->AddSubItem(pWallIndex);
-	
 	pWindow->AddSubItem(pPos);
 	pWindow->AddSubItem(pWinUpHeight);
 	pWindow->AddSubItem(pWinDownHeight);
 	pWindow->AddSubItem(pWinWidth);
+	pWindow->AddSubItem(pWinMaterial);
 
 	m_wndPropList.AddProperty(pWindow);
 	//m_wndPropList.UpdateProperty((PropertyGridProperty*)(pWindow));
@@ -212,7 +278,7 @@ LRESULT CWindowWnd::OnPropertyChanged (WPARAM,LPARAM lParam)
 {
 	CMFCPropertyGridProperty* pProp = (CMFCPropertyGridProperty*) lParam;
 
-	if (pProp->GetData() == 0)
+	if (pProp->GetData() == 1000)
 	{
 		CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;     
 		
