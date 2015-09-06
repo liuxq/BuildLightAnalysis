@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 #include "vec2.h"
 using namespace std;
 
@@ -28,3 +29,32 @@ struct sLine
 		type = IN_WALL;
 	}
 };
+
+struct WallIndex
+{
+	WallIndex(int t, int i)
+	{
+		this->type = t;
+		this->index = i;
+	}
+	WallIndex()
+	{
+		this->type = 1;
+		this->index = -1;
+	}
+	int type;
+	int index;
+};
+
+#pragma pack(1)
+struct stWindow
+{
+	WCHAR wallType[80];
+	int wallIndex;
+	double pos;
+	double WinUpHeight;
+	double WinDownHeight;
+	double WinWidth;
+	WCHAR WinMaterial[80];
+};
+#pragma pack()

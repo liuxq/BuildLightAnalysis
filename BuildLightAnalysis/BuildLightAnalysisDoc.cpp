@@ -309,6 +309,15 @@ void CBuildLightAnalysisDoc::load(ifstream& inputFile)
 	//读取内墙
 	pMain->GetInWallProperty().load(inputFile);
 
+	//读取处理后墙
+	pMain->GetOptimizeWallProperty().load(inputFile);
+
+	//读取窗户
+	pMain->GetWindowProperty().load(inputFile);
+
+	//读取房间信息
+	//pMain->GetRoomProperty().load(inputFile);
+
 	//读取选项
 	pMain->GetOptionProperty().load(inputFile);
 	pMain->GetOptionProperty().loadMaterialTemplate();
@@ -322,6 +331,15 @@ void CBuildLightAnalysisDoc::save(ofstream& outputFile)
 
 	//写入内墙
 	pMain->GetInWallProperty().save(outputFile);
+
+	//写入处理后墙
+	pMain->GetOptimizeWallProperty().save(outputFile);
+
+	//写入窗户
+	pMain->GetWindowProperty().save(outputFile);
+
+	//写入房间信息
+	//pMain->GetRoomProperty().save(outputFile);
 
 	//写入选项
 	pMain->GetOptionProperty().save(outputFile);

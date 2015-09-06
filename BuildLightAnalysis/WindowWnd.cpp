@@ -8,6 +8,7 @@
 #include "BuildLightAnalysisDoc.h"
 #include "BuildLightAnalysisView.h"
 
+#include "MathUtility.h"
 #include "Serializer.h"
 
 #ifdef _DEBUG
@@ -325,17 +326,32 @@ LRESULT CWindowWnd::OnPropertyChanged (WPARAM,LPARAM lParam)
 
 void CWindowWnd::save(ofstream& out)
 {
-	/*double d1 = m_wndPropList.GetProperty(0)->GetValue().dblVal;
-	double d2 = m_wndPropList.GetProperty(1)->GetValue().dblVal;
-	serializer<double>::write(out,&d1);
-	serializer<double>::write(out,&d2);*/
+	vector<stWindow> windows;
+	for (int i = 0; i < m_wndPropList.GetPropertyCount(); i++)
+	{
+		stWindow win;
+		CMFCPropertyGridProperty* pWin = m_wndPropList.GetProperty(i);
+		CString wallType = pWin->GetSubItem(0)->GetValue().bstrVal;
+		 _tcscpy(win.wallType, wallType);
+		win.wallIndex = pWin->GetSubItem(1)->GetValue().intVal;
+		win.pos = pWin->GetSubItem(1)->GetValue().intVal;
+		win.WinUpHeight = pWin->GetSubItem(1)->GetValue().intVal;
+		win.WinDownHeight = pWin->GetSubItem(1)->GetValue().intVal;
+		win.WinWidth = pWin->GetSubItem(1)->GetValue().intVal;
+		CString mat = pWin->GetSubItem(0)->GetValue().bstrVal;
+		_tcscpy(win.WinMaterial, mat);
+
+		windows.push_back(win);
+	}
+	serializer<stWindow>::write(out,&windows);
 }
 void CWindowWnd::load(ifstream& in)
 {
-	/*double d1;
-	double d2;
-	serializer<double>::read(in,&d1);
-	serializer<double>::read(in,&d2);
-	m_wndPropList.GetProperty(0)->SetValue(d1);
-	m_wndPropList.GetProperty(1)->SetValue(d2);*/
+	OnDeleteWindow();
+	vector<stWindow> windows;
+	serializer<stWindow>::read(in, &windows);
+	for (int i = 0; i < windows.size(); i++)
+	{
+
+	}
 }

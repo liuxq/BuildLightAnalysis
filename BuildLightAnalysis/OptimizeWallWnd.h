@@ -1,5 +1,7 @@
-#include "PropertyGridCtrl.h"
+
 #pragma once
+#include "PropertyGridCtrl.h"
+#include "CommonData.h"
 
 class CPropertiesToolBar : public CMFCToolBar
 {
@@ -37,6 +39,11 @@ public:
 	}
 	void InsertPos(bool isOutWall, double,double,double,double);
 	void DeletePos();
+
+	void OutputToLines(vector<sLine>& sLines);
+	void inputFromLines(vector<sLine>& sLines);
+	void save(ofstream& out);
+	void load(ifstream& in);
 
 protected:
 	CFont m_fntPropList;

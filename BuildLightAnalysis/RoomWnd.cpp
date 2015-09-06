@@ -237,17 +237,80 @@ LRESULT CRoomWnd::OnPropertyChanged (WPARAM,LPARAM lParam)
 
 void CRoomWnd::save(ofstream& out)
 {
-	/*double d1 = m_wndPropList.GetProperty(0)->GetValue().dblVal;
-	double d2 = m_wndPropList.GetProperty(1)->GetValue().dblVal;
-	serializer<double>::write(out,&d1);
-	serializer<double>::write(out,&d2);*/
+	vector<vector<WallIndex> > rooms;
+	for (int i = 0; i < m_wndPropList.GetPropertyCount(); i++)
+	{
+		vector<WallIndex> room;
+		CMFCPropertyGridProperty* pRoom = m_wndPropList.GetProperty(i);
+		for (int j = 0; j < pRoom->GetSubItemsCount(); j++)
+		{
+			CString name = pRoom->GetSubItem(j)->GetName();
+			if (name == _T("外墙号"))
+			{
+				room.push_back(WallIndex(1,pRoom->GetSubItem(j)->GetValue().intVal));
+			}
+			if (name == _T("内墙号"))
+			{
+				room.push_back(WallIndex(2,pRoom->GetSubItem(j)->GetValue().intVal));
+			}
+			if (name == _T("窗户号"))
+			{
+				room.push_back(WallIndex(3,pRoom->GetSubItem(j)->GetValue().intVal));
+			}
+		}
+		rooms.push_back(room);
+	}
+
+	int size = rooms.size();
+	out.write((char *)&size, sizeof(size));
+	for (int i = 0; i < size; i++)
+	{
+		serializer<WallIndex>::write(out, &rooms[i]);
+	}
+	
 }
 void CRoomWnd::load(ifstream& in)
 {
-	/*double d1;
-	double d2;
-	serializer<double>::read(in,&d1);
-	serializer<double>::read(in,&d2);
-	m_wndPropList.GetProperty(0)->SetValue(d1);
-	m_wndPropList.GetProperty(1)->SetValue(d2);*/
+	OnDeleteRoom();
+
+	int size = 0;
+	in.read((char *)&size, sizeof(size));
+	vector<vector<WallIndex> > rooms(size);
+	for (int i = 0; i < size; i++)
+	{
+		serializer<WallIndex>::read(in, &rooms[i]);
+	}
+	for (int i = 0; i < size; i++)
+	{
+		CString strCount;
+		strCount.Format(_T("房间%d"),i);
+		PropertyGridProperty* pRoom = new PropertyGridProperty(strCount, 0, TRUE);
+		
+		
+		
+		for (int j = 0; j < rooms[i].size(); j++)
+		{
+			if(rooms[i][j].type == 1)
+			{
+				PropertyGridProperty* pItem = new PropertyGridProperty(_T("外墙号"), (_variant_t)rooms[i][j].index, _T("房间内的项目"));
+				pRoom->AddSubItem(pItem);
+			}
+			else if(rooms[i][j].type == 2)
+			{
+				PropertyGridProperty* pItem = new PropertyGridProperty(_T("内墙号"), (_variant_t)rooms[i][j].index, _T("房间内的项目"));
+				pRoom->AddSubItem(pItem);
+			}
+			else if(rooms[i][j].type == 3)
+			{
+				PropertyGridProperty* pItem = new PropertyGridProperty(_T("窗户号"), (_variant_t)rooms[i][j].index, _T("房间内的项目"));
+				pRoom->AddSubItem(pItem);
+			}
+		}
+
+		m_wndPropList.AddProperty(pRoom);
+
+		m_wndPropList.AdjustLayout();
+		
+	}
+
 }

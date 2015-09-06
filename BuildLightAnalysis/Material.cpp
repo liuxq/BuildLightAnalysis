@@ -13,6 +13,7 @@ bool MaterialSet::loadTemplate(CString file)
 	ifstream inputFile(CStringToString(file));
 	if (!inputFile.is_open())
 	{
+		AfxMessageBox(_T("缺少材质模板，请将Template_material.rad文件放入工程文件夹下"));
 		return false;
 	}
 	string strLine;

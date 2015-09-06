@@ -270,6 +270,49 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 				graph->DrawLine(&winPen, (float)pWins.x, (float)pWins.y, (float)pWine.x, (float)pWine.y);
 			
 		}
+		//»­·¿¼ä
+		Gdiplus::Pen roomPen(Gdiplus::Color(255,100,255,100), 20);
+		PropertyGridCtrl* pRoomlist = pMain->GetRoomProperty().getPropList();
+		for (int i = 0; i < pRoomlist->GetPropertyCount(); i++)
+		{
+			CMFCPropertyGridProperty* pRoom = pRoomlist->GetProperty(i);
+			Vec2d pos = Vec2d::ZERO;
+			int sumCount = 0;
+			for (int j = 0; j < pRoom->GetSubItemsCount(); j++)
+			{
+				CString na = pRoom->GetSubItem(j)->GetName();
+				if (na == _T("ÍâÇ½ºÅ"))
+				{
+					int index = pRoom->GetSubItem(j)->GetValue().intVal;
+					p.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+					p.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+					
+					pos += p;
+					sumCount ++;
+				}
+				else if (na == _T("ÄÚÇ½ºÅ"))
+				{
+					int index = pRoom->GetSubItem(j)->GetValue().intVal;
+					p.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+					p.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+
+					pos += p;
+					sumCount ++;
+				}				
+			}
+			if (sumCount)
+			{
+				pos /= sumCount;
+				pos = m_transform.RealToScreen(pos);
+				PointF posf(pos.x, pos.y);
+				FontFamily fontFamily(L"Ó×Ô²");
+				Gdiplus::Font font(&fontFamily,12);
+				SolidBrush brush(Color(255, 255, 0, 0));
+				CString na = pRoom->GetName();
+				WCHAR *wch = (WCHAR*)na.GetBuffer(na.GetLength());
+				graph->DrawString(wch ,na.GetLength(), &font,posf, &brush);
+			}
+		}
 	}
 	/*Graphics graphics(pDC->GetSafeHdc());
 	CachedBitmap cachedBmp(&bmp,&graphics);

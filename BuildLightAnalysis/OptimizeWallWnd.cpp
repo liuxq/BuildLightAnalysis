@@ -7,6 +7,7 @@
 #include "BuildLightAnalysis.h"
 #include "BuildLightAnalysisDoc.h"
 #include "BuildLightAnalysisView.h"
+#include "Serializer.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -239,4 +240,64 @@ void COptimizeWallWnd::SetPropListFont()
 	m_fntPropList.CreateFontIndirect(&lf);
 
 	m_wndPropList.SetFont(&m_fntPropList);
+}
+
+void COptimizeWallWnd::inputFromLines(vector<sLine>& sLines)
+{
+	
+	DeletePos();	
+	for (int i = 0; i < sLines.size(); i++)
+	{
+		if (sLines[i].type == sLine::OUT_WALL)
+		{
+			InsertPos(true, sLines[i].s.x, sLines[i].s.y, sLines[i].e.x, sLines[i].e.y);
+		}
+		else
+		{
+			InsertPos(false, sLines[i].s.x, sLines[i].s.y, sLines[i].e.x, sLines[i].e.y);
+		}
+		
+	}
+
+}
+void COptimizeWallWnd::OutputToLines(vector<sLine>& sLines)
+{
+	//ÍâÇ½
+	CMFCPropertyGridProperty* outWallPos = getCoodOutWallGroup();
+	Vec2d ps, pe;
+	for (int i = 0; i < outWallPos->GetSubItemsCount(); i++)
+	{
+		ps.x = outWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+		ps.y = outWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+
+		pe.x = outWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+		pe.y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+
+		sLines.push_back(sLine(ps,pe,sLine::OUT_WALL));
+	}
+
+	//ÄÚÇ½
+	CMFCPropertyGridProperty* inWallPos = getCoodInWallGroup();
+	for (int i = 0; i < inWallPos->GetSubItemsCount(); i++)
+	{
+		ps.x = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+		ps.y = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+
+		pe.x = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+		pe.y = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+
+		sLines.push_back(sLine(ps,pe,sLine::IN_WALL));
+	}
+}
+void COptimizeWallWnd::save(ofstream& out)
+{
+	vector<sLine> sLines;
+	OutputToLines(sLines);
+	serializer<sLine>::write(out, &sLines);
+}
+void COptimizeWallWnd::load(ifstream& in)
+{
+	vector<sLine> sLines;
+	serializer<sLine>::read(in, &sLines);
+	inputFromLines(sLines);
 }
