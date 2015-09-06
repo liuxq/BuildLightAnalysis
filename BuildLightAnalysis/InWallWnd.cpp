@@ -159,7 +159,7 @@ void CInWallWnd::OnInsertPos()
 {
 	InsertPos(100l,200l,200l,300l);
 }
-void CInWallWnd::DeletePos()
+void CInWallWnd::DeleteAllPos()
 {
 	CMFCPropertyGridProperty* pGroup = getCoodGroup();
 	for (int i = 0; i < pGroup->GetSubItemsCount(); i++)
@@ -171,7 +171,7 @@ void CInWallWnd::DeletePos()
 }
 void CInWallWnd::inputFromLines(vector<sLine>& sLines)
 {
-	DeletePos();	
+	DeleteAllPos();	
 	for (int i = 0; i < sLines.size(); i++)
 	{
 		InsertPos(sLines[i].s.x, sLines[i].s.y, sLines[i].e.x, sLines[i].e.y);

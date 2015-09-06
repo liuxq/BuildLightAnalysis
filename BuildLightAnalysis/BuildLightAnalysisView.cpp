@@ -50,7 +50,7 @@ CBuildLightAnalysisView::CBuildLightAnalysisView():m_selectedOutWallPoint(-1),m_
 	// TODO: add construction code here
 	m_transform.scale = 0.1;
 	m_transform.height = 100;
-	m_transform.center = Vec2d(200,200);
+	m_transform.center = Vec2d(100,100);
 }
 
 CBuildLightAnalysisView::~CBuildLightAnalysisView()
@@ -286,18 +286,22 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 					int index = pRoom->GetSubItem(j)->GetValue().intVal;
 					p.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
 					p.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+					p1.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+					p1.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
 					
-					pos += p;
-					sumCount ++;
+					pos += p + p1;
+					sumCount += 2;
 				}
 				else if (na == _T("内墙号"))
 				{
 					int index = pRoom->GetSubItem(j)->GetValue().intVal;
 					p.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
 					p.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+					p1.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+					p1.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
 
-					pos += p;
-					sumCount ++;
+					pos += p + p1;
+					sumCount += 2;
 				}				
 			}
 			if (sumCount)
@@ -307,9 +311,13 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 				PointF posf(pos.x, pos.y);
 				FontFamily fontFamily(L"幼圆");
 				Gdiplus::Font font(&fontFamily,12);
+				
 				SolidBrush brush(Color(255, 255, 0, 0));
 				CString na = pRoom->GetName();
 				WCHAR *wch = (WCHAR*)na.GetBuffer(na.GetLength());
+
+				posf.X -= 6 * na.GetLength();
+				posf.Y -= 6;
 				graph->DrawString(wch ,na.GetLength(), &font,posf, &brush);
 			}
 		}
@@ -607,9 +615,24 @@ CBuildLightAnalysisDoc* CBuildLightAnalysisView::GetDocument() const // non-debu
 
 void CBuildLightAnalysisView::OnEditOptimize()
 {
-	optimize();
-
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+	if (!pMain)
+		return;
+	
+	if (pMain->GetWindowProperty().getPropList()->GetPropertyCount() > 0 || pMain->GetRoomProperty().getPropList()->GetPropertyCount() > 0)
+	{
+		int nRes = AfxMessageBox(_T("检测到已有窗户或房间信息，如果处理的话会删除掉改信息，确认处理吗？"), MB_OKCANCEL | 
+			MB_ICONQUESTION);
+		if (IDCANCEL == nRes)
+		{
+			return;
+		}
+	}
+	
+	pMain->GetWindowProperty().DeleteAllWindow();
+	pMain->GetRoomProperty().DeleteAllRoom();
+
+	optimize();
 
 	pMain->GetOutWallProperty().ShowPane(FALSE,FALSE,TRUE);
 	pMain->GetInWallProperty().ShowPane(FALSE,FALSE,TRUE);

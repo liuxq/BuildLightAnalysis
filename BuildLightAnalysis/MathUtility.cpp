@@ -13,9 +13,11 @@ string CStringToString(CString& str)
 
 CString stringToCString(string& str)
 {
-	CString ss;
-	ss.Format(_T("%s"),str.c_str());
-	return ss;
+	CStringA ss;
+	ss.Format("%s",str.c_str());
+	CString ws(ss.GetBuffer(0));
+	ss.ReleaseBuffer();
+	return ws;
 };
 
 
@@ -245,4 +247,80 @@ double lenOfLinePoint(sLine& line, Vec2d p)
 		return (p - line.e).Length();
 	}
 
+}
+//相等的阈值，20mm
+bool isEqual(Vec2d a, Vec2d b)
+{
+	double x = a.x - b.x;
+	double y = a.y - b.y;
+	return x*x + y*y < 400; //20 * 20
+}
+//求线段集合形成的封闭多边形，如果不封闭则返回false
+bool CalClosedPolygon(list<sLine>& lines, vector<Vec2d>& outPoints)
+{
+	if (lines.size() < 3)
+	{
+		return false;
+	}
+
+	list<sLine>::iterator i;
+	i = lines.begin();
+	sLine line = *i;
+	Vec2d p = line.s;
+	lines.erase(i);
+	outPoints.push_back(p);
+	do
+	{
+		bool flag = false;
+		for (list<sLine>::iterator j = lines.begin(); j != lines.end(); j++)
+		{
+			if (isEqual(p,(*j).s))
+			{
+				p = (*j).e;
+				lines.erase(j);
+				flag = true;
+				outPoints.push_back(p);
+				break;
+			}
+			if (isEqual(p,(*j).e))
+			{
+				p = (*j).s;
+				lines.erase(j);
+				flag = true;
+				outPoints.push_back(p);
+				break;
+			}
+		}
+
+		if (!flag)
+		{
+			return false;
+		}
+	}
+	while(!isEqual(p,line.e));
+
+	return true;
+}
+
+//判断多边形是逆时针还是顺时针, true：逆时针
+bool isAntiClock(vector<Vec2d>& polygon)
+{
+	int sz = polygon.size();
+	int greaterC = 0, lessC = 0;
+	for (int i = 0; i < polygon.size(); i++)
+	{
+		Vec2d a = polygon[i];
+		Vec2d b = polygon[(i+1)%sz];
+		Vec2d c = polygon[(i+2)%sz];
+		if ((b-a)/(c-b) > 0)
+			greaterC ++;
+		else
+			lessC ++;
+	}
+	if (greaterC > lessC)
+	{
+		return true;
+	}
+	else
+		return false;
 }

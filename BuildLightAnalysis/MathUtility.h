@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <list>
 #include "CommonData.h"
 
 using namespace std;
@@ -13,3 +14,9 @@ CString stringToCString(string& str);
 void OptimizeLine(vector<sLine>& slines, vector<sLine>& outSlines, double wTh);
 //求点和线段的距离
 double lenOfLinePoint(sLine& line, Vec2d p);
+
+//求线段集合形成的封闭多边形，如果不封闭则返回false
+bool CalClosedPolygon(list<sLine>& lines, vector<Vec2d>& outPoints);
+
+//判断多边形是逆时针还是顺时针
+bool isAntiClock(vector<Vec2d>& polygon);

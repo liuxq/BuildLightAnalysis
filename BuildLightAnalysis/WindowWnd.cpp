@@ -120,7 +120,6 @@ void CWindowWnd::OnDeleteWindow()
 			m_wndPropList.GetProperty(i)->SetName(strName);
 		}
 	}
-
 	//更新视图
 	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;     
 	pMain->GetActiveView()->Invalidate(); 
@@ -200,7 +199,8 @@ void CWindowWnd::SetPropListFont()
 	m_insertButton.SetFont(&m_fntPropList);
 	m_deleteButton.SetFont(&m_fntPropList);
 }
-void CWindowWnd::InsertWindow(int outWallIndex, int inWallIndex)
+void CWindowWnd::InsertWindow(int outWallIndex, int inWallIndex, double pos ,double WinUpHeight,double WinDownHeight,
+double WinWidth, CString mat)
 {
 	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;  
 	CBuildLightAnalysisDoc* pDoc = (CBuildLightAnalysisDoc*)pMain->GetActiveDocument();
@@ -245,18 +245,17 @@ void CWindowWnd::InsertWindow(int outWallIndex, int inWallIndex)
 	pWallIndex->AddOption(_T("1"));
 	pWallIndex->AddOption(_T("2"));
 	pWallIndex->AllowEdit(FALSE);
-	PropertyGridProperty* pPos = new PropertyGridProperty(_T("位置"), (_variant_t) 0.5, _T("窗台中心与墙角的距离占墙的而距离比值"));
-	PropertyGridProperty* pWinUpHeight = new PropertyGridProperty(_T("窗上高"), (_variant_t) 2.8, _T("窗户上高"));
-	PropertyGridProperty* pWinDownHeight = new PropertyGridProperty(_T("窗下高"), (_variant_t) 3.8, _T("窗户下高"));
-	PropertyGridProperty* pWinWidth = new PropertyGridProperty(_T("窗宽"), (_variant_t) 20.0, _T("窗户宽度"));
+	PropertyGridProperty* pPos = new PropertyGridProperty(_T("位置"), (_variant_t)pos, _T("窗台中心与墙角的距离占墙的而距离比值"));
+	PropertyGridProperty* pWinUpHeight = new PropertyGridProperty(_T("窗上高"), (_variant_t)WinUpHeight, _T("窗户上高"));
+	PropertyGridProperty* pWinDownHeight = new PropertyGridProperty(_T("窗下高"), (_variant_t)WinDownHeight, _T("窗户下高"));
+	PropertyGridProperty* pWinWidth = new PropertyGridProperty(_T("窗宽"), (_variant_t)WinWidth, _T("窗户宽度"));
 
-	PropertyGridProperty* pWinMaterial = new PropertyGridProperty(_T("窗材质"), _T("GenericCeiling_80PercentReflectance"), _T("窗户的材质"));
-	CString strMat;
+	PropertyGridProperty* pWinMaterial = new PropertyGridProperty(_T("窗材质"), mat, _T("窗户的材质"));
+	CStringA strMat;
 	vector<Material>& mats = pDoc->getMaterials();
 	for (int i = 0; i < mats.size(); i++)
 	{
-		strMat.Format(_T("%s"), mats[i].name.c_str());
-		pWinMaterial->AddOption(strMat);
+		pWinMaterial->AddOption(stringToCString(mats[i].name));
 	}
 	
 	pWindow->AddSubItem(pWallType);
@@ -273,6 +272,16 @@ void CWindowWnd::InsertWindow(int outWallIndex, int inWallIndex)
 
 	//更新视图     
 	pMain->GetActiveView()->Invalidate(); 
+}
+
+void CWindowWnd::DeleteAllWindow()
+{
+	for (int i = 0; i < m_wndPropList.GetPropertyCount(); i++)
+	{
+		CMFCPropertyGridProperty* subItem = m_wndPropList.GetProperty(i);
+		m_wndPropList.DeleteProperty(subItem);
+		i--;
+	}
 }
 
 LRESULT CWindowWnd::OnPropertyChanged (WPARAM,LPARAM lParam)
@@ -334,11 +343,11 @@ void CWindowWnd::save(ofstream& out)
 		CString wallType = pWin->GetSubItem(0)->GetValue().bstrVal;
 		 _tcscpy(win.wallType, wallType);
 		win.wallIndex = pWin->GetSubItem(1)->GetValue().intVal;
-		win.pos = pWin->GetSubItem(1)->GetValue().intVal;
-		win.WinUpHeight = pWin->GetSubItem(1)->GetValue().intVal;
-		win.WinDownHeight = pWin->GetSubItem(1)->GetValue().intVal;
-		win.WinWidth = pWin->GetSubItem(1)->GetValue().intVal;
-		CString mat = pWin->GetSubItem(0)->GetValue().bstrVal;
+		win.pos = pWin->GetSubItem(2)->GetValue().dblVal;
+		win.WinUpHeight = pWin->GetSubItem(3)->GetValue().dblVal;
+		win.WinDownHeight = pWin->GetSubItem(4)->GetValue().dblVal;
+		win.WinWidth = pWin->GetSubItem(5)->GetValue().dblVal;
+		CString mat = pWin->GetSubItem(6)->GetValue().bstrVal;
 		_tcscpy(win.WinMaterial, mat);
 
 		windows.push_back(win);
@@ -352,6 +361,17 @@ void CWindowWnd::load(ifstream& in)
 	serializer<stWindow>::read(in, &windows);
 	for (int i = 0; i < windows.size(); i++)
 	{
-
+		CString type = windows[i].wallType;
+		if (type == _T("外墙"))
+		{
+			InsertWindow(windows[i].wallIndex, -1, windows[i].pos, windows[i].WinUpHeight, windows[i].WinDownHeight,
+				windows[i].WinWidth, CString(windows[i].WinMaterial));
+		}
+		else if (type == _T("内墙"))
+		{
+			InsertWindow(-1,windows[i].wallIndex, windows[i].pos, windows[i].WinUpHeight, windows[i].WinDownHeight,
+				windows[i].WinWidth, CString(windows[i].WinMaterial));
+		}
+		
 	}
 }

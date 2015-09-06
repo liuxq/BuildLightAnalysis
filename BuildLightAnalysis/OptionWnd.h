@@ -17,9 +17,9 @@ public:
 		m_wndPropList.SetVSDotNetLook(bSet);
 		m_wndPropList.SetGroupNameFullWidth(bSet);
 	}
-	CMFCPropertyGridProperty* getCoodGroup()
+	PropertyGridCtrl* getPropList()
 	{
-		return m_wndPropList.GetProperty(0);
+		return &m_wndPropList;
 	}
 
 	double getProperty(int dataIndex)

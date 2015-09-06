@@ -34,6 +34,7 @@ BEGIN_MESSAGE_MAP(CBuildLightAnalysisDoc, CDocument)
 	ON_COMMAND(ID_FILE_SAVE_AS, &CBuildLightAnalysisDoc::OnFileSaveAs)
 	ON_COMMAND(ID_FILE_NEW, &CBuildLightAnalysisDoc::OnFileNew)
 	ON_COMMAND(ID_FILE_OPEN, &CBuildLightAnalysisDoc::OnFileOpen)
+	ON_COMMAND(ID_FILE_OUTPUT, &CBuildLightAnalysisDoc::OnFileOutput)
 END_MESSAGE_MAP()
 
 
@@ -232,6 +233,13 @@ void CBuildLightAnalysisDoc::OnFileNew()
 		m_projectLocation = dlgPn.m_projectLocation;
 		m_bIsOpen = true;
 		SetTitle(m_projectName);//设置文档名称
+
+		//读取选项
+		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+		//读取外墙
+		loadMaterial();
+		pMain->GetOptionProperty().loadMaterialTemplate();
+		pMain->GetOptionProperty().SetTransform();
 	}
 	else
 		return;
@@ -316,7 +324,7 @@ void CBuildLightAnalysisDoc::load(ifstream& inputFile)
 	pMain->GetWindowProperty().load(inputFile);
 
 	//读取房间信息
-	//pMain->GetRoomProperty().load(inputFile);
+	pMain->GetRoomProperty().load(inputFile);
 
 	//读取选项
 	pMain->GetOptionProperty().load(inputFile);
@@ -339,9 +347,72 @@ void CBuildLightAnalysisDoc::save(ofstream& outputFile)
 	pMain->GetWindowProperty().save(outputFile);
 
 	//写入房间信息
-	//pMain->GetRoomProperty().save(outputFile);
+	pMain->GetRoomProperty().save(outputFile);
 
 	//写入选项
 	pMain->GetOptionProperty().save(outputFile);
 
+}
+
+void CBuildLightAnalysisDoc::OnFileOutput()
+{
+	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+	if (!pMain)
+		return;
+
+	ofstream out("9p-noshelf_geometry.rad");
+	if (!out.is_open())
+	{
+		return;
+	}
+
+	PropertyGridCtrl* pOption = pMain->GetOptionProperty().getPropList();
+	PropertyGridCtrl* pRoomlist = pMain->GetRoomProperty().getPropList();
+	CMFCPropertyGridProperty* optimizeOutWallPos = pMain->GetOptimizeWallProperty().getCoodOutWallGroup();
+	CMFCPropertyGridProperty* optimizeInWallPos = pMain->GetOptimizeWallProperty().getCoodInWallGroup();
+	for (int i = 0; i < pRoomlist->GetPropertyCount(); i++)
+	{
+		//导出第i个房间
+		CMFCPropertyGridProperty* pRoom = pRoomlist->GetProperty(i);
+		sLine line;
+		list<sLine> roomLines;
+		for (int j = 0; j < pRoom->GetSubItemsCount(); j++)
+		{
+			CString wallType = pRoom->GetSubItem(j)->GetName();
+			if (wallType == _T("外墙号"))
+			{
+				int index = pRoom->GetSubItem(j)->GetValue().intVal;
+				line.s.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+				line.s.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+				line.e.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+				line.e.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+
+				roomLines.push_back(line);
+			}
+			if (wallType == _T("内墙号"))
+			{
+				int index = pRoom->GetSubItem(j)->GetValue().intVal;
+				line.s.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+				line.s.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+				line.e.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+				line.e.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+
+				roomLines.push_back(line);
+			}
+					
+		}
+		vector<Vec2d> outPolygon;
+		if (!CalClosedPolygon(roomLines, outPolygon))
+		{
+			CString msg;
+			msg.Format(_T("房间%d没有封闭，不能导出"),i);
+			AfxMessageBox(msg);
+		}
+		if (isAntiClock(outPolygon))
+		{
+			//地面
+			out << "room" << i << ".Floor";
+			out << " polygon " << CStringToString(CString(pOption->GetProperty(5)->GetValue().bstrVal)) << endl; 
+		}
+	}
 }

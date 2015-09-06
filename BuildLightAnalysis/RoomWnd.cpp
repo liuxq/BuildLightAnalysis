@@ -199,7 +199,6 @@ void CRoomWnd::OnDeleteRoom()
 			m_wndPropList.GetProperty(i)->SetName(strName);
 		}
 	}
-
 	//更新视图
 	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;     
 	pMain->GetActiveView()->Invalidate(); 
@@ -228,6 +227,16 @@ bool CRoomWnd::AddToSelectedRoom(CString name, int index)
 	{
 		AfxMessageBox(_T("尚未选择任何房间，请选择要添加进的房间"));
 		return false;
+	}
+}
+
+void CRoomWnd::DeleteAllRoom()
+{
+	for (int i = 0; i < m_wndPropList.GetPropertyCount(); i++)
+	{
+		CMFCPropertyGridProperty* subItem = m_wndPropList.GetProperty(i);
+		m_wndPropList.DeleteProperty(subItem);
+		i--;
 	}
 }
 LRESULT CRoomWnd::OnPropertyChanged (WPARAM,LPARAM lParam)

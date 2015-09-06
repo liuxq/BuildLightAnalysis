@@ -23,6 +23,7 @@ public:
 	}
 
 	bool AddToSelectedRoom(CString name, int index);
+	void DeleteAllRoom();
 
 	void save(ofstream& out);
 	void load(ifstream& in);
