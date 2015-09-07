@@ -10,8 +10,9 @@ struct sLine
 {
 	enum W_TYPE
 	{
-		IN_WALL = 0,
-		OUT_WALL
+		OUT_WALL = 1,
+		IN_WALL = 2
+		
 	};
 	Vec2d s;
 	Vec2d e;
@@ -30,6 +31,14 @@ struct sLine
 	}
 };
 
+#pragma pack(1)
+struct sOpWall
+{
+	sLine line;
+	WCHAR mat[80];
+};
+#pragma pack()
+
 struct WallIndex
 {
 	WallIndex(int t, int i)
@@ -42,8 +51,15 @@ struct WallIndex
 		this->type = 1;
 		this->index = -1;
 	}
-	int type;
+	int type;// 1 2 3 : ÍâÇ½£¬ ÄÚÇ½£¬ ´°»§
 	int index;
+};
+
+struct Wall
+{
+	sLine line;
+	WallIndex wallInfo;
+	bool isOrder;
 };
 
 #pragma pack(1)

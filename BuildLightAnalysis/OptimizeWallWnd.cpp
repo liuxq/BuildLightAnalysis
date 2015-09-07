@@ -8,6 +8,7 @@
 #include "BuildLightAnalysisDoc.h"
 #include "BuildLightAnalysisView.h"
 #include "Serializer.h"
+#include "MathUtility.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -117,8 +118,13 @@ void COptimizeWallWnd::DeletePos()
 		i--;
 	}
 }
-void COptimizeWallWnd::InsertPos(bool isOutWall, double x, double y, double x1, double y1)
+void COptimizeWallWnd::InsertPos(bool isOutWall, double x, double y, double x1, double y1, CString mat)
 {
+	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;  
+	CBuildLightAnalysisDoc* pDoc = (CBuildLightAnalysisDoc*)pMain->GetActiveDocument();
+	if (!pMain || !pDoc)
+		return;
+
 	CMFCPropertyGridProperty* pGroup = NULL;
 	if (isOutWall)
 	{
@@ -136,19 +142,26 @@ void COptimizeWallWnd::InsertPos(bool isOutWall, double x, double y, double x1, 
 	PropertyGridProperty* pPos = new PropertyGridProperty(strCount, 0, TRUE);
 
 	PropertyGridProperty* pStart = new PropertyGridProperty(_T("Start"), 0, TRUE);
-	PropertyGridProperty* pProp = new PropertyGridProperty(_T("X"), (_variant_t) x, _T("Specifies the window's height"));
+	PropertyGridProperty* pProp = new PropertyGridProperty(_T("X"), (_variant_t) x, _T("坐标X"));
 	pStart->AddSubItem(pProp);
-	pProp = new PropertyGridProperty( _T("Y"), (_variant_t) y, _T("Specifies the window's width"));
+	pProp = new PropertyGridProperty( _T("Y"), (_variant_t) y, _T("坐标Y"));
 	pStart->AddSubItem(pProp);
 
 	PropertyGridProperty* pEnd = new PropertyGridProperty(_T("End"), 0, TRUE);
-	pProp = new PropertyGridProperty(_T("X"), (_variant_t) x1, _T("Specifies the window's height"));
+	pProp = new PropertyGridProperty(_T("X"), (_variant_t) x1, _T("坐标X"));
 	pEnd->AddSubItem(pProp);
-	pProp = new PropertyGridProperty( _T("Y"), (_variant_t) y1, _T("Specifies the window's width"));
+	pProp = new PropertyGridProperty( _T("Y"), (_variant_t) y1, _T("坐标Y"));
 	pEnd->AddSubItem(pProp);
 
+	PropertyGridProperty* pMat = new PropertyGridProperty(_T("材质"), mat, _T("墙材质"));
+	vector<Material>& mats = pDoc->getMaterials();
+	for (int i = 0; i < mats.size(); i++)
+	{
+		pMat->AddOption(stringToCString(mats[i].name));
+	}
 	pPos->AddSubItem(pStart);
 	pPos->AddSubItem(pEnd);
+	pPos->AddSubItem(pMat);
 
 
 	pGroup->AddSubItem(pPos);
@@ -242,62 +255,63 @@ void COptimizeWallWnd::SetPropListFont()
 	m_wndPropList.SetFont(&m_fntPropList);
 }
 
-void COptimizeWallWnd::inputFromLines(vector<sLine>& sLines)
+void COptimizeWallWnd::inputFromLines(vector<sOpWall>& sOpWalls)
 {
-	
 	DeletePos();	
-	for (int i = 0; i < sLines.size(); i++)
+	for (int i = 0; i < sOpWalls.size(); i++)
 	{
-		if (sLines[i].type == sLine::OUT_WALL)
+		if (sOpWalls[i].line.type == sLine::OUT_WALL)
 		{
-			InsertPos(true, sLines[i].s.x, sLines[i].s.y, sLines[i].e.x, sLines[i].e.y);
+			InsertPos(true, sOpWalls[i].line.s.x, sOpWalls[i].line.s.y, sOpWalls[i].line.e.x, sOpWalls[i].line.e.y,sOpWalls[i].mat);
 		}
 		else
 		{
-			InsertPos(false, sLines[i].s.x, sLines[i].s.y, sLines[i].e.x, sLines[i].e.y);
-		}
-		
+			InsertPos(false, sOpWalls[i].line.s.x, sOpWalls[i].line.s.y, sOpWalls[i].line.e.x, sOpWalls[i].line.e.y,sOpWalls[i].mat);
+		}	
 	}
-
 }
-void COptimizeWallWnd::OutputToLines(vector<sLine>& sLines)
+void COptimizeWallWnd::OutputToLines(vector<sOpWall>& sOpWalls)
 {
 	//外墙
 	CMFCPropertyGridProperty* outWallPos = getCoodOutWallGroup();
-	Vec2d ps, pe;
+	sOpWall w;
 	for (int i = 0; i < outWallPos->GetSubItemsCount(); i++)
 	{
-		ps.x = outWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
-		ps.y = outWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+		w.line.s.x = outWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+		w.line.s.y = outWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+		w.line.e.x = outWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+		w.line.e.y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+		w.line.type = sLine::OUT_WALL;
+		CString mat = outWallPos->GetSubItem(i)->GetSubItem(2)->GetValue().bstrVal;
+		_tcscpy(w.mat, mat);
 
-		pe.x = outWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
-		pe.y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
-
-		sLines.push_back(sLine(ps,pe,sLine::OUT_WALL));
+		sOpWalls.push_back(w);
 	}
 
 	//内墙
 	CMFCPropertyGridProperty* inWallPos = getCoodInWallGroup();
 	for (int i = 0; i < inWallPos->GetSubItemsCount(); i++)
 	{
-		ps.x = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
-		ps.y = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+		w.line.s.x = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+		w.line.s.y = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+		w.line.e.x = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+		w.line.e.y = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+		w.line.type = sLine::IN_WALL;
+		CString mat = outWallPos->GetSubItem(i)->GetSubItem(2)->GetValue().bstrVal;
+		_tcscpy(w.mat, mat);
 
-		pe.x = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
-		pe.y = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
-
-		sLines.push_back(sLine(ps,pe,sLine::IN_WALL));
+		sOpWalls.push_back(w);
 	}
 }
 void COptimizeWallWnd::save(ofstream& out)
 {
-	vector<sLine> sLines;
-	OutputToLines(sLines);
-	serializer<sLine>::write(out, &sLines);
+	vector<sOpWall> sOpWalls;
+	OutputToLines(sOpWalls);
+	serializer<sOpWall>::write(out, &sOpWalls);
 }
 void COptimizeWallWnd::load(ifstream& in)
 {
-	vector<sLine> sLines;
-	serializer<sLine>::read(in, &sLines);
-	inputFromLines(sLines);
+	vector<sOpWall> sOpWalls;
+	serializer<sOpWall>::read(in, &sOpWalls);
+	inputFromLines(sOpWalls);
 }

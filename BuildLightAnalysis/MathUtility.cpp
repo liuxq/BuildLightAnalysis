@@ -256,38 +256,46 @@ bool isEqual(Vec2d a, Vec2d b)
 	return x*x + y*y < 400; //20 * 20
 }
 //求线段集合形成的封闭多边形，如果不封闭则返回false
-bool CalClosedPolygon(list<sLine>& lines, vector<Vec2d>& outPoints)
+bool CalClosedPolygon(list<Wall>& walls, vector<Wall>& outWalls, vector<Vec2d>& outPoints)
 {
-	if (lines.size() < 3)
+	if (walls.size() < 3)
 	{
 		return false;
 	}
 
-	list<sLine>::iterator i;
-	i = lines.begin();
-	sLine line = *i;
-	Vec2d p = line.s;
-	lines.erase(i);
+	list<Wall>::iterator i;
+	i = walls.begin();
+	Wall firstWall = *i;
+	Vec2d p = firstWall.line.s;
+	firstWall.isOrder = false;
+	walls.erase(i);
 	outPoints.push_back(p);
+	outWalls.push_back(firstWall);
 	do
 	{
 		bool flag = false;
-		for (list<sLine>::iterator j = lines.begin(); j != lines.end(); j++)
+		for (list<Wall>::iterator j = walls.begin(); j != walls.end(); j++)
 		{
-			if (isEqual(p,(*j).s))
+			if (isEqual(p,(*j).line.s))
 			{
-				p = (*j).e;
-				lines.erase(j);
+				Wall w = (*j);
+				p = w.line.e;
+				walls.erase(j);
 				flag = true;
 				outPoints.push_back(p);
+				w.isOrder = true;
+				outWalls.push_back(w);
 				break;
 			}
-			if (isEqual(p,(*j).e))
+			if (isEqual(p,(*j).line.e))
 			{
-				p = (*j).s;
-				lines.erase(j);
+				Wall w = (*j);
+				p = w.line.s;
+				walls.erase(j);
 				flag = true;
 				outPoints.push_back(p);
+				w.isOrder = false;
+				outWalls.push_back(w);
 				break;
 			}
 		}
@@ -297,7 +305,7 @@ bool CalClosedPolygon(list<sLine>& lines, vector<Vec2d>& outPoints)
 			return false;
 		}
 	}
-	while(!isEqual(p,line.e));
+	while(!isEqual(p,firstWall.line.e));
 
 	return true;
 }

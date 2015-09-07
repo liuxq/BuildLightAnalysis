@@ -83,16 +83,19 @@ void CBuildLightAnalysisView::optimize()
 	OptimizeLine(sLines,outLines, wTh);
 
 	//设置处理后的墙
+	CString outMat = pMain->GetOptionProperty().getPropList()->GetProperty(2)->GetValue().bstrVal;
+	CString inMat = pMain->GetOptionProperty().getPropList()->GetProperty(3)->GetValue().bstrVal;
 	pMain->GetOptimizeWallProperty().DeletePos();
 	for (int i = 0; i < outLines.size(); i++)
 	{
 		if (outLines[i].type == sLine::OUT_WALL)
 		{
-			pMain->GetOptimizeWallProperty().InsertPos(true, outLines[i].s.x,outLines[i].s.y,outLines[i].e.x,outLines[i].e.y);
+
+			pMain->GetOptimizeWallProperty().InsertPos(true, outLines[i].s.x,outLines[i].s.y,outLines[i].e.x,outLines[i].e.y, outMat);
 		}
 		else
 		{
-			pMain->GetOptimizeWallProperty().InsertPos(false, outLines[i].s.x,outLines[i].s.y,outLines[i].e.x,outLines[i].e.y);
+			pMain->GetOptimizeWallProperty().InsertPos(false, outLines[i].s.x,outLines[i].s.y,outLines[i].e.x,outLines[i].e.y, inMat);
 		}
 		
 	}

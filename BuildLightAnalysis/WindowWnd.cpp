@@ -251,7 +251,6 @@ double WinWidth, CString mat)
 	PropertyGridProperty* pWinWidth = new PropertyGridProperty(_T("窗宽"), (_variant_t)WinWidth, _T("窗户宽度"));
 
 	PropertyGridProperty* pWinMaterial = new PropertyGridProperty(_T("窗材质"), mat, _T("窗户的材质"));
-	CStringA strMat;
 	vector<Material>& mats = pDoc->getMaterials();
 	for (int i = 0; i < mats.size(); i++)
 	{

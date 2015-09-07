@@ -370,39 +370,46 @@ void CBuildLightAnalysisDoc::OnFileOutput()
 	PropertyGridCtrl* pRoomlist = pMain->GetRoomProperty().getPropList();
 	CMFCPropertyGridProperty* optimizeOutWallPos = pMain->GetOptimizeWallProperty().getCoodOutWallGroup();
 	CMFCPropertyGridProperty* optimizeInWallPos = pMain->GetOptimizeWallProperty().getCoodInWallGroup();
+
+	double h = pOption->GetProperty(0)->GetValue().dblVal;
 	for (int i = 0; i < pRoomlist->GetPropertyCount(); i++)
 	{
 		//导出第i个房间
 		CMFCPropertyGridProperty* pRoom = pRoomlist->GetProperty(i);
-		sLine line;
-		list<sLine> roomLines;
+		Wall wall;
+		list<Wall> roomWalls;
 		for (int j = 0; j < pRoom->GetSubItemsCount(); j++)
 		{
 			CString wallType = pRoom->GetSubItem(j)->GetName();
 			if (wallType == _T("外墙号"))
 			{
 				int index = pRoom->GetSubItem(j)->GetValue().intVal;
-				line.s.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
-				line.s.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
-				line.e.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
-				line.e.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
-
-				roomLines.push_back(line);
+				wall.line.s.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+				wall.line.s.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+				wall.line.e.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+				wall.line.e.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+				wall.wallInfo.index = index;
+				wall.wallInfo.type = sLine::OUT_WALL;
+				wall.isOrder = true;
+				roomWalls.push_back(wall);
 			}
 			if (wallType == _T("内墙号"))
 			{
 				int index = pRoom->GetSubItem(j)->GetValue().intVal;
-				line.s.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
-				line.s.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
-				line.e.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
-				line.e.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
-
-				roomLines.push_back(line);
+				wall.line.s.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+				wall.line.s.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+				wall.line.e.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+				wall.line.e.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+				wall.wallInfo.index = index;
+				wall.wallInfo.type = sLine::IN_WALL;
+				wall.isOrder = true;
+				roomWalls.push_back(wall);
 			}
 					
 		}
 		vector<Vec2d> outPolygon;
-		if (!CalClosedPolygon(roomLines, outPolygon))
+		vector<Wall> outWalls;
+		if (!CalClosedPolygon(roomWalls, outWalls, outPolygon))
 		{
 			CString msg;
 			msg.Format(_T("房间%d没有封闭，不能导出"),i);
@@ -413,6 +420,50 @@ void CBuildLightAnalysisDoc::OnFileOutput()
 			//地面
 			out << "room" << i << ".Floor";
 			out << " polygon " << CStringToString(CString(pOption->GetProperty(5)->GetValue().bstrVal)) << endl; 
+			out << "0 0 9 ";
+			for (int j = 0; j < outPolygon.size(); j++)
+			{
+				out << outPolygon[j].x << " " << outPolygon[j].y << " "<< 0.0 << endl;
+			}
+			out << endl;
+			//棚顶
+			out << "room" << i << ".Roof";
+			out << " polygon " << CStringToString(CString(pOption->GetProperty(6)->GetValue().bstrVal)) << endl; 
+			out << "0 0 9 ";
+			for (int j = outPolygon.size()-1; j >= 0 ; j--)
+			{
+				out << outPolygon[j].x << " " << outPolygon[j].y << " "<< h << endl;
+			}
+			out << endl;
+			//侧墙
+			for (int j = 0; j < outWalls.size(); j++)
+			{
+				CString mat;
+				if (outWalls[j].wallInfo.type == sLine::OUT_WALL)
+					mat = optimizeOutWallPos->GetSubItem(outWalls[j].wallInfo.index)->GetSubItem(2)->GetValue().bstrVal;
+				else
+					mat = optimizeInWallPos->GetSubItem(outWalls[j].wallInfo.index)->GetSubItem(2)->GetValue().bstrVal;
+				
+				out << "room" << i << ".Flank." << j;
+				out << " polygon " << CStringToString(mat) << endl; 
+				out << "0 0 9 ";
+				if (outWalls[j].isOrder)
+				{
+					out << outWalls[j].line.s.x << " "<< outWalls[j].line.s.y << " "<< h << endl;
+					out << outWalls[j].line.e.x << " "<< outWalls[j].line.e.y << " "<< h << endl;
+					out << outWalls[j].line.e.x << " "<< outWalls[j].line.e.y << " "<< 0.0 << endl;
+					out << outWalls[j].line.s.x << " "<< outWalls[j].line.s.y << " "<< 0.0 << endl;
+				}
+				else
+				{
+					out << outWalls[j].line.e.x << " "<< outWalls[j].line.e.y << " "<< h << endl;
+					out << outWalls[j].line.s.x << " "<< outWalls[j].line.s.y << " "<< h << endl;
+					out << outWalls[j].line.s.x << " "<< outWalls[j].line.s.y << " "<< 0.0 << endl;
+					out << outWalls[j].line.e.x << " "<< outWalls[j].line.e.y << " "<< 0.0 << endl;
+				}
+				out << endl;
+				
+			}
 		}
 	}
 }

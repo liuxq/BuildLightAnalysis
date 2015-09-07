@@ -16,7 +16,7 @@ void OptimizeLine(vector<sLine>& slines, vector<sLine>& outSlines, double wTh);
 double lenOfLinePoint(sLine& line, Vec2d p);
 
 //求线段集合形成的封闭多边形，如果不封闭则返回false
-bool CalClosedPolygon(list<sLine>& lines, vector<Vec2d>& outPoints);
+bool CalClosedPolygon(list<Wall>& lines, vector<Wall>& outWalls, vector<Vec2d>& outPoints);
 
 //判断多边形是逆时针还是顺时针
 bool isAntiClock(vector<Vec2d>& polygon);
