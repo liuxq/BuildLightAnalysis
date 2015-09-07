@@ -118,6 +118,7 @@
     <ClInclude Include="OptimizeWallWnd.h" />
     <ClInclude Include="OptionWnd.h" />
     <ClInclude Include="OutWallWnd.h" />
+    <ClInclude Include="ProjectOutput.h" />
     <ClInclude Include="PropertyGridCtrl.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RoomWnd.h" />
@@ -140,6 +141,7 @@
     <ClCompile Include="OptimizeWallWnd.cpp" />
     <ClCompile Include="OptionWnd.cpp" />
     <ClCompile Include="OutWallWnd.cpp" />
+    <ClCompile Include="ProjectOutput.cpp" />
     <ClCompile Include="PropertyGridCtrl.cpp" />
     <ClCompile Include="RoomWnd.cpp" />
     <ClCompile Include="stdafx.cpp">

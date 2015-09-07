@@ -380,7 +380,7 @@ void CWindowWnd::load(ifstream& in)
 		CString type = windows[i].wallType;
 		if (type == _T("ÍâÇ½"))
 		{
-			InsertWindow(windows[i].wallIndex, -1,-1 windows[i].pos, windows[i].WinUpHeight, windows[i].WinDownHeight,
+			InsertWindow(windows[i].wallIndex, -1,-1, windows[i].pos, windows[i].WinUpHeight, windows[i].WinDownHeight,
 				windows[i].WinWidth, CString(windows[i].WinMaterial));
 		}
 		else if (type == _T("ÄÚÇ½"))
