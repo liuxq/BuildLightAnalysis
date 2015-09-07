@@ -232,12 +232,14 @@ bool CRoomWnd::AddToSelectedRoom(CString name, int index)
 
 void CRoomWnd::DeleteAllRoom()
 {
-	for (int i = 0; i < m_wndPropList.GetPropertyCount(); i++)
+	m_wndPropList.RemoveAll();
+	m_wndPropList.AdjustLayout();
+	/*for (int i = 0; i < m_wndPropList.GetPropertyCount(); i++)
 	{
 		CMFCPropertyGridProperty* subItem = m_wndPropList.GetProperty(i);
 		m_wndPropList.DeleteProperty(subItem);
 		i--;
-	}
+	}*/
 }
 LRESULT CRoomWnd::OnPropertyChanged (WPARAM,LPARAM lParam)
 {

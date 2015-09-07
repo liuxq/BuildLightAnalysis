@@ -102,7 +102,7 @@ int CWindowWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 void CWindowWnd::OnNewWindow()
 {
-	InsertWindow(0, 0);
+	InsertWindow(0, 0, -1);
 }
 void CWindowWnd::OnDeleteWindow()
 {
@@ -199,7 +199,7 @@ void CWindowWnd::SetPropListFont()
 	m_insertButton.SetFont(&m_fntPropList);
 	m_deleteButton.SetFont(&m_fntPropList);
 }
-void CWindowWnd::InsertWindow(int outWallIndex, int inWallIndex, double pos ,double WinUpHeight,double WinDownHeight,
+void CWindowWnd::InsertWindow(int outWallIndex, int inWallIndex, int windowIndex, double pos ,double WinUpHeight,double WinDownHeight,
 double WinWidth, CString mat)
 {
 	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;  
@@ -210,6 +210,20 @@ double WinWidth, CString mat)
 	int count = m_wndPropList.GetPropertyCount();
 	CString strCount;
 	strCount.Format(_T("窗%d"),count);
+
+	if (windowIndex >= 0)
+	{
+		CString t = m_wndPropList.GetProperty(windowIndex)->GetSubItem(0)->GetValue().bstrVal;
+		int _index = m_wndPropList.GetProperty(windowIndex)->GetSubItem(1)->GetValue().intVal;
+		if (t == _T("外墙"))
+		{
+			outWallIndex = _index;
+		}
+		if (t == _T("内墙"))
+		{
+			inWallIndex = _index;
+		}
+	}
 
 	CString strWallType;
 	int wallIndex;
@@ -225,6 +239,7 @@ double WinWidth, CString mat)
 		wallIndex = inWallIndex;
 		count = pMain->GetOptimizeWallProperty().getCoodInWallGroup()->GetSubItemsCount();
 	}
+	
 
 	PropertyGridProperty* pWindow = new PropertyGridProperty(strCount, 0, TRUE);
 
@@ -275,12 +290,14 @@ double WinWidth, CString mat)
 
 void CWindowWnd::DeleteAllWindow()
 {
-	for (int i = 0; i < m_wndPropList.GetPropertyCount(); i++)
+	m_wndPropList.RemoveAll();
+	m_wndPropList.AdjustLayout();
+	/*for (int i = 0; i < m_wndPropList.GetPropertyCount(); i++)
 	{
 		CMFCPropertyGridProperty* subItem = m_wndPropList.GetProperty(i);
 		m_wndPropList.DeleteProperty(subItem);
 		i--;
-	}
+	}*/
 }
 
 LRESULT CWindowWnd::OnPropertyChanged (WPARAM,LPARAM lParam)
@@ -363,12 +380,12 @@ void CWindowWnd::load(ifstream& in)
 		CString type = windows[i].wallType;
 		if (type == _T("外墙"))
 		{
-			InsertWindow(windows[i].wallIndex, -1, windows[i].pos, windows[i].WinUpHeight, windows[i].WinDownHeight,
+			InsertWindow(windows[i].wallIndex, -1,-1 windows[i].pos, windows[i].WinUpHeight, windows[i].WinDownHeight,
 				windows[i].WinWidth, CString(windows[i].WinMaterial));
 		}
 		else if (type == _T("内墙"))
 		{
-			InsertWindow(-1,windows[i].wallIndex, windows[i].pos, windows[i].WinUpHeight, windows[i].WinDownHeight,
+			InsertWindow(-1,windows[i].wallIndex,-1, windows[i].pos, windows[i].WinUpHeight, windows[i].WinDownHeight,
 				windows[i].WinWidth, CString(windows[i].WinMaterial));
 		}
 		

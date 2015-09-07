@@ -395,6 +395,7 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 	//如果是处理后模式
 	if (pMain->GetOptimizeWallProperty().IsPaneVisible())
 	{
+		//外墙拾取
 		CMFCPropertyGridProperty* outWallPos = pMain->GetOptimizeWallProperty().getCoodOutWallGroup();
 		if (!outWallPos)
 			return;
@@ -415,7 +416,7 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 				break;
 			}
 		}
-
+		//内墙拾取
 		CMFCPropertyGridProperty* inWallPos = pMain->GetOptimizeWallProperty().getCoodInWallGroup();
 		if (!inWallPos)
 			return;
@@ -431,10 +432,12 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 			if (lenOfLinePoint(line, p) < 100.0)
 			{
 				m_iSelectInWallIndex = i;
+				m_iSelectOutWallIndex = -1;
 				break;
 			}
 		}
 
+		//窗户拾取
 		m_iSelectWindowIndex = -1;
 		PropertyGridCtrl* list = pMain->GetWindowProperty().getPropList();
 		Vec2d p1, p2;
@@ -470,6 +473,8 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 			if (lenOfLinePoint(line, p) < 100.0)
 			{
 				m_iSelectWindowIndex = i;
+				m_iSelectInWallIndex = -1;
+				m_iSelectOutWallIndex = -1;
 				break;
 			}
 		}
@@ -546,7 +551,7 @@ void CBuildLightAnalysisView::OnLButtonUp(UINT nFlags, CPoint point)
 
 void CBuildLightAnalysisView::OnRButtonUp(UINT /* nFlags */, CPoint point)
 {
-	if (m_iSelectOutWallIndex >= 0 || m_iSelectInWallIndex >= 0)
+	if (m_iSelectOutWallIndex >= 0 || m_iSelectInWallIndex >= 0 || m_iSelectWindowIndex >= 0)
 	{
 		ClientToScreen(&point);
 		OnContextMenu(this, point);
@@ -650,7 +655,7 @@ void CBuildLightAnalysisView::OnPopAddWindow()
 {
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 	pMain->GetWindowProperty().ShowPane(TRUE,FALSE,TRUE);
-	pMain->GetWindowProperty().InsertWindow(m_iSelectOutWallIndex, m_iSelectInWallIndex);
+	pMain->GetWindowProperty().InsertWindow(m_iSelectOutWallIndex, m_iSelectInWallIndex, m_iSelectWindowIndex);
 }
 
 
