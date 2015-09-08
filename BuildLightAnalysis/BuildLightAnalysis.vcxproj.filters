@@ -113,6 +113,9 @@
     <ClInclude Include="ProjectOutput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GridWnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BuildLightAnalysis.cpp">
@@ -161,6 +164,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ProjectOutput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GridWnd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

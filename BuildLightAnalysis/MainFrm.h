@@ -9,6 +9,7 @@
 #include "OptionWnd.h"
 #include "WindowWnd.h"
 #include "RoomWnd.h"
+#include "GridWnd.h"
 
 
 class CMainFrame : public CFrameWndEx
@@ -73,8 +74,8 @@ protected:  // control bar embedded members
 	COptionWnd		  m_wndOptionProperties;
 	CWindowWnd		  m_wndWindowProperties;
 	CRoomWnd		  m_wndRoomProperties;
+	CGridWnd		  m_wndGridProperties;
 	
-
 public:
 	
 
@@ -100,6 +101,7 @@ public:
 	afx_msg void OnFileSaveAs();
 	afx_msg void OnEditWindow();
 	afx_msg void OnEditRoom();
+	afx_msg void OnEditGrid();
 };
 
 

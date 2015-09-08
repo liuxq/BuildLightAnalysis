@@ -111,6 +111,7 @@
     <ClInclude Include="BuildLightAnalysisView.h" />
     <ClInclude Include="CommonData.h" />
     <ClInclude Include="DlgProjectNew.h" />
+    <ClInclude Include="GridWnd.h" />
     <ClInclude Include="InWallWnd.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="Material.h" />
@@ -134,6 +135,7 @@
     <ClCompile Include="BuildLightAnalysisDoc.cpp" />
     <ClCompile Include="BuildLightAnalysisView.cpp" />
     <ClCompile Include="DlgProjectNew.cpp" />
+    <ClCompile Include="GridWnd.cpp" />
     <ClCompile Include="InWallWnd.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="Material.cpp" />
