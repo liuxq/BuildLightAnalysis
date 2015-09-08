@@ -210,7 +210,7 @@ void CGridWnd::InsertGrid(int roomIndex, double offset, double meshLen)
 	strCount.Format(_T("计算点%d"),count);
 	
 
-	PropertyGridProperty* pGrid = new PropertyGridProperty(strCount, 0, TRUE);
+	PropertyGridProperty* pGrid = new PropertyGridProperty(strCount, 1000, TRUE);
 
 	_variant_t var;
 	var.vt = VT_INT;var = roomIndex;
@@ -232,12 +232,98 @@ void CGridWnd::InsertGrid(int roomIndex, double offset, double meshLen)
 	pGrid->AddSubItem(pOffset);
 	pGrid->AddSubItem(pMeshLen);
 
+	CalGrid(pGrid);
+
 	m_wndPropList.AddProperty(pGrid);
 	//m_wndPropList.UpdateProperty((PropertyGridProperty*)(pWindow));
 	m_wndPropList.AdjustLayout();
 
 	//更新视图     
 	pMain->GetActiveView()->Invalidate(); 
+}
+
+void CGridWnd::CalGrid(CMFCPropertyGridProperty* pGrid)
+{
+	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+	if (!pMain)
+		return;
+
+	if (pGrid->GetSubItemsCount() >= 4)
+	{
+		CMFCPropertyGridProperty* pl = pGrid->GetSubItem(3);
+		if (pl)
+			pGrid->RemoveSubItem(pl);
+	}
+	
+
+	int roomIndex = pGrid->GetSubItem(0)->GetValue().intVal;
+	int offset = pGrid->GetSubItem(1)->GetValue().dblVal;
+	int meshLen = pGrid->GetSubItem(2)->GetValue().dblVal;
+
+	if (roomIndex == -1)
+		return;
+
+	CMFCPropertyGridProperty* pGridList = new CMFCPropertyGridProperty(_T("计算点"),0,TRUE);
+
+	PropertyGridCtrl* pRoomlist = pMain->GetRoomProperty().getPropList();
+	CMFCPropertyGridProperty* optimizeOutWallPos = pMain->GetOptimizeWallProperty().getCoodOutWallGroup();
+	CMFCPropertyGridProperty* optimizeInWallPos = pMain->GetOptimizeWallProperty().getCoodInWallGroup();
+	//导出第i个房间
+	CMFCPropertyGridProperty* pRoom = pRoomlist->GetProperty(roomIndex);
+	Wall wall;
+	list<Wall> roomWalls;
+	for (int j = 0; j < pRoom->GetSubItemsCount(); j++)
+	{
+		CString wallType = pRoom->GetSubItem(j)->GetName();
+		if (wallType == _T("外墙号"))
+		{
+			int index = pRoom->GetSubItem(j)->GetValue().intVal;
+			wall.line.s.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+			wall.line.s.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+			wall.line.e.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+			wall.line.e.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+			wall.wallInfo.index = index;
+			wall.wallInfo.type = sLine::OUT_WALL;
+			wall.isOrder = true;
+			roomWalls.push_back(wall);
+		}
+		else if (wallType == _T("内墙号"))
+		{
+			int index = pRoom->GetSubItem(j)->GetValue().intVal;
+			wall.line.s.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+			wall.line.s.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+			wall.line.e.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+			wall.line.e.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+			wall.wallInfo.index = index;
+			wall.wallInfo.type = sLine::IN_WALL;
+			wall.isOrder = true;
+			roomWalls.push_back(wall);
+		}
+	}
+	vector<Vec2d> outPolygon;
+	vector<Wall> outWalls;
+	if (!CalClosedPolygon(roomWalls, outWalls, outPolygon))
+	{
+		return;
+	}
+	vector<Vec2d> gridPoints;
+	CalGridFromPolygon(outPolygon,offset,meshLen,gridPoints);
+
+	CString strGridPointIndex;
+	for (int i = 0; i < gridPoints.size(); i++)
+	{
+		strGridPointIndex.Format(_T("%d"),i);
+		CMFCPropertyGridProperty* pGridPoint = new CMFCPropertyGridProperty(_T("计算点"),0,TRUE);
+		CMFCPropertyGridProperty* pGridPointX = new CMFCPropertyGridProperty(_T("X"),(_variant_t)gridPoints[i].x,_T("X"));
+		CMFCPropertyGridProperty* pGridPointY = new CMFCPropertyGridProperty(_T("Y"),(_variant_t)gridPoints[i].y,_T("Y"));
+		pGridPoint->AddSubItem(pGridPointX);
+		pGridPoint->AddSubItem(pGridPointY);
+
+		pGridList->AddSubItem(pGridPoint);
+	}
+	pGrid->AddSubItem(pGridList);
+
+	m_wndPropList.UpdateProperty((PropertyGridProperty*)(pGrid));
 }
 
 void CGridWnd::DeleteAllWindow()
@@ -256,47 +342,11 @@ LRESULT CGridWnd::OnPropertyChanged (WPARAM,LPARAM lParam)
 {
 	CMFCPropertyGridProperty* pProp = (CMFCPropertyGridProperty*) lParam;
 
-	if (pProp->GetData() == 1000)
+	if (pProp->GetParent() && pProp->GetParent()->GetData() == 1000)
 	{
-		CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;     
-		
-		CString d;
-		d = pProp->GetValue().bstrVal;
-		if (d == _T("外墙"))
-		{
-			CMFCPropertyGridProperty* pIndex = pProp->GetParent()->GetSubItem(1);
-			pIndex->RemoveAllOptions();
-
-			int count = pMain->GetOptimizeWallProperty().getCoodOutWallGroup()->GetSubItemsCount();
-			if (count == 0)
-			{
-				pIndex->SetValue((_variant_t)(-1));
-			}
-			CString strItem;
-			for (int i = 0; i < count; i++)
-			{
-				strItem.Format(_T("%d"), i);
-				pIndex->AddOption(strItem);
-			}
-			
-		}
-		else if (d == _T("内墙"))
-		{
-			CMFCPropertyGridProperty* pIndex = pProp->GetParent()->GetSubItem(1);
-			pIndex->RemoveAllOptions();
-
-			int count = pMain->GetOptimizeWallProperty().getCoodInWallGroup()->GetSubItemsCount();
-			if (count == 0)
-			{
-				pIndex->SetValue((_variant_t)(-1));
-			}
-			CString strItem;
-			for (int i = 0; i < count; i++)
-			{
-				strItem.Format(_T("%d"), i);
-				pIndex->AddOption(strItem);
-			}
-		}
+		CMFCPropertyGridProperty* grid = pProp->GetParent();
+		CalGrid(grid);
+		m_wndPropList.AdjustLayout();
 	}
 	return 0;
 }

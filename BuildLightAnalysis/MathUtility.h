@@ -20,3 +20,6 @@ bool CalClosedPolygon(list<Wall>& lines, vector<Wall>& outWalls, vector<Vec2d>& 
 
 //判断多边形是逆时针还是顺时针
 bool isAntiClock(vector<Vec2d>& polygon);
+
+//求多边形内的计算点
+void CalGridFromPolygon(vector<Vec2d>& polygon, double offset, double meshLen, vector<Vec2d>& outPoints);

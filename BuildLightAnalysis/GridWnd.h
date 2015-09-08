@@ -22,7 +22,8 @@ public:
 		return &m_wndPropList;
 	}
 
-	void InsertGrid(int roomIndex, double offset = 20.0, double meshLen = 20.0);
+	void InsertGrid(int roomIndex, double offset = 40.0, double meshLen = 40.0);
+	void CalGrid(CMFCPropertyGridProperty* pGrid);
 	void DeleteAllWindow();
 
 	void save(ofstream& out);

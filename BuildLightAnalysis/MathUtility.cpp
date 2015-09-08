@@ -332,3 +332,111 @@ bool isAntiClock(vector<Vec2d>& polygon)
 	else
 		return false;
 }
+
+//判断点是否在线的内侧
+bool IsPointInsideLine(Vec2d p,sLine& line)
+{
+	Vec2d d1 = line.e - line.s;
+	Vec2d d2 = p - line.s;
+
+	if (d1/d2 < 0)
+		return false;
+	if (d1*d2 < 0)
+		return false;
+	if (d1*(line.e-p) < 0)
+		return false;
+
+	return true;
+}
+
+//x线段向内侧平移offset
+void OffsetLine(sLine& line, double offset)
+{
+	Vec2d d1 = line.e - line.s;
+	Vec2d dv(-d1.y,d1.x);
+	dv.Normalize();
+
+	line.s += dv * offset;
+	line.e += dv * offset;
+
+	return;
+}
+
+bool PtInPolygon (Vec2d p, vector<Vec2d>& ptPolygon) 
+{ 
+	int nCross = 0;
+	for (int i = 0; i < ptPolygon.size(); i++) 
+	{ 
+		Vec2d p1 = ptPolygon[i]; 
+		Vec2d p2 = ptPolygon[(i + 1) % nCount];
+			// 求解 y=p.y 与 p1p2 的交点
+		if ( p1.y == p2.y ) // p1p2 与 y=p0.y平行 
+			continue;
+		if ( p.y < min(p1.y, p2.y) ) // 交点在p1p2延长线上 
+			continue; 
+		if ( p.y >= max(p1.y, p2.y) ) // 交点在p1p2延长线上 
+			continue;
+		// 求交点的 X 坐标 -------------------------------------------------------------- 
+		double x = (double)(p.y - p1.y) * (double)(p2.x - p1.x) / (double)(p2.y - p1.y) + p1.x;
+		if ( x > p.x ) 
+			nCross++; // 只统计单边交点 
+	}
+
+	// 单边交点为偶数，点在多边形之外 --- 
+	return (nCross % 2 == 1); 
+}
+
+
+void CalGridFromPolygon(vector<Vec2d>& polygon, double offset,double meshLen, vector<Vec2d>& outPoints)
+{
+	vector<sLine> lines;
+	sLine line;
+	int sz = polygon.size();
+	if (isAntiClock(polygon))
+	{
+		for (int i = 0; i < sz; i++)
+		{
+			line.s = polygon[i];
+			line.e = polygon[(i+1)%sz];
+			OffsetLine(line, offset);
+			lines.push_back(line);
+		}
+	}
+	else
+	{
+		for (int i = sz-1; i >= 0; i--)
+		{
+			line.s = polygon[i];
+			line.e = polygon[(i-1)%sz];
+			OffsetLine(line, offset);
+			lines.push_back(line);
+		}
+	}
+	Vec2d boxMin(1.0e9,1.0e9), boxMax(-1.0e9,-1.0e9);
+	for (int i = 0; i < lines.size(); i++)
+	{
+		lines[i].s.UpdateMinMax(boxMin, boxMax);
+		lines[i].e.UpdateMinMax(boxMin, boxMax);
+	}
+
+	for (double x = boxMin.x; x < boxMax.x; x += meshLen)
+	{
+		for (double y = boxMin.y; y < boxMax.y; y += meshLen)
+		{
+			Vec2d p(x,y);
+			bool flag = true;
+			for (int i = 0; i < lines.size(); i++)
+			{
+				if (!IsPointInsideLine(p,lines[i]))
+				{
+					flag = false;
+					break;
+				}
+			}
+			if (flag)
+			{
+				outPoints.push_back(p);
+			}
+		}
+	}
+}
