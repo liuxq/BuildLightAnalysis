@@ -313,7 +313,7 @@ void CGridWnd::CalGrid(CMFCPropertyGridProperty* pGrid)
 	for (int i = 0; i < gridPoints.size(); i++)
 	{
 		strGridPointIndex.Format(_T("%d"),i);
-		CMFCPropertyGridProperty* pGridPoint = new CMFCPropertyGridProperty(_T("计算点"),0,TRUE);
+		CMFCPropertyGridProperty* pGridPoint = new CMFCPropertyGridProperty(_T("点"),0,TRUE);
 		CMFCPropertyGridProperty* pGridPointX = new CMFCPropertyGridProperty(_T("X"),(_variant_t)gridPoints[i].x,_T("X"));
 		CMFCPropertyGridProperty* pGridPointY = new CMFCPropertyGridProperty(_T("Y"),(_variant_t)gridPoints[i].y,_T("Y"));
 		pGridPoint->AddSubItem(pGridPointX);
@@ -326,16 +326,10 @@ void CGridWnd::CalGrid(CMFCPropertyGridProperty* pGrid)
 	m_wndPropList.UpdateProperty((PropertyGridProperty*)(pGrid));
 }
 
-void CGridWnd::DeleteAllWindow()
+void CGridWnd::DeleteAllGrid()
 {
 	m_wndPropList.RemoveAll();
 	m_wndPropList.AdjustLayout();
-	/*for (int i = 0; i < m_wndPropList.GetPropertyCount(); i++)
-	{
-		CMFCPropertyGridProperty* subItem = m_wndPropList.GetProperty(i);
-		m_wndPropList.DeleteProperty(subItem);
-		i--;
-	}*/
 }
 
 LRESULT CGridWnd::OnPropertyChanged (WPARAM,LPARAM lParam)
@@ -344,15 +338,34 @@ LRESULT CGridWnd::OnPropertyChanged (WPARAM,LPARAM lParam)
 
 	if (pProp->GetParent() && pProp->GetParent()->GetData() == 1000)
 	{
+		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+		if (!pMain)
+			0;
 		CMFCPropertyGridProperty* grid = pProp->GetParent();
 		CalGrid(grid);
 		m_wndPropList.AdjustLayout();
+
+		//更新视图     
+		pMain->GetActiveView()->Invalidate(); 
 	}
 	return 0;
 }
 
 void CGridWnd::save(ofstream& out)
 {
+	vector<Grid> grids;
+
+	for (int i = 0; i < m_wndPropList.GetPropertyCount(); i++)
+	{
+		Grid g;
+		CMFCPropertyGridProperty* pG = m_wndPropList.GetProperty(i);
+		g.roomIndex = pG->GetSubItem(0)->GetValue().intVal;
+		g.offset = pG->GetSubItem(1)->GetValue().dblVal;
+		g.meshLen = pG->GetSubItem(2)->GetValue().dblVal;
+		if (pG->GetSubItem())
+		{
+		}
+	}
 	/*vector<stWindow> windows;
 	for (int i = 0; i < m_wndPropList.GetPropertyCount(); i++)
 	{

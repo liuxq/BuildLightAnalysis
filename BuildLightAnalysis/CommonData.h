@@ -74,3 +74,16 @@ struct stWindow
 	WCHAR WinMaterial[80];
 };
 #pragma pack()
+
+struct GridPoint
+{
+	Vec2d p;
+	bool isKey;
+};
+struct Grid
+{
+	int roomIndex;
+	double offset;
+	double meshLen;
+	vector<GridPoint> points;
+};

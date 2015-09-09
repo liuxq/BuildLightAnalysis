@@ -48,6 +48,10 @@ public:
 	{
 		return m_wndRoomProperties;
 	}
+	CGridWnd& GetGridProperty()
+	{
+		return m_wndGridProperties;
+	}
 	CMFCStatusBar& GetStatusBar()
 	{
 		return m_wndStatusBar;

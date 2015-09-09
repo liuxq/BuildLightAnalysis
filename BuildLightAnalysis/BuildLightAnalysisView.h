@@ -44,6 +44,10 @@ private:
 	int m_iSelectOutWallIndex;
 	int m_iSelectInWallIndex;
 	int m_iSelectWindowIndex;
+
+	int m_iSelectGridSetIndex;
+	int m_iSelectGridIndex;
+
 	bool m_bIsPullTranslate;
 	Transform m_transform;
 	CPoint prePoint;

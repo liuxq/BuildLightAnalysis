@@ -365,6 +365,7 @@ void OffsetLine(sLine& line, double offset)
 bool PtInPolygon (Vec2d p, vector<Vec2d>& ptPolygon) 
 { 
 	int nCross = 0;
+	int nCount = ptPolygon.size();
 	for (int i = 0; i < ptPolygon.size(); i++) 
 	{ 
 		Vec2d p1 = ptPolygon[i]; 
@@ -392,31 +393,15 @@ void CalGridFromPolygon(vector<Vec2d>& polygon, double offset,double meshLen, ve
 	vector<sLine> lines;
 	sLine line;
 	int sz = polygon.size();
-	if (isAntiClock(polygon))
-	{
-		for (int i = 0; i < sz; i++)
-		{
-			line.s = polygon[i];
-			line.e = polygon[(i+1)%sz];
-			OffsetLine(line, offset);
-			lines.push_back(line);
-		}
-	}
-	else
-	{
-		for (int i = sz-1; i >= 0; i--)
-		{
-			line.s = polygon[i];
-			line.e = polygon[(i-1)%sz];
-			OffsetLine(line, offset);
-			lines.push_back(line);
-		}
-	}
+	
 	Vec2d boxMin(1.0e9,1.0e9), boxMax(-1.0e9,-1.0e9);
-	for (int i = 0; i < lines.size(); i++)
+	vector<sLine> polygonLines;
+	for (int i = 0; i < sz; i++)
 	{
-		lines[i].s.UpdateMinMax(boxMin, boxMax);
-		lines[i].e.UpdateMinMax(boxMin, boxMax);
+		polygon[i].UpdateMinMax(boxMin, boxMax);
+		line.s = polygon[i];
+		line.e = polygon[(i+1)%sz];
+		polygonLines.push_back(line);
 	}
 
 	for (double x = boxMin.x; x < boxMax.x; x += meshLen)
@@ -424,19 +409,20 @@ void CalGridFromPolygon(vector<Vec2d>& polygon, double offset,double meshLen, ve
 		for (double y = boxMin.y; y < boxMax.y; y += meshLen)
 		{
 			Vec2d p(x,y);
-			bool flag = true;
-			for (int i = 0; i < lines.size(); i++)
+			if (PtInPolygon(p,polygon))
 			{
-				if (!IsPointInsideLine(p,lines[i]))
+				bool flag = false;
+				for (int i = 0; i < polygonLines.size(); i++)
 				{
-					flag = false;
-					break;
+					if (lenOfLinePoint(polygonLines[i], p) < offset)
+					{
+						flag = true;
+						break;
+					}
 				}
-			}
-			if (flag)
-			{
-				outPoints.push_back(p);
-			}
+				if (!flag)
+					outPoints.push_back(p);
+			}	
 		}
 	}
 }

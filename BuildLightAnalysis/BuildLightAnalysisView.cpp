@@ -45,7 +45,8 @@ END_MESSAGE_MAP()
 // CBuildLightAnalysisView construction/destruction
 
 CBuildLightAnalysisView::CBuildLightAnalysisView():m_selectedOutWallPoint(-1),m_isDrawInWall(false),
-	m_iSelectOutWallIndex(-1), m_iSelectInWallIndex(-1), m_iSelectWindowIndex(-1),m_bIsPullTranslate(false)
+	m_iSelectOutWallIndex(-1), m_iSelectInWallIndex(-1), m_iSelectWindowIndex(-1),m_bIsPullTranslate(false),
+	m_iSelectGridSetIndex(-1),m_iSelectGridIndex(-1)
 {
 	// TODO: add construction code here
 	m_transform.scale = 0.1;
@@ -127,7 +128,9 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 	
 	Graphics* graph = Graphics::FromImage(&bmp);
 	graph->Clear(Color::White);
-	graph->SetSmoothingMode(Gdiplus::SmoothingModeHighQuality); 
+	graph->SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);
+
+	Gdiplus::SolidBrush pointBrush(Gdiplus::Color(255,100,100,100));
 
 	if (!pMain->GetOptimizeWallProperty().IsPaneVisible())
 	{
@@ -140,7 +143,7 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 			startP.y = outWallPos->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
 			startP = m_transform.RealToScreen(startP);
 
-			graph->DrawEllipse(&outPen, (float)startP.x - 2, (float)startP.y - 2, 4.0,4.0);
+			graph->FillEllipse(&pointBrush, (float)startP.x - 2, (float)startP.y - 2, 4.0,4.0);
 			lastP = startP;
 			for (int i = 1; i < outWallPos->GetSubItemsCount(); i++)
 			{
@@ -148,7 +151,7 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 				p.y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetValue().dblVal;
 				p = m_transform.RealToScreen(p);
 				
-				graph->DrawEllipse(&outPen, (float)p.x - 2, (float)p.y - 2, 4.0, 4.0);
+				graph->FillEllipse(&pointBrush, (float)p.x - 5, (float)p.y - 5, 10.0, 10.0);
 				graph->DrawLine(&outPen, (float)lastP.x, (float)lastP.y, (float)p.x, (float)p.y);
 				lastP = p;
 			}
@@ -324,6 +327,34 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 				graph->DrawString(wch ,na.GetLength(), &font,posf, &brush);
 			}
 		}
+		//画计算点
+		SolidBrush selectPen(Gdiplus::Color(255,100,255,100));
+		SolidBrush keyPen(Gdiplus::Color(255,0,255,255));
+		PropertyGridCtrl* pGridList = pMain->GetGridProperty().getPropList();
+		for (int i = 0; i < pGridList->GetPropertyCount(); i++)
+		{
+			if (pGridList->GetProperty(i)->GetSubItemsCount() < 4)
+				continue;
+			CMFCPropertyGridProperty* pGrid = pGridList->GetProperty(i)->GetSubItem(3);
+			for (int j = 0; j < pGrid->GetSubItemsCount(); j++)
+			{
+				p.x = pGrid->GetSubItem(j)->GetSubItem(0)->GetValue().dblVal;
+				p.y = pGrid->GetSubItem(j)->GetSubItem(1)->GetValue().dblVal;
+				p = m_transform.RealToScreen(p);
+				CString _name = pGrid->GetSubItem(j)->GetName();
+				if (i == m_iSelectGridSetIndex && j == m_iSelectGridIndex)//如果是拾取的计算点
+				{
+					graph->FillEllipse(&selectPen, (float)p.x - 5, (float)p.y - 5, 10.0, 10.0);
+				}
+				else if (_name == _T("关键点"))
+				{
+					graph->FillEllipse(&keyPen, (float)p.x - 4, (float)p.y - 4, 8.0, 8.0);
+				}
+				else
+					graph->FillEllipse(&pointBrush, (float)p.x - 1, (float)p.y - 1, 2.0, 2.0);
+					
+			}
+		}
 	}
 	/*Graphics graphics(pDC->GetSafeHdc());
 	CachedBitmap cachedBmp(&bmp,&graphics);
@@ -352,6 +383,7 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 	xy.Format(_T("%f,%f"),p.x, p.y);
 	pMain->GetStatusBar().SetPaneText(0,xy);
 
+	//移动
 	if (m_bIsPullTranslate && MK_LBUTTON&nFlags > 0)
 	{
 		m_transform.center.x += point.x - prePoint.x;
@@ -479,6 +511,35 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 			}
 		}
 
+		//计算点拾取
+		m_iSelectGridSetIndex = -1;
+		m_iSelectGridIndex = -1;
+		Vec2d gridP;
+		PropertyGridCtrl* pGridList = pMain->GetGridProperty().getPropList();
+		for (int i = 0; i < pGridList->GetPropertyCount(); i++)
+		{
+			if (pGridList->GetProperty(i)->GetSubItemsCount() < 4)
+				continue;
+			bool flag = false;
+			CMFCPropertyGridProperty* pGrid = pGridList->GetProperty(i)->GetSubItem(3);
+			for (int j = 0; j < pGrid->GetSubItemsCount(); j++)
+			{
+				gridP.x = pGrid->GetSubItem(j)->GetSubItem(0)->GetValue().dblVal;
+				gridP.y = pGrid->GetSubItem(j)->GetSubItem(1)->GetValue().dblVal;
+				
+				if ((p-gridP).Length() < 100.0)
+				{
+					m_iSelectGridSetIndex = i;
+					m_iSelectGridIndex = j;
+					flag = true;
+					break;
+				}
+			}
+			if (flag)
+				break;
+		}
+
+
 		Invalidate();
 	}
 }
@@ -526,6 +587,21 @@ void CBuildLightAnalysisView::OnLButtonDown(UINT nFlags, CPoint point)
 	{
 		pMain->GetInWallProperty().InsertPos(p.x,p.y,p.x,p.y);
 		m_isDrawInWall = true;
+	}
+
+	//添加关键计算点
+	if (MK_CONTROL&nFlags && m_iSelectGridSetIndex >= 0 && m_iSelectGridIndex >= 0)
+	{
+		CMFCPropertyGridProperty* pPoint = pMain->GetGridProperty().getPropList()->GetProperty(m_iSelectGridSetIndex)->GetSubItem(3)->GetSubItem(m_iSelectGridIndex);
+		CString _name = pPoint->GetName();
+		if (_name == _T("关键点"))
+		{
+			pPoint->SetName(_T("点"));
+		}
+		else
+		{
+			pPoint->SetName(_T("关键点"));
+		}
 	}
 	
 }
@@ -639,6 +715,7 @@ void CBuildLightAnalysisView::OnEditOptimize()
 	
 	pMain->GetWindowProperty().DeleteAllWindow();
 	pMain->GetRoomProperty().DeleteAllRoom();
+	pMain->GetGridProperty().DeleteAllGrid();
 
 	optimize();
 
