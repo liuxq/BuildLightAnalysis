@@ -3,6 +3,8 @@
 #include <vector>
 #include <string>
 #include "vec2.h"
+#include "vec3.h"
+
 using namespace std;
 
 
@@ -86,4 +88,12 @@ struct Grid
 	double offset;
 	double meshLen;
 	vector<GridPoint> points;
+};
+
+struct Surface
+{
+	string name;
+	string type;
+	string mat;
+	vector<Vec3d> points;
 };

@@ -327,6 +327,9 @@ void CBuildLightAnalysisDoc::load(ifstream& inputFile)
 	//读取房间信息
 	pMain->GetRoomProperty().load(inputFile);
 
+	//读取计算点信息
+	pMain->GetGridProperty().load(inputFile);
+
 	//读取选项
 	pMain->GetOptionProperty().load(inputFile);
 	pMain->GetOptionProperty().loadMaterialTemplate();
@@ -350,6 +353,9 @@ void CBuildLightAnalysisDoc::save(ofstream& outputFile)
 	//写入房间信息
 	pMain->GetRoomProperty().save(outputFile);
 
+	//写入计算点信息
+	pMain->GetGridProperty().save(outputFile);
+
 	//写入选项
 	pMain->GetOptionProperty().save(outputFile);
 
@@ -359,4 +365,5 @@ void CBuildLightAnalysisDoc::OnFileOutput()
 {
 	geometryOutput(CStringToString(m_projectLocation) + "\\9p-noshelf_geometry.rad");
 	materialOutput(CStringToString(m_projectLocation) + "\\9p-noshelf_material.rad", m_material);
+	RoomOutput(CStringToString(m_projectLocation) + "\\room_info.txt");
 }

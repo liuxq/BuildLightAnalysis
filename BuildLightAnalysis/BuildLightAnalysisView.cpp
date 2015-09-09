@@ -143,7 +143,7 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 			startP.y = outWallPos->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
 			startP = m_transform.RealToScreen(startP);
 
-			graph->FillEllipse(&pointBrush, (float)startP.x - 2, (float)startP.y - 2, 4.0,4.0);
+			graph->FillEllipse(&pointBrush, (float)startP.x - 5, (float)startP.y - 5, 10.0,10.0);
 			lastP = startP;
 			for (int i = 1; i < outWallPos->GetSubItemsCount(); i++)
 			{

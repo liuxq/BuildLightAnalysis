@@ -1,6 +1,6 @@
-#include "PropertyGridCtrl.h"
 #pragma once
-
+#include "PropertyGridCtrl.h"
+#include "CommonData.h"
 
 class CGridWnd : public CDockablePane
 {
@@ -22,10 +22,13 @@ public:
 		return &m_wndPropList;
 	}
 
-	void InsertGrid(int roomIndex, double offset = 120.0, double meshLen = 120.0);
+	CMFCPropertyGridProperty* InsertGrid(int roomIndex, double offset = 120.0, double meshLen = 120.0);
 	void CalGrid(CMFCPropertyGridProperty* pGrid);
+	void LoadGrid(CMFCPropertyGridProperty* pGrid, vector<GridPoint>& points);
 	void DeleteAllGrid();
 
+	void OutputToGrids(vector<Grid>& sLines);
+	void inputFromGrids(vector<Grid>& sLines);
 	void save(ofstream& out);
 	void load(ifstream& in);
 

@@ -9,4 +9,4 @@ void geometryOutput(string filename);
 
 void materialOutput(string filename, MaterialSet& materials);
 
-void RoomOutput(string filename, MaterialSet& materials);
+void RoomOutput(string filename);

@@ -102,7 +102,8 @@ int CGridWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 void CGridWnd::OnNewGrid()
 {
-	InsertGrid(-1);
+	CMFCPropertyGridProperty* pgrid = InsertGrid(-1);
+	CalGrid(pgrid);
 }
 void CGridWnd::OnDeleteGrid()
 {
@@ -199,11 +200,11 @@ void CGridWnd::SetPropListFont()
 	m_insertButton.SetFont(&m_fntPropList);
 	m_deleteButton.SetFont(&m_fntPropList);
 }
-void CGridWnd::InsertGrid(int roomIndex, double offset, double meshLen)
+CMFCPropertyGridProperty* CGridWnd::InsertGrid(int roomIndex, double offset, double meshLen)
 {
 	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;  
 	if (!pMain)
-		return;
+		return NULL;
 
 	int count = m_wndPropList.GetPropertyCount();
 	CString strCount;
@@ -232,20 +233,51 @@ void CGridWnd::InsertGrid(int roomIndex, double offset, double meshLen)
 	pGrid->AddSubItem(pOffset);
 	pGrid->AddSubItem(pMeshLen);
 
-	CalGrid(pGrid);
-
 	m_wndPropList.AddProperty(pGrid);
 	//m_wndPropList.UpdateProperty((PropertyGridProperty*)(pWindow));
 	m_wndPropList.AdjustLayout();
 
-	//更新视图     
-	pMain->GetActiveView()->Invalidate(); 
+	return pGrid;
 }
-
-void CGridWnd::CalGrid(CMFCPropertyGridProperty* pGrid)
+void CGridWnd::LoadGrid(CMFCPropertyGridProperty* pGrid, vector<GridPoint>& points)
 {
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 	if (!pMain)
+		return;
+
+	if (pGrid->GetSubItemsCount() >= 4)
+	{
+		CMFCPropertyGridProperty* pl = pGrid->GetSubItem(3);
+		if (pl)
+			pGrid->RemoveSubItem(pl);
+	}
+
+	CMFCPropertyGridProperty* pGridList = new CMFCPropertyGridProperty(_T("计算点"),0,TRUE);
+
+	CString strp;
+	for (int i = 0; i < points.size(); i++)
+	{
+		if (points[i].isKey)
+			strp = _T("关键点");
+		else
+			strp = _T("点");
+		CMFCPropertyGridProperty* pGridPoint = new CMFCPropertyGridProperty(strp,0,TRUE);
+		CMFCPropertyGridProperty* pGridPointX = new CMFCPropertyGridProperty(_T("X"),(_variant_t)points[i].p.x,_T("X"));
+		CMFCPropertyGridProperty* pGridPointY = new CMFCPropertyGridProperty(_T("Y"),(_variant_t)points[i].p.y,_T("Y"));
+		pGridPoint->AddSubItem(pGridPointX);
+		pGridPoint->AddSubItem(pGridPointY);
+
+		pGridList->AddSubItem(pGridPoint);
+	}
+	pGrid->AddSubItem(pGridList);
+
+	m_wndPropList.UpdateProperty((PropertyGridProperty*)(pGrid));
+
+}
+void CGridWnd::CalGrid(CMFCPropertyGridProperty* pGrid)
+{
+	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+	if (!pMain || !pGrid)
 		return;
 
 	if (pGrid->GetSubItemsCount() >= 4)
@@ -309,10 +341,8 @@ void CGridWnd::CalGrid(CMFCPropertyGridProperty* pGrid)
 	vector<Vec2d> gridPoints;
 	CalGridFromPolygon(outPolygon,offset,meshLen,gridPoints);
 
-	CString strGridPointIndex;
 	for (int i = 0; i < gridPoints.size(); i++)
 	{
-		strGridPointIndex.Format(_T("%d"),i);
 		CMFCPropertyGridProperty* pGridPoint = new CMFCPropertyGridProperty(_T("点"),0,TRUE);
 		CMFCPropertyGridProperty* pGridPointX = new CMFCPropertyGridProperty(_T("X"),(_variant_t)gridPoints[i].x,_T("X"));
 		CMFCPropertyGridProperty* pGridPointY = new CMFCPropertyGridProperty(_T("Y"),(_variant_t)gridPoints[i].y,_T("Y"));
@@ -350,11 +380,8 @@ LRESULT CGridWnd::OnPropertyChanged (WPARAM,LPARAM lParam)
 	}
 	return 0;
 }
-
-void CGridWnd::save(ofstream& out)
+void CGridWnd::OutputToGrids(vector<Grid>& grids)
 {
-	vector<Grid> grids;
-
 	for (int i = 0; i < m_wndPropList.GetPropertyCount(); i++)
 	{
 		Grid g;
@@ -362,47 +389,61 @@ void CGridWnd::save(ofstream& out)
 		g.roomIndex = pG->GetSubItem(0)->GetValue().intVal;
 		g.offset = pG->GetSubItem(1)->GetValue().dblVal;
 		g.meshLen = pG->GetSubItem(2)->GetValue().dblVal;
-		if (pG->GetSubItem())
-		{
-		}
-	}
-	/*vector<stWindow> windows;
-	for (int i = 0; i < m_wndPropList.GetPropertyCount(); i++)
-	{
-		stWindow win;
-		CMFCPropertyGridProperty* pWin = m_wndPropList.GetProperty(i);
-		CString wallType = pWin->GetSubItem(0)->GetValue().bstrVal;
-		 _tcscpy(win.wallType, wallType);
-		win.wallIndex = pWin->GetSubItem(1)->GetValue().intVal;
-		win.pos = pWin->GetSubItem(2)->GetValue().dblVal;
-		win.WinUpHeight = pWin->GetSubItem(3)->GetValue().dblVal;
-		win.WinDownHeight = pWin->GetSubItem(4)->GetValue().dblVal;
-		win.WinWidth = pWin->GetSubItem(5)->GetValue().dblVal;
-		CString mat = pWin->GetSubItem(6)->GetValue().bstrVal;
-		_tcscpy(win.WinMaterial, mat);
+		if (pG->GetSubItemsCount() < 4)
+			continue;
 
-		windows.push_back(win);
+		CMFCPropertyGridProperty* pList = pG->GetSubItem(3);
+		for (int j = 0; j < pList->GetSubItemsCount(); j++)
+		{
+			GridPoint p;
+			CString _name = pList->GetSubItem(j)->GetName();
+			if (_name == _T("关键点"))
+				p.isKey = true;
+			else
+				p.isKey = false;
+			p.p.x = pList->GetSubItem(j)->GetSubItem(0)->GetValue().dblVal;
+			p.p.y = pList->GetSubItem(j)->GetSubItem(1)->GetValue().dblVal;
+			g.points.push_back(p);
+		}
+		grids.push_back(g);
 	}
-	serializer<stWindow>::write(out,&windows);*/
+}
+void CGridWnd::inputFromGrids(vector<Grid>& sGrids)
+{
+
+}
+void CGridWnd::save(ofstream& out)
+{
+	vector<Grid> grids;
+	OutputToGrids(grids);
+	int sz = grids.size();
+	serializer<int>::write(out, &sz);
+	for (int i = 0; i < sz; i++)
+	{
+		serializer<int>::write(out, &grids[i].roomIndex);
+		serializer<double>::write(out, &grids[i].offset);
+		serializer<double>::write(out, &grids[i].meshLen);
+
+		int gsz = grids[i].points.size();
+		serializer<GridPoint>::write(out, &grids[i].points);
+	}
 }
 void CGridWnd::load(ifstream& in)
 {
-	/*OnDeleteGrid();
-	vector<stWindow> windows;
-	serializer<stWindow>::read(in, &windows);
-	for (int i = 0; i < windows.size(); i++)
+	OnDeleteGrid();
+	int sz = 0;
+	serializer<int>::read(in, &sz);
+	for (int i = 0; i < sz; i++)
 	{
-		CString type = windows[i].wallType;
-		if (type == _T("外墙"))
-		{
-			InsertGrid(windows[i].wallIndex, -1,-1, windows[i].pos, windows[i].WinUpHeight, windows[i].WinDownHeight,
-				windows[i].WinWidth, CString(windows[i].WinMaterial));
-		}
-		else if (type == _T("内墙"))
-		{
-			InsertGrid(-1,windows[i].wallIndex,-1, windows[i].pos, windows[i].WinUpHeight, windows[i].WinDownHeight,
-				windows[i].WinWidth, CString(windows[i].WinMaterial));
-		}
+		int roomIndex = -1;
+		double offset = 0;
+		double meshLen = 0;
+		serializer<int>::read(in, &roomIndex);
+		serializer<double>::read(in, &offset);
+		serializer<double>::read(in, &meshLen);
+		vector<GridPoint> points;
+		serializer<GridPoint>::read(in, &points);
 		
-	}*/
+		LoadGrid(InsertGrid(roomIndex, offset, meshLen), points);
+	}
 }
