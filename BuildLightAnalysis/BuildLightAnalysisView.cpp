@@ -117,6 +117,7 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 	if (pMain && !pDoc->m_bIsOpen)//如果没有打开项目则不进行绘制
 		return;
 
+
 	CMFCPropertyGridProperty* outWallPos = pMain->GetOutWallProperty().getCoodGroup();
 	CMFCPropertyGridProperty* inWallPos = pMain->GetInWallProperty().getCoodGroup();
 	if (!outWallPos || !inWallPos)
@@ -130,12 +131,34 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 	graph->Clear(Color::White);
 	graph->SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);
 
+
+	//绘制坐标系
+	Vec2d Oaxis(0,0);
+	Vec2d Xaxis(2000,0);
+	Vec2d Yaxis(0,2000);
+	Oaxis = m_transform.RealToScreen(Oaxis);
+	Xaxis = m_transform.RealToScreen(Xaxis);
+	Yaxis = m_transform.RealToScreen(Yaxis);
+	AdjustableArrowCap cap(4,4,true);
+	
+	Gdiplus::Pen ArrowXPen(Gdiplus::Color(255,255,0,0), 3);
+	Gdiplus::Pen ArrowYPen(Gdiplus::Color(255,0,0,255), 3);
+	ArrowXPen.SetCustomEndCap(&cap);
+	ArrowYPen.SetCustomEndCap(&cap);
+	graph->DrawLine(&ArrowXPen, (float)Oaxis.x, (float)Oaxis.y, (float)Xaxis.x, (float)Xaxis.y);
+	graph->DrawLine(&ArrowYPen, (float)Oaxis.x, (float)Oaxis.y, (float)Yaxis.x, (float)Yaxis.y);
+
+	//取配置中的内外墙颜色
+	COLORREF outWallColor = pMain->GetOptionProperty().GetOutWallColor();
+	COLORREF inWallColor = pMain->GetOptionProperty().GetInWallColor();
+
 	Gdiplus::SolidBrush pointBrush(Gdiplus::Color(255,100,100,100));
 
 	if (!pMain->GetOptimizeWallProperty().IsPaneVisible())
 	{
 		//画外墙
-		Gdiplus::Pen outPen(Gdiplus::Color(255,100,100,100), 10);
+		Pen outPen(Color(255,GetRValue(outWallColor),GetGValue(outWallColor),GetBValue(outWallColor)), 10);
+		SolidBrush outPointBrush(Color(255,GetRValue(outWallColor),GetGValue(outWallColor),GetBValue(outWallColor)));
 		Vec2d p, p1, startP, lastP;
 		if (outWallPos->GetSubItemsCount() > 0)
 		{
@@ -143,7 +166,7 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 			startP.y = outWallPos->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
 			startP = m_transform.RealToScreen(startP);
 
-			graph->FillEllipse(&pointBrush, (float)startP.x - 5, (float)startP.y - 5, 10.0,10.0);
+			graph->FillEllipse(&outPointBrush, (float)startP.x - 5, (float)startP.y - 5, 10.0,10.0);
 			lastP = startP;
 			for (int i = 1; i < outWallPos->GetSubItemsCount(); i++)
 			{
@@ -151,14 +174,14 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 				p.y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetValue().dblVal;
 				p = m_transform.RealToScreen(p);
 				
-				graph->FillEllipse(&pointBrush, (float)p.x - 5, (float)p.y - 5, 10.0, 10.0);
+				graph->FillEllipse(&outPointBrush, (float)p.x - 5, (float)p.y - 5, 10.0, 10.0);
 				graph->DrawLine(&outPen, (float)lastP.x, (float)lastP.y, (float)p.x, (float)p.y);
 				lastP = p;
 			}
 			graph->DrawLine(&outPen, (float)lastP.x, (float)lastP.y, (float)startP.x, (float)startP.y);
 		}
 		//画内墙
-		Gdiplus::Pen inPen(Gdiplus::Color(255,100,100,100), 10);
+		Gdiplus::Pen inPen(Gdiplus::Color(255,GetRValue(inWallColor),GetGValue(inWallColor),GetBValue(inWallColor)), 6);
 		for (int i = 0; i < inWallPos->GetSubItemsCount(); i++)
 		{
 			p.x = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
@@ -181,7 +204,7 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 		if (!optimizeOutWallPos)
 			return;
 
-		Gdiplus::Pen outPen(Gdiplus::Color(255,100,100,100), 10);
+		Pen outPen(Color(255,GetRValue(outWallColor),GetGValue(outWallColor),GetBValue(outWallColor)), 10);
 		Vec2d p,p1;
 		for (int i = 0; i < optimizeOutWallPos->GetSubItemsCount(); i++)
 		{
@@ -196,7 +219,7 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 
 			if (i == m_iSelectOutWallIndex)//如果是拾取的外墙
 			{
-				Gdiplus::Pen selectPen(Gdiplus::Color(255,100,100,100), 16);
+				Gdiplus::Pen selectPen(Color(255,GetRValue(outWallColor),GetGValue(outWallColor),GetBValue(outWallColor)), 16);
 				graph->DrawLine(&selectPen, (float)p.x, (float)p.y, (float)p1.x, (float)p1.y);
 			}
 			else
@@ -210,7 +233,7 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 		if (!optimizeInWallPos)
 			return;
 
-		Gdiplus::Pen inPen(Gdiplus::Color(255,100,100,100), 10);
+		Gdiplus::Pen inPen(Gdiplus::Color(255,GetRValue(inWallColor),GetGValue(inWallColor),GetBValue(inWallColor)), 6);
 		for (int i = 0; i < optimizeInWallPos->GetSubItemsCount(); i++)
 		{
 			p.x = optimizeInWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
@@ -222,9 +245,9 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 			p = m_transform.RealToScreen(p);
 			p1 = m_transform.RealToScreen(p1);
 
-			if (i == m_iSelectInWallIndex)//如果是拾取的外墙
+			if (i == m_iSelectInWallIndex)//如果是拾取的内墙
 			{
-				Gdiplus::Pen selectPen(Gdiplus::Color(255,100,100,100), 16);
+				Gdiplus::Pen selectPen(Gdiplus::Color(255,GetRValue(inWallColor),GetGValue(inWallColor),GetBValue(inWallColor)), 12);
 				graph->DrawLine(&selectPen, (float)p.x, (float)p.y, (float)p1.x, (float)p1.y);
 			}
 			else
@@ -602,6 +625,11 @@ void CBuildLightAnalysisView::OnLButtonDown(UINT nFlags, CPoint point)
 		{
 			pPoint->SetName(_T("关键点"));
 		}
+	}
+	//画外墙
+	if (MK_CONTROL&nFlags && pMain->GetOutWallProperty().IsPaneVisible())
+	{
+		pMain->GetOutWallProperty().InsertPos(p.x, p.y);
 	}
 	
 }

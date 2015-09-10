@@ -241,6 +241,8 @@ void CBuildLightAnalysisDoc::OnFileNew()
 		loadMaterial();
 		pMain->GetOptionProperty().loadMaterialTemplate();
 		pMain->GetOptionProperty().SetTransform();
+
+		OnFileSave();
 	}
 	else
 		return;

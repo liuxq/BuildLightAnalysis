@@ -430,7 +430,7 @@ void CGridWnd::save(ofstream& out)
 }
 void CGridWnd::load(ifstream& in)
 {
-	OnDeleteGrid();
+	DeleteAllGrid();
 	int sz = 0;
 	serializer<int>::read(in, &sz);
 	for (int i = 0; i < sz; i++)

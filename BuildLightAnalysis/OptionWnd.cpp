@@ -122,6 +122,9 @@ void COptionWnd::InitPropList()
 	CMFCPropertyGridProperty* pScale = new CMFCPropertyGridProperty(_T("像素毫米比"),(_variant_t) 0.1,_T("缩放系数：像素/毫米"));
 	CMFCPropertyGridProperty* pCenterX = new CMFCPropertyGridProperty(_T("初始原点位置X"),(_variant_t) 100.0,_T("平移系数，X"));
 	CMFCPropertyGridProperty* pCenterY = new CMFCPropertyGridProperty(_T("初始原点位置Y"),(_variant_t) 100.0,_T("平移系数，Y"));
+	CMFCPropertyGridColorProperty* pOutWallColor = new CMFCPropertyGridColorProperty(_T("外墙颜色"),RGB(0, 111, 200));
+	CMFCPropertyGridColorProperty* pInWallColor = new CMFCPropertyGridColorProperty(_T("内墙颜色"),RGB(0, 111, 200));
+
 	
 	m_wndPropList.AddProperty(pLevelHigh);
 	m_wndPropList.AddProperty(pOptimizeTh);
@@ -133,6 +136,8 @@ void COptionWnd::InitPropList()
 	m_wndPropList.AddProperty(pScale);
 	m_wndPropList.AddProperty(pCenterX);
 	m_wndPropList.AddProperty(pCenterY);
+	m_wndPropList.AddProperty(pOutWallColor);
+	m_wndPropList.AddProperty(pInWallColor);
 }
 
 void COptionWnd::loadMaterialTemplate()
@@ -193,6 +198,15 @@ void COptionWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 	SetPropListFont();
 }
 
+COLORREF COptionWnd::GetOutWallColor()
+{
+	return ((CMFCPropertyGridColorProperty*)m_wndPropList.GetProperty(10))->GetColor();
+}
+COLORREF COptionWnd::GetInWallColor()
+{
+	return ((CMFCPropertyGridColorProperty*)m_wndPropList.GetProperty(11))->GetColor();
+}
+
 void COptionWnd::SetPropListFont()
 {
 	::DeleteObject(m_fntPropList.Detach());
@@ -225,6 +239,8 @@ void COptionWnd::save(ofstream& out)
 	double d7 = m_wndPropList.GetProperty(7)->GetValue().dblVal;
 	double d8 = m_wndPropList.GetProperty(8)->GetValue().dblVal;
 	double d9 = m_wndPropList.GetProperty(9)->GetValue().dblVal;
+	int d10 = m_wndPropList.GetProperty(10)->GetValue().intVal;
+	int d11 = m_wndPropList.GetProperty(11)->GetValue().intVal;
 
 	string st2 = CStringToString(d2);
 	string st3 = CStringToString(d3);
@@ -242,6 +258,8 @@ void COptionWnd::save(ofstream& out)
 	serializer<double>::write(out,&d7);
 	serializer<double>::write(out,&d8);
 	serializer<double>::write(out,&d9);
+	serializer<int>::write(out,&d10);
+	serializer<int>::write(out,&d11);
 }
 void COptionWnd::load(ifstream& in)
 {
@@ -255,6 +273,8 @@ void COptionWnd::load(ifstream& in)
 	double d7;
 	double d8;
 	double d9;
+	int d10;
+	int d11;
 	serializer<double>::read(in,&d0);
 	serializer<double>::read(in,&d1);
 	serializer<string>::readString(in,&d2);
@@ -265,6 +285,9 @@ void COptionWnd::load(ifstream& in)
 	serializer<double>::read(in,&d7);
 	serializer<double>::read(in,&d8);
 	serializer<double>::read(in,&d9);
+	serializer<int>::read(in,&d10);
+	serializer<int>::read(in,&d11);
+
 
 	m_wndPropList.GetProperty(0)->SetValue(d0);
 	m_wndPropList.GetProperty(1)->SetValue(d1);
@@ -276,4 +299,9 @@ void COptionWnd::load(ifstream& in)
 	m_wndPropList.GetProperty(7)->SetValue(d7);
 	m_wndPropList.GetProperty(8)->SetValue(d8);
 	m_wndPropList.GetProperty(9)->SetValue(d9);
+	_variant_t var;
+	var = d10;var.vt = VT_I4;
+	((CMFCPropertyGridColorProperty*)m_wndPropList.GetProperty(10))->SetColor(var);
+	var = d11;var.vt = VT_I4;
+	((CMFCPropertyGridColorProperty*)m_wndPropList.GetProperty(11))->SetColor(var);
 }

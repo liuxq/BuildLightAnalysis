@@ -372,7 +372,7 @@ void CWindowWnd::save(ofstream& out)
 }
 void CWindowWnd::load(ifstream& in)
 {
-	OnDeleteWindow();
+	DeleteAllWindow();
 	vector<stWindow> windows;
 	serializer<stWindow>::read(in, &windows);
 	for (int i = 0; i < windows.size(); i++)

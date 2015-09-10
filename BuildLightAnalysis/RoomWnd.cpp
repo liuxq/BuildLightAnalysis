@@ -282,7 +282,7 @@ void CRoomWnd::save(ofstream& out)
 }
 void CRoomWnd::load(ifstream& in)
 {
-	OnDeleteRoom();
+	DeleteAllRoom();
 
 	int size = 0;
 	in.read((char *)&size, sizeof(size));

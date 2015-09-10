@@ -36,6 +36,9 @@ public:
 	void SetTransform();
 	void save(ofstream& out);
 	void load(ifstream& in);
+	COLORREF GetOutWallColor();
+	COLORREF GetInWallColor();
+	
 
 protected:
 	CFont m_fntPropList;
