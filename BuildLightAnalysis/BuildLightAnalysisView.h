@@ -70,6 +70,7 @@ public:
 	afx_msg void OnPopAddWindow();
 	afx_msg void OnPopAddtoRoom();
 	afx_msg void OnEditTranslate();
+	afx_msg void OnEditDoOptimize();
 };
 
 #ifndef _DEBUG  // debug version in BuildLightAnalysisView.cpp

@@ -40,6 +40,7 @@ BEGIN_MESSAGE_MAP(CBuildLightAnalysisView, CView)
 	ON_COMMAND(ID_POP_ADD_WINDOW, &CBuildLightAnalysisView::OnPopAddWindow)
 	ON_COMMAND(ID_POP_ADDTO_ROOM, &CBuildLightAnalysisView::OnPopAddtoRoom)
 	ON_COMMAND(ID_EDIT_TRANSLATE, &CBuildLightAnalysisView::OnEditTranslate)
+	ON_COMMAND(ID_EDIT_DO_OPTIMIZE, &CBuildLightAnalysisView::OnEditDoOptimize)
 END_MESSAGE_MAP()
 
 // CBuildLightAnalysisView construction/destruction
@@ -722,7 +723,35 @@ CBuildLightAnalysisDoc* CBuildLightAnalysisView::GetDocument() const // non-debu
 #endif //_DEBUG
 
 
-// CBuildLightAnalysisView message handlers
+// 优化操作
+void CBuildLightAnalysisView::OnEditDoOptimize()
+{
+	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+	if (!pMain)
+		return;
+
+	if (pMain->GetWindowProperty().getPropList()->GetPropertyCount() > 0 || pMain->GetRoomProperty().getPropList()->GetPropertyCount() > 0)
+	{
+		int nRes = AfxMessageBox(_T("检测到已有窗户或房间信息，如果优化处理的话会删除掉该信息，确认处理吗？"), MB_OKCANCEL | 
+			MB_ICONQUESTION);
+		if (IDCANCEL == nRes)
+		{
+			return;
+		}
+	}
+
+	pMain->GetWindowProperty().DeleteAllWindow();
+	pMain->GetRoomProperty().DeleteAllRoom();
+	pMain->GetGridProperty().DeleteAllGrid();
+
+	optimize();
+
+	pMain->GetOutWallProperty().ShowPane(FALSE,FALSE,TRUE);
+	pMain->GetInWallProperty().ShowPane(FALSE,FALSE,TRUE);
+	pMain->GetOptimizeWallProperty().ShowPane(TRUE,FALSE,TRUE);
+
+	Invalidate();
+}
 
 
 void CBuildLightAnalysisView::OnEditOptimize()
@@ -730,22 +759,6 @@ void CBuildLightAnalysisView::OnEditOptimize()
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 	if (!pMain)
 		return;
-	
-	if (pMain->GetWindowProperty().getPropList()->GetPropertyCount() > 0 || pMain->GetRoomProperty().getPropList()->GetPropertyCount() > 0)
-	{
-		int nRes = AfxMessageBox(_T("检测到已有窗户或房间信息，如果处理的话会删除掉改信息，确认处理吗？"), MB_OKCANCEL | 
-			MB_ICONQUESTION);
-		if (IDCANCEL == nRes)
-		{
-			return;
-		}
-	}
-	
-	pMain->GetWindowProperty().DeleteAllWindow();
-	pMain->GetRoomProperty().DeleteAllRoom();
-	pMain->GetGridProperty().DeleteAllGrid();
-
-	optimize();
 
 	pMain->GetOutWallProperty().ShowPane(FALSE,FALSE,TRUE);
 	pMain->GetInWallProperty().ShowPane(FALSE,FALSE,TRUE);
@@ -798,3 +811,4 @@ void CBuildLightAnalysisView::OnEditTranslate()
 	}
 	
 }
+
