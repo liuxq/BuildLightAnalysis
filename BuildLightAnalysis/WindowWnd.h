@@ -22,8 +22,8 @@ public:
 		return &m_wndPropList;
 	}
 
-	void InsertWindow(int outWallIndex, int inWallIndex, int winIndex, double pos = 0.5 ,double WinUpHeight = 2.7,double WinDownHeight = 0.5,
-		double WinWidth = 20.0, CString mat = _T("GenericCeiling_80PercentReflectance"));
+	void InsertWindow(int outWallIndex, int inWallIndex, int winIndex, CString mat = _T("GenericDoubleGlazing60_60VisualTransmittance"), double pos = 0.5 ,double WinUpHeight = 2300.0,double WinDownHeight = 900.0,
+		double WinWidth = 1200.0);
 	void DeleteAllWindow();
 
 	void save(ofstream& out);

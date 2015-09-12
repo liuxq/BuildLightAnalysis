@@ -365,7 +365,8 @@ void CBuildLightAnalysisDoc::save(ofstream& outputFile)
 
 void CBuildLightAnalysisDoc::OnFileOutput()
 {
-	geometryOutput(CStringToString(m_projectLocation) + "\\9p-noshelf_geometry.rad");
-	materialOutput(CStringToString(m_projectLocation) + "\\9p-noshelf_material.rad", m_material);
-	RoomOutput(CStringToString(m_projectLocation) + "\\room_info.txt");
+	OnFileSave();
+	geometryOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_geometry.rad");
+	materialOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_material.rad", m_material);
+	RoomOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) +"_room_info.txt");
 }

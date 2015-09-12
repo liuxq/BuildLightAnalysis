@@ -114,10 +114,10 @@ void COptionWnd::InitPropList()
 
 	CMFCPropertyGridProperty* pLevelHigh = new CMFCPropertyGridProperty(_T("层高"),(_variant_t) 2800.0,_T("层高度"), 1);
 	CMFCPropertyGridProperty* pOptimizeTh = new CMFCPropertyGridProperty(_T("处理阈值"),(_variant_t) 400.0,_T("处理内外墙时低于多少毫米会进行补足和删除"), 2);
-	CMFCPropertyGridProperty* pOutWallMaterial = new PropertyGridProperty(_T("默认外墙材质"), _T("GenericCeiling_80PercentReflectance"), _T("默认外墙材质"));
-	CMFCPropertyGridProperty* pInWallMaterial = new PropertyGridProperty(_T("默认内墙材质"), _T("GenericCeiling_80PercentReflectance"), _T("默认内墙材质"));
-	CMFCPropertyGridProperty* pWindowMaterial = new PropertyGridProperty(_T("默认窗户材质"), _T("GenericCeiling_80PercentReflectance"), _T("默认窗户材质"));
-	CMFCPropertyGridProperty* pFloorMaterial = new PropertyGridProperty(_T("默认地面材质"), _T("GenericCeiling_80PercentReflectance"), _T("默认地面材质"));
+	CMFCPropertyGridProperty* pOutWallMaterial = new PropertyGridProperty(_T("默认外墙材质"), _T("GenericInteriorWall_50PercentReflectance"), _T("默认外墙材质"));
+	CMFCPropertyGridProperty* pInWallMaterial = new PropertyGridProperty(_T("默认内墙材质"), _T("GenericInteriorWall_50PercentReflectance"), _T("默认内墙材质"));
+	CMFCPropertyGridProperty* pWindowMaterial = new PropertyGridProperty(_T("默认窗户材质"), _T("GenericDoubleGlazing60_60VisualTransmittance"), _T("默认窗户材质"));
+	CMFCPropertyGridProperty* pFloorMaterial = new PropertyGridProperty(_T("默认地面材质"), _T("GenericFloor_20PercentReflectance"), _T("默认地面材质"));
 	CMFCPropertyGridProperty* pRoofMaterial = new PropertyGridProperty(_T("默认棚顶材质"), _T("GenericCeiling_80PercentReflectance"), _T("默认棚顶材质"));
 	CMFCPropertyGridProperty* pScale = new CMFCPropertyGridProperty(_T("像素毫米比"),(_variant_t) 0.1,_T("缩放系数：像素/毫米"));
 	CMFCPropertyGridProperty* pCenterX = new CMFCPropertyGridProperty(_T("初始原点位置X"),(_variant_t) 100.0,_T("平移系数，X"));
@@ -198,14 +198,7 @@ void COptionWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 	SetPropListFont();
 }
 
-COLORREF COptionWnd::GetOutWallColor()
-{
-	return ((CMFCPropertyGridColorProperty*)m_wndPropList.GetProperty(10))->GetColor();
-}
-COLORREF COptionWnd::GetInWallColor()
-{
-	return ((CMFCPropertyGridColorProperty*)m_wndPropList.GetProperty(11))->GetColor();
-}
+
 
 void COptionWnd::SetPropListFont()
 {

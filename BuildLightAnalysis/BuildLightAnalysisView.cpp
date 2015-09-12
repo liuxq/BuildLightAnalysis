@@ -85,8 +85,8 @@ void CBuildLightAnalysisView::optimize()
 	OptimizeLine(sLines,outLines, wTh);
 
 	//设置处理后的墙
-	CString outMat = pMain->GetOptionProperty().getPropList()->GetProperty(2)->GetValue().bstrVal;
-	CString inMat = pMain->GetOptionProperty().getPropList()->GetProperty(3)->GetValue().bstrVal;
+	CString outMat = pMain->GetOptionProperty().GetOutWallMat();
+	CString inMat = pMain->GetOptionProperty().GetInWallMat();
 	pMain->GetOptimizeWallProperty().DeletePos();
 	for (int i = 0; i < outLines.size(); i++)
 	{
@@ -282,14 +282,15 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 			p.y = wallProperty->GetSubItem(wallIndex)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
 			p1.x = wallProperty->GetSubItem(wallIndex)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
 			p1.y = wallProperty->GetSubItem(wallIndex)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
-			p = m_transform.RealToScreen(p);
-			p1 = m_transform.RealToScreen(p1);
 
 			Vec2d dir = p1 - p;
 			Vec2d pWinc = p + dir * pos;
 			dir = dir / dir.Length();
 			Vec2d pWins = pWinc - dir * width * 0.5;
 			Vec2d pWine = pWinc + dir * width * 0.5;
+
+			pWins = m_transform.RealToScreen(pWins);
+			pWine = m_transform.RealToScreen(pWine);
 
 			if (i == m_iSelectWindowIndex)//如果是拾取的外墙
 			{
@@ -773,7 +774,8 @@ void CBuildLightAnalysisView::OnPopAddWindow()
 {
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 	pMain->GetWindowProperty().ShowPane(TRUE,FALSE,TRUE);
-	pMain->GetWindowProperty().InsertWindow(m_iSelectOutWallIndex, m_iSelectInWallIndex, m_iSelectWindowIndex);
+
+	pMain->GetWindowProperty().InsertWindow(m_iSelectOutWallIndex, m_iSelectInWallIndex, m_iSelectWindowIndex, pMain->GetOptionProperty().GetWindowMat());
 }
 
 

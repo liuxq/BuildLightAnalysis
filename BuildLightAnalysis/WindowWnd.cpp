@@ -199,8 +199,8 @@ void CWindowWnd::SetPropListFont()
 	m_insertButton.SetFont(&m_fntPropList);
 	m_deleteButton.SetFont(&m_fntPropList);
 }
-void CWindowWnd::InsertWindow(int outWallIndex, int inWallIndex, int windowIndex, double pos ,double WinUpHeight,double WinDownHeight,
-double WinWidth, CString mat)
+void CWindowWnd::InsertWindow(int outWallIndex, int inWallIndex, int windowIndex, CString mat, double pos ,double WinUpHeight,double WinDownHeight,
+double WinWidth )
 {
 	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;  
 	CBuildLightAnalysisDoc* pDoc = (CBuildLightAnalysisDoc*)pMain->GetActiveDocument();
@@ -357,14 +357,14 @@ void CWindowWnd::save(ofstream& out)
 		stWindow win;
 		CMFCPropertyGridProperty* pWin = m_wndPropList.GetProperty(i);
 		CString wallType = pWin->GetSubItem(0)->GetValue().bstrVal;
-		 _tcscpy(win.wallType, wallType);
+		 _tcscpy_s(win.wallType, wallType);
 		win.wallIndex = pWin->GetSubItem(1)->GetValue().intVal;
 		win.pos = pWin->GetSubItem(2)->GetValue().dblVal;
 		win.WinUpHeight = pWin->GetSubItem(3)->GetValue().dblVal;
 		win.WinDownHeight = pWin->GetSubItem(4)->GetValue().dblVal;
 		win.WinWidth = pWin->GetSubItem(5)->GetValue().dblVal;
 		CString mat = pWin->GetSubItem(6)->GetValue().bstrVal;
-		_tcscpy(win.WinMaterial, mat);
+		_tcscpy_s(win.WinMaterial, mat);
 
 		windows.push_back(win);
 	}
@@ -380,13 +380,13 @@ void CWindowWnd::load(ifstream& in)
 		CString type = windows[i].wallType;
 		if (type == _T("ÍâÇ½"))
 		{
-			InsertWindow(windows[i].wallIndex, -1,-1, windows[i].pos, windows[i].WinUpHeight, windows[i].WinDownHeight,
-				windows[i].WinWidth, CString(windows[i].WinMaterial));
+			InsertWindow(windows[i].wallIndex, -1,-1,CString(windows[i].WinMaterial), windows[i].pos, windows[i].WinUpHeight, windows[i].WinDownHeight,
+				windows[i].WinWidth);
 		}
 		else if (type == _T("ÄÚÇ½"))
 		{
-			InsertWindow(-1,windows[i].wallIndex,-1, windows[i].pos, windows[i].WinUpHeight, windows[i].WinDownHeight,
-				windows[i].WinWidth, CString(windows[i].WinMaterial));
+			InsertWindow(-1,windows[i].wallIndex,-1, CString(windows[i].WinMaterial), windows[i].pos, windows[i].WinUpHeight, windows[i].WinDownHeight,
+				windows[i].WinWidth);
 		}
 		
 	}

@@ -4,6 +4,24 @@
 
 class COptionWnd : public CDockablePane
 {
+public:
+	enum
+	{
+		OPTION_LEVEL_HEIGHT = 0,  //层高
+		OPTION_OPTIMIZE_TH, //处理阈值，毫米
+		OPTION_OUTWALL_MAT,	//外墙材质
+		OPTION_INWALL_MAT,
+		OPTION_WINDOW_MAT,
+		OPTION_FLOOR_MAT,
+		OPTION_ROOF_MAT,
+		OPTION_PIX_MM_SCALE,
+		OPTION_ORIGIN_X,
+		OPTION_ORIGIN_Y,
+		OPTION_OUTWALL_COLOR,
+		OPTION_INWALL_COLOR,
+
+		OPTION_NUM
+	};
 // Construction
 public:
 	COptionWnd();
@@ -36,8 +54,27 @@ public:
 	void SetTransform();
 	void save(ofstream& out);
 	void load(ifstream& in);
-	COLORREF GetOutWallColor();
-	COLORREF GetInWallColor();
+
+	COLORREF GetOutWallColor()
+	{
+		return ((CMFCPropertyGridColorProperty*)m_wndPropList.GetProperty(OPTION_OUTWALL_COLOR))->GetColor();
+	}
+	COLORREF GetInWallColor()
+	{
+		return ((CMFCPropertyGridColorProperty*)m_wndPropList.GetProperty(OPTION_INWALL_COLOR))->GetColor();
+	}
+	CString GetOutWallMat()
+	{
+		return m_wndPropList.GetProperty(OPTION_OUTWALL_MAT)->GetValue().bstrVal;
+	}
+	CString GetInWallMat()
+	{
+		return m_wndPropList.GetProperty(OPTION_INWALL_MAT)->GetValue().bstrVal;
+	}
+	CString GetWindowMat()
+	{
+		return m_wndPropList.GetProperty(OPTION_WINDOW_MAT)->GetValue().bstrVal;
+	}
 	
 
 protected:
