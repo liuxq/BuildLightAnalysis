@@ -235,9 +235,11 @@ void CBuildLightAnalysisDoc::OnFileNew()
 		m_bIsOpen = true;
 		SetTitle(m_projectName);//设置文档名称
 
+		//清空数据
+		clear();
 		//读取选项
 		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
-		//读取外墙
+		//读取材料
 		loadMaterial();
 		pMain->GetOptionProperty().loadMaterialTemplate();
 		pMain->GetOptionProperty().SetTransform();
@@ -311,6 +313,32 @@ void CBuildLightAnalysisDoc::loadMaterial()
 	m_material.loadTemplate(path);
 }
 
+void CBuildLightAnalysisDoc::clear()
+{
+	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+	//读取外墙
+	pMain->GetOutWallProperty().DeleteAllPos();
+
+	//读取内墙
+	pMain->GetInWallProperty().DeleteAllPos();
+
+	//读取处理后墙
+	pMain->GetOptimizeWallProperty().DeleteAllPos();
+
+	//读取窗户
+	pMain->GetWindowProperty().DeleteAllWindow();
+
+	//读取房间信息
+	pMain->GetRoomProperty().DeleteAllRoom();
+
+	//读取计算点信息
+	pMain->GetGridProperty().DeleteAllGrid();
+
+	//读取选项
+	pMain->GetOptionProperty().ResetAllOption();
+	pMain->GetOptionProperty().loadMaterialTemplate();
+	pMain->GetOptionProperty().SetTransform();
+}
 void CBuildLightAnalysisDoc::load(ifstream& inputFile)
 {
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
@@ -327,7 +355,7 @@ void CBuildLightAnalysisDoc::load(ifstream& inputFile)
 	pMain->GetWindowProperty().load(inputFile);
 
 	//读取房间信息
-	pMain->GetRoomProperty().load(inputFile);
+	//pMain->GetRoomProperty().load(inputFile);
 
 	//读取计算点信息
 	pMain->GetGridProperty().load(inputFile);
@@ -353,7 +381,7 @@ void CBuildLightAnalysisDoc::save(ofstream& outputFile)
 	pMain->GetWindowProperty().save(outputFile);
 
 	//写入房间信息
-	pMain->GetRoomProperty().save(outputFile);
+	//pMain->GetRoomProperty().save(outputFile);
 
 	//写入计算点信息
 	pMain->GetGridProperty().save(outputFile);
@@ -366,7 +394,9 @@ void CBuildLightAnalysisDoc::save(ofstream& outputFile)
 void CBuildLightAnalysisDoc::OnFileOutput()
 {
 	OnFileSave();
-	geometryOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_geometry.rad");
-	materialOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_material.rad", m_material);
+
+	set<CString> mats;
+	geometryOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_geometry.rad", mats);
+	materialOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_material.rad", m_material, mats);
 	RoomOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) +"_room_info.txt");
 }

@@ -6,6 +6,10 @@ void PropertyGridCtrl::UpdateProperty(PropertyGridProperty* pProp)
 {
 	pProp->SetOwnerList(this);
 }
+void PropertyGridCtrl::ClearSel()
+{
+	m_pSel = NULL;
+}
 
 BOOL PropertyGridCtrl::EndEditItem(BOOL bUpdateData)
 {  
@@ -49,4 +53,20 @@ CString PropertyGridProperty::FormatProperty()
 			strVal = strVal.Left(strVal.GetLength()-1);
 	}
 	return strVal;
+}
+
+void PropertyGridProperty::RemoveAllSubItem()
+{
+	for (POSITION pos = m_lstSubItems.GetHeadPosition(); pos != NULL;)
+	{
+		POSITION posSaved = pos;
+
+		CMFCPropertyGridProperty* pListProp = m_lstSubItems.GetNext(pos);
+		ASSERT_VALID(pListProp);
+
+		m_lstSubItems.RemoveAt(posSaved);
+		delete pListProp;
+	}
+	((PropertyGridCtrl*)m_pWndList)->ClearSel();
+
 }

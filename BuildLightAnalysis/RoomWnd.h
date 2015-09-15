@@ -1,6 +1,13 @@
 #include "PropertyGridCtrl.h"
 #pragma once
 
+enum
+{
+	ROOM_OUT_WALL = 0,
+	ROOM_IN_WALL,
+	ROOM_WINDOW
+};
+
 
 class CRoomWnd : public CDockablePane
 {
@@ -22,7 +29,7 @@ public:
 		return &m_wndPropList;
 	}
 
-	bool AddToSelectedRoom(CString name, int index);
+	bool AddToSelectedRoom(int type, int index);
 	void DeleteAllRoom();
 
 	void save(ofstream& out);

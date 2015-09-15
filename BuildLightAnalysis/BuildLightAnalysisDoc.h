@@ -45,6 +45,7 @@ public:
 #endif
 
 protected:
+	void clear();
 	void load(ifstream& in);
 	void loadMaterial();
 	void save(ofstream& out);

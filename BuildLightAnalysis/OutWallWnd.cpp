@@ -151,7 +151,7 @@ void COutWallWnd::OnInsertPos()
 
 void COutWallWnd::inputFromLines(vector<sLine>& sLines)
 {
-	DeletePos();
+	DeleteAllPos();
 
 	if (sLines.size() >= 3)
 	{
@@ -166,15 +166,10 @@ void COutWallWnd::inputFromLines(vector<sLine>& sLines)
 		InsertPos(sLines[0].e.x, sLines[0].e.y);
 	}
 }
-void COutWallWnd::DeletePos()
+void COutWallWnd::DeleteAllPos()
 {
 	CMFCPropertyGridProperty* pGroup = getCoodGroup();
-	for (int i = 0; i < pGroup->GetSubItemsCount(); i++)
-	{
-		CMFCPropertyGridProperty* subItem = pGroup->GetSubItem(i);
-		pGroup->RemoveSubItem(subItem);
-		i--;
-	}
+	((PropertyGridProperty*)pGroup)->RemoveAllSubItem();
 }
 
 void COutWallWnd::save(ofstream& out)

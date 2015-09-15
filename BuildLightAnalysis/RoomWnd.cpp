@@ -174,7 +174,13 @@ void CRoomWnd::OnNewRoom()
 	CString strCount;
 	strCount.Format(_T("房间%d"),count);
 
-	PropertyGridProperty* pRoom = new PropertyGridProperty(strCount, 0, TRUE);
+	PropertyGridProperty* pRoom = new PropertyGridProperty(strCount, 0, FALSE);
+	PropertyGridProperty* pOutWall = new PropertyGridProperty(_T("外墙"), 0, TRUE);
+	PropertyGridProperty* pInWall = new PropertyGridProperty(_T("内墙"), 0, TRUE);
+	PropertyGridProperty* pWin = new PropertyGridProperty(_T("窗户"), 0, TRUE);
+	pRoom->AddSubItem(pOutWall);
+	pRoom->AddSubItem(pInWall);
+	pRoom->AddSubItem(pWin);
 	m_wndPropList.AddProperty(pRoom);
 	//m_wndPropList.UpdateProperty((PropertyGridProperty*)(pWindow));
 	m_wndPropList.AdjustLayout();
@@ -188,6 +194,7 @@ void CRoomWnd::OnDeleteRoom()
 	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
 	if (selItem && !selItem->GetParent())
 	{
+		((PropertyGridProperty*)selItem)->RemoveAllSubItem();
 		m_wndPropList.DeleteProperty(selItem);
 
 		//重新设置一下坐标编号
@@ -204,22 +211,28 @@ void CRoomWnd::OnDeleteRoom()
 	pMain->GetActiveView()->Invalidate(); 
 }
 
-bool CRoomWnd::AddToSelectedRoom(CString name, int index)
+bool CRoomWnd::AddToSelectedRoom(int type, int index)
 {
 	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
-	if (selItem && !selItem->GetParent())
+	while (selItem->GetParent())
 	{
-		for (int i = 0; i < selItem->GetSubItemsCount(); i++)
+		selItem = selItem->GetParent();
+	}
+	if (selItem)
+	{
+		CMFCPropertyGridProperty* subItem = selItem->GetSubItem(type);
+		for (int i = 0; i < subItem->GetSubItemsCount(); i++)
 		{
-			CMFCPropertyGridProperty* p = selItem->GetSubItem(i);
-			if (p->GetName() == name && p->GetValue().intVal == index)
+			CMFCPropertyGridProperty* p = subItem->GetSubItem(i);
+			if (p->GetValue().intVal == index)
 			{
 				AfxMessageBox(_T("该房间已经存在该墙或窗户"));
 				return false;
 			}
 		}
-		PropertyGridProperty* pItem = new PropertyGridProperty(name, (_variant_t)index, _T("房间内的项目"));
-		selItem->AddSubItem(pItem);
+		PropertyGridProperty* pItem = new PropertyGridProperty(_T("编号"), (_variant_t)index, _T("房间内的项目"));
+		subItem->AddSubItem(pItem);
+		m_wndPropList.UpdateProperty((PropertyGridProperty*)subItem);
 		m_wndPropList.AdjustLayout();
 		return true;
 	}
@@ -234,12 +247,6 @@ void CRoomWnd::DeleteAllRoom()
 {
 	m_wndPropList.RemoveAll();
 	m_wndPropList.AdjustLayout();
-	/*for (int i = 0; i < m_wndPropList.GetPropertyCount(); i++)
-	{
-		CMFCPropertyGridProperty* subItem = m_wndPropList.GetProperty(i);
-		m_wndPropList.DeleteProperty(subItem);
-		i--;
-	}*/
 }
 LRESULT CRoomWnd::OnPropertyChanged (WPARAM,LPARAM lParam)
 {

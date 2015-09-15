@@ -23,7 +23,7 @@ public:
 		return m_wndPropList.GetProperty(0);
 	}
 	void InsertPos(double, double);
-	void DeletePos();
+	void DeleteAllPos();
 	void OutputToLines(vector<sLine>& sLines);
 	void inputFromLines(vector<sLine>& sLines);
 	void save(ofstream& out);

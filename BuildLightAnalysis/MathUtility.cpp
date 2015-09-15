@@ -11,7 +11,7 @@ string CStringToString(CString& str)
 	return strString;
 };
 
-CString stringToCString(string& str)
+CString StringToCString(string& str)
 {
 	CStringA ss;
 	ss.Format("%s",str.c_str());

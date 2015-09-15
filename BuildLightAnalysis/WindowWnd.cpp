@@ -269,7 +269,7 @@ double WinWidth )
 	vector<Material>& mats = pDoc->getMaterials();
 	for (int i = 0; i < mats.size(); i++)
 	{
-		pWinMaterial->AddOption(stringToCString(mats[i].name));
+		pWinMaterial->AddOption(StringToCString(mats[i].name));
 	}
 	
 	pWindow->AddSubItem(pWallType);

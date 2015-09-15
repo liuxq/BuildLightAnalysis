@@ -162,12 +162,7 @@ void CInWallWnd::OnInsertPos()
 void CInWallWnd::DeleteAllPos()
 {
 	CMFCPropertyGridProperty* pGroup = getCoodGroup();
-	for (int i = 0; i < pGroup->GetSubItemsCount(); i++)
-	{
-		CMFCPropertyGridProperty* subItem = pGroup->GetSubItem(i);
-		pGroup->RemoveSubItem(subItem);
-		i--;
-	}
+	((PropertyGridProperty*)pGroup)->RemoveAllSubItem();
 }
 void CInWallWnd::inputFromLines(vector<sLine>& sLines)
 {

@@ -7,7 +7,8 @@
 #include <list>
 
 
-void geometryOutput(string filename)
+
+void geometryOutput(string filename, set<CString>& outMats)
 {
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 	if (!pMain)
@@ -20,20 +21,24 @@ void geometryOutput(string filename)
 		return;
 	}
 
-	PropertyGridCtrl* pOption = pMain->GetOptionProperty().getPropList();
 	PropertyGridCtrl* pRoomlist = pMain->GetRoomProperty().getPropList();
 	CMFCPropertyGridProperty* optimizeOutWallPos = pMain->GetOptimizeWallProperty().getCoodOutWallGroup();
 	CMFCPropertyGridProperty* optimizeInWallPos = pMain->GetOptimizeWallProperty().getCoodInWallGroup();
 	PropertyGridCtrl* pWindowlist = pMain->GetWindowProperty().getPropList();
 
-	double h = pOption->GetProperty(0)->GetValue().dblVal;
+	double h = pMain->GetOptionProperty().GetDataDouble(OPTION_LEVEL_HEIGHT);
+	CString roofMat = pMain->GetOptionProperty().GetDataCString(OPTION_ROOF_MAT);
+	CString floorMat = pMain->GetOptionProperty().GetDataCString(OPTION_FLOOR_MAT);
+
+	outMats.insert(roofMat);
+	outMats.insert(floorMat);
+
 	for (int i = 0; i < pRoomlist->GetPropertyCount(); i++)
 	{
 		//导出第i个房间
 		CMFCPropertyGridProperty* pRoom = pRoomlist->GetProperty(i);
 		Wall wall;
 		list<Wall> roomWalls;
-		stWindow window;
 		vector<stWindow> roomWindows;
 		for (int j = 0; j < pRoom->GetSubItemsCount(); j++)
 		{
@@ -68,14 +73,14 @@ void geometryOutput(string filename)
 				stWindow win;
 				CMFCPropertyGridProperty* pWin = pWindowlist->GetProperty(index);
 				CString wallType = pWin->GetSubItem(0)->GetValue().bstrVal;
-				_tcscpy(win.wallType, wallType);
+				_tcscpy_s(win.wallType, wallType);
 				win.wallIndex = pWin->GetSubItem(1)->GetValue().intVal;
 				win.pos = pWin->GetSubItem(2)->GetValue().dblVal;
 				win.WinUpHeight = pWin->GetSubItem(3)->GetValue().dblVal;
 				win.WinDownHeight = pWin->GetSubItem(4)->GetValue().dblVal;
 				win.WinWidth = pWin->GetSubItem(5)->GetValue().dblVal;
 				CString mat = pWin->GetSubItem(6)->GetValue().bstrVal;
-				_tcscpy(win.WinMaterial, mat);
+				_tcscpy_s(win.WinMaterial, mat);
 
 				roomWindows.push_back(win);
 			}
@@ -93,7 +98,7 @@ void geometryOutput(string filename)
 		{
 			//地面
 			out << "room" << i << ".Floor";
-			out << " polygon " << CStringToString(CString(pOption->GetProperty(5)->GetValue().bstrVal)) << endl; 
+			out << " polygon " << CStringToString(floorMat) << endl; 
 			out << "0 0 9 ";
 			for (int j = 0; j < outPolygon.size(); j++)
 			{
@@ -102,7 +107,7 @@ void geometryOutput(string filename)
 			out << endl;
 			//棚顶
 			out << "room" << i << ".Roof";
-			out << " polygon " << CStringToString(CString(pOption->GetProperty(6)->GetValue().bstrVal)) << endl; 
+			out << " polygon " << CStringToString(roofMat) << endl; 
 			out << "0 0 9 ";
 			for (int j = outPolygon.size()-1; j >= 0 ; j--)
 			{
@@ -117,6 +122,8 @@ void geometryOutput(string filename)
 					mat = optimizeOutWallPos->GetSubItem(outWalls[j].wallInfo.index)->GetSubItem(2)->GetValue().bstrVal;
 				else
 					mat = optimizeInWallPos->GetSubItem(outWalls[j].wallInfo.index)->GetSubItem(2)->GetValue().bstrVal;
+
+				outMats.insert(mat);
 
 				out << "room" << i << ".Flank" << j;
 				out << " polygon " << CStringToString(mat) << endl; 
@@ -144,6 +151,8 @@ void geometryOutput(string filename)
 				out << "room" << i << ".Window" << j;
 				out << " polygon " << CStringToString(CString(roomWindows[j].WinMaterial)) << endl; 
 				out << "0 0 9 ";
+
+				outMats.insert(CString(roomWindows[j].WinMaterial));
 
 				CMFCPropertyGridProperty* wallProperty = NULL;
 				sLine::W_TYPE type;
@@ -201,7 +210,7 @@ void geometryOutput(string filename)
 		{
 			//地面
 			out << "room" << i << ".Floor";
-			out << " polygon " << CStringToString(CString(pOption->GetProperty(5)->GetValue().bstrVal)) << endl; 
+			out << " polygon " << CStringToString(floorMat) << endl; 
 			out << "0 0 9 ";
 			for (int j = outPolygon.size()-1; j >= 0 ; j--)
 			{
@@ -210,7 +219,7 @@ void geometryOutput(string filename)
 			out << endl;
 			//棚顶
 			out << "room" << i << ".Roof";
-			out << " polygon " << CStringToString(CString(pOption->GetProperty(6)->GetValue().bstrVal)) << endl; 
+			out << " polygon " << CStringToString(roofMat) << endl; 
 			out << "0 0 9 ";
 			for (int j = 0; j < outPolygon.size(); j++)
 			{
@@ -225,6 +234,8 @@ void geometryOutput(string filename)
 					mat = optimizeOutWallPos->GetSubItem(outWalls[j].wallInfo.index)->GetSubItem(2)->GetValue().bstrVal;
 				else
 					mat = optimizeInWallPos->GetSubItem(outWalls[j].wallInfo.index)->GetSubItem(2)->GetValue().bstrVal;
+
+				outMats.insert(mat);
 
 				out << "room" << i << ".Flank" << j;
 				out << " polygon " << CStringToString(mat) << endl; 
@@ -254,6 +265,8 @@ void geometryOutput(string filename)
 				out << "room" << i << ".Window" << j;
 				out << " polygon " << CStringToString(CString(roomWindows[j].WinMaterial)) << endl; 
 				out << "0 0 9 ";
+
+				outMats.insert(CString(roomWindows[j].WinMaterial));
 
 				CMFCPropertyGridProperty* wallProperty = NULL;
 				sLine::W_TYPE type;
@@ -310,7 +323,7 @@ void geometryOutput(string filename)
 	}
 }
 
-void materialOutput(string filename, MaterialSet& materials)
+void materialOutput(string filename, MaterialSet& materials, set<CString>& mats )
 {
 	ofstream out(filename);
 	if (!out.is_open())
@@ -320,6 +333,8 @@ void materialOutput(string filename, MaterialSet& materials)
 
 	for (int i = 0; i < materials.m_materials.size(); i++)
 	{
+		if (mats.find(StringToCString(materials.m_materials[i].name)) == mats.end())
+			continue;
 		out << "void " << materials.m_materials[i].type << " " << materials.m_materials[i].name;
 		for (int j = 0; j < materials.m_materials[i].args.size(); j++)
 		{
@@ -345,13 +360,14 @@ void RoomOutput(string filename)
 		return;
 	}
 
-	PropertyGridCtrl* pOption = pMain->GetOptionProperty().getPropList();
 	PropertyGridCtrl* pRoomlist = pMain->GetRoomProperty().getPropList();
 	CMFCPropertyGridProperty* optimizeOutWallPos = pMain->GetOptimizeWallProperty().getCoodOutWallGroup();
 	CMFCPropertyGridProperty* optimizeInWallPos = pMain->GetOptimizeWallProperty().getCoodInWallGroup();
 	PropertyGridCtrl* pWindowlist = pMain->GetWindowProperty().getPropList();
 
-	double h = pOption->GetProperty(0)->GetValue().dblVal;
+	double h = pMain->GetOptionProperty().GetDataDouble(OPTION_LEVEL_HEIGHT);
+	CString roofMat = pMain->GetOptionProperty().GetDataCString(OPTION_ROOF_MAT);
+	CString floorMat = pMain->GetOptionProperty().GetDataCString(OPTION_FLOOR_MAT);
 	for (int i = 0; i < pRoomlist->GetPropertyCount(); i++)
 	{
 		//导出第i个房间
@@ -394,14 +410,14 @@ void RoomOutput(string filename)
 				stWindow win;
 				CMFCPropertyGridProperty* pWin = pWindowlist->GetProperty(index);
 				CString wallType = pWin->GetSubItem(0)->GetValue().bstrVal;
-				_tcscpy(win.wallType, wallType);
+				_tcscpy_s(win.wallType, wallType);
 				win.wallIndex = pWin->GetSubItem(1)->GetValue().intVal;
 				win.pos = pWin->GetSubItem(2)->GetValue().dblVal;
 				win.WinUpHeight = pWin->GetSubItem(3)->GetValue().dblVal;
 				win.WinDownHeight = pWin->GetSubItem(4)->GetValue().dblVal;
 				win.WinWidth = pWin->GetSubItem(5)->GetValue().dblVal;
 				CString mat = pWin->GetSubItem(6)->GetValue().bstrVal;
-				_tcscpy(win.WinMaterial, mat);
+				_tcscpy_s(win.WinMaterial, mat);
 
 				roomWindows.push_back(win);
 			}
@@ -422,7 +438,7 @@ void RoomOutput(string filename)
 			surf.name = "room" + i; 
 			surf.name += ".Floor";
 			surf.type = "polygon";
-			surf.mat = CStringToString(CString(pOption->GetProperty(5)->GetValue().bstrVal));
+			surf.mat = CStringToString(floorMat);
 			surf.points.clear();
 			for (int j = 0; j < outPolygon.size(); j++)
 			{
@@ -435,7 +451,7 @@ void RoomOutput(string filename)
 			surf.name = "room" + i; 
 			surf.name += ".Roof";
 			surf.type = "polygon";
-			surf.mat = CStringToString(CString(pOption->GetProperty(6)->GetValue().bstrVal));
+			surf.mat = CStringToString(roofMat);
 			surf.points.clear();
 			for (int j = outPolygon.size()-1; j >= 0 ; j--)
 			{
@@ -540,7 +556,7 @@ void RoomOutput(string filename)
 			surf.name = "room" + i; 
 			surf.name += ".Floor";
 			surf.type = "polygon";
-			surf.mat = CStringToString(CString(pOption->GetProperty(5)->GetValue().bstrVal));
+			surf.mat = CStringToString(floorMat);
 			surf.points.clear();
 			for (int j = outPolygon.size()-1; j >= 0 ; j--)
 			{
@@ -551,7 +567,7 @@ void RoomOutput(string filename)
 			surf.name = "room" + i; 
 			surf.name += ".Roof";
 			surf.type = "polygon";
-			surf.mat = CStringToString(CString(pOption->GetProperty(6)->GetValue().bstrVal));
+			surf.mat = CStringToString(roofMat);
 			surf.points.clear();
 			for (int j = 0; j < outPolygon.size(); j++)
 			{

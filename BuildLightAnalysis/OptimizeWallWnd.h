@@ -38,7 +38,7 @@ public:
 		return m_wndPropList.GetProperty(1);
 	}
 	void InsertPos(bool isOutWall, double,double,double,double,CString);
-	void DeletePos();
+	void DeleteAllPos();
 
 	void OutputToLines(vector<sOpWall>& sLines);
 	void inputFromLines(vector<sOpWall>& sLines);

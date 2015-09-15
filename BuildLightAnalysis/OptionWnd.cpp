@@ -124,20 +124,22 @@ void COptionWnd::InitPropList()
 	CMFCPropertyGridProperty* pCenterY = new CMFCPropertyGridProperty(_T("初始原点位置Y"),(_variant_t) 100.0,_T("平移系数，Y"));
 	CMFCPropertyGridColorProperty* pOutWallColor = new CMFCPropertyGridColorProperty(_T("外墙颜色"),RGB(0, 111, 200));
 	CMFCPropertyGridColorProperty* pInWallColor = new CMFCPropertyGridColorProperty(_T("内墙颜色"),RGB(0, 111, 200));
+	CMFCPropertyGridColorProperty* pInKeyGridColor = new CMFCPropertyGridColorProperty(_T("关键点颜色"),RGB(255, 0, 0));
 
 	
-	m_wndPropList.AddProperty(pLevelHigh);
-	m_wndPropList.AddProperty(pOptimizeTh);
-	m_wndPropList.AddProperty(pOutWallMaterial);
-	m_wndPropList.AddProperty(pInWallMaterial);
-	m_wndPropList.AddProperty(pWindowMaterial);
-	m_wndPropList.AddProperty(pFloorMaterial);
-	m_wndPropList.AddProperty(pRoofMaterial);
-	m_wndPropList.AddProperty(pScale);
-	m_wndPropList.AddProperty(pCenterX);
-	m_wndPropList.AddProperty(pCenterY);
-	m_wndPropList.AddProperty(pOutWallColor);
-	m_wndPropList.AddProperty(pInWallColor);
+	m_wndPropList.AddProperty(pLevelHigh);m_DataType[OPTION_LEVEL_HEIGHT] = OPTION_TYPE_DOUBLE;
+	m_wndPropList.AddProperty(pOptimizeTh);m_DataType[OPTION_OPTIMIZE_TH] = OPTION_TYPE_DOUBLE;
+	m_wndPropList.AddProperty(pOutWallMaterial);m_DataType[OPTION_OUTWALL_MAT] = OPTION_TYPE_STRING;
+	m_wndPropList.AddProperty(pInWallMaterial);m_DataType[OPTION_INWALL_MAT] = OPTION_TYPE_STRING;
+	m_wndPropList.AddProperty(pWindowMaterial);m_DataType[OPTION_WINDOW_MAT] = OPTION_TYPE_STRING;
+	m_wndPropList.AddProperty(pFloorMaterial);m_DataType[OPTION_FLOOR_MAT] = OPTION_TYPE_STRING;
+	m_wndPropList.AddProperty(pRoofMaterial);m_DataType[OPTION_ROOF_MAT] = OPTION_TYPE_STRING;
+	m_wndPropList.AddProperty(pScale);m_DataType[OPTION_PIX_MM_SCALE] = OPTION_TYPE_DOUBLE;
+	m_wndPropList.AddProperty(pCenterX);m_DataType[OPTION_ORIGIN_X] = OPTION_TYPE_DOUBLE;
+	m_wndPropList.AddProperty(pCenterY);m_DataType[OPTION_ORIGIN_Y] = OPTION_TYPE_DOUBLE;
+	m_wndPropList.AddProperty(pOutWallColor);m_DataType[OPTION_OUTWALL_COLOR] = OPTION_TYPE_COLOR;
+	m_wndPropList.AddProperty(pInWallColor);m_DataType[OPTION_INWALL_COLOR] = OPTION_TYPE_COLOR;
+	m_wndPropList.AddProperty(pInKeyGridColor);m_DataType[OPTION_KEYGRID_COLOR] = OPTION_TYPE_COLOR;
 }
 
 void COptionWnd::loadMaterialTemplate()
@@ -147,15 +149,15 @@ void COptionWnd::loadMaterialTemplate()
 	CString strMat;
 	vector<Material>& mats = pDoc->getMaterials();
 
-	CMFCPropertyGridProperty* pOutWallMaterial = m_wndPropList.GetProperty(2);
-	CMFCPropertyGridProperty* pInWallMaterial = m_wndPropList.GetProperty(3);
-	CMFCPropertyGridProperty* pWindowMaterial = m_wndPropList.GetProperty(4);
-	CMFCPropertyGridProperty* pFloorMaterial = m_wndPropList.GetProperty(5);
-	CMFCPropertyGridProperty* pRoofMaterial = m_wndPropList.GetProperty(6);
+	CMFCPropertyGridProperty* pOutWallMaterial = m_wndPropList.GetProperty(OPTION_OUTWALL_MAT);
+	CMFCPropertyGridProperty* pInWallMaterial = m_wndPropList.GetProperty(OPTION_INWALL_MAT);
+	CMFCPropertyGridProperty* pWindowMaterial = m_wndPropList.GetProperty(OPTION_WINDOW_MAT);
+	CMFCPropertyGridProperty* pFloorMaterial = m_wndPropList.GetProperty(OPTION_FLOOR_MAT);
+	CMFCPropertyGridProperty* pRoofMaterial = m_wndPropList.GetProperty(OPTION_ROOF_MAT);
 
 	for (int i = 0; i < mats.size(); i++)
 	{
-		strMat = stringToCString(mats[i].name);
+		strMat = StringToCString(mats[i].name);
 		pOutWallMaterial->AddOption(strMat);
 		pInWallMaterial->AddOption(strMat);
 		pWindowMaterial->AddOption(strMat);
@@ -166,19 +168,19 @@ void COptionWnd::loadMaterialTemplate()
 }
 void COptionWnd::GetTransform(double s, double centerX, double centerY)
 {
-	m_wndPropList.GetProperty(7)->SetValue(s);
-	m_wndPropList.GetProperty(8)->SetValue(centerX);
-	m_wndPropList.GetProperty(9)->SetValue(centerY);
+	m_wndPropList.GetProperty(OPTION_PIX_MM_SCALE)->SetValue(s);
+	m_wndPropList.GetProperty(OPTION_ORIGIN_X)->SetValue(centerX);
+	m_wndPropList.GetProperty(OPTION_ORIGIN_Y)->SetValue(centerY);
 }
 void COptionWnd::SetTransform()
 {
 	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;  
 	CBuildLightAnalysisView* pView = (CBuildLightAnalysisView*)pMain->GetActiveView();
-	double d7 = m_wndPropList.GetProperty(7)->GetValue().dblVal;
-	double d8 = m_wndPropList.GetProperty(8)->GetValue().dblVal;
-	double d9 = m_wndPropList.GetProperty(9)->GetValue().dblVal;
+	double s = m_wndPropList.GetProperty(OPTION_PIX_MM_SCALE)->GetValue().dblVal;
+	double X = m_wndPropList.GetProperty(OPTION_ORIGIN_X)->GetValue().dblVal;
+	double Y = m_wndPropList.GetProperty(OPTION_ORIGIN_Y)->GetValue().dblVal;
 	
-	pView->GetTransform().Set(d7,Vec2d(d8,d9));
+	pView->GetTransform().Set(s,Vec2d(X,Y));
 	pView->Invalidate();
 }
 LRESULT COptionWnd::OnPropertyChanged (WPARAM,LPARAM lParam)
@@ -220,81 +222,70 @@ void COptionWnd::SetPropListFont()
 
 	m_wndPropList.SetFont(&m_fntPropList);
 }
+
 void COptionWnd::save(ofstream& out)
 {
-	double d0 = m_wndPropList.GetProperty(0)->GetValue().dblVal;
-	double d1 = m_wndPropList.GetProperty(1)->GetValue().dblVal;
-	CString d2(m_wndPropList.GetProperty(2)->GetValue().bstrVal);
-	CString d3(m_wndPropList.GetProperty(3)->GetValue().bstrVal);
-	CString d4(m_wndPropList.GetProperty(4)->GetValue().bstrVal);
-	CString d5(m_wndPropList.GetProperty(5)->GetValue().bstrVal);
-	CString d6(m_wndPropList.GetProperty(6)->GetValue().bstrVal);
-	double d7 = m_wndPropList.GetProperty(7)->GetValue().dblVal;
-	double d8 = m_wndPropList.GetProperty(8)->GetValue().dblVal;
-	double d9 = m_wndPropList.GetProperty(9)->GetValue().dblVal;
-	int d10 = m_wndPropList.GetProperty(10)->GetValue().intVal;
-	int d11 = m_wndPropList.GetProperty(11)->GetValue().intVal;
+	double dbl;
+	int intv;
+	string str;
+	CString cstr;
 
-	string st2 = CStringToString(d2);
-	string st3 = CStringToString(d3);
-	string st4 = CStringToString(d4);
-	string st5 = CStringToString(d5);
-	string st6 = CStringToString(d6);
-	
-	serializer<double>::write(out,&d0);
-	serializer<double>::write(out,&d1);
-	serializer<string>::writeString(out,&st2);
-	serializer<string>::writeString(out,&st3);
-	serializer<string>::writeString(out,&st4);
-	serializer<string>::writeString(out,&st5);
-	serializer<string>::writeString(out,&st6);
-	serializer<double>::write(out,&d7);
-	serializer<double>::write(out,&d8);
-	serializer<double>::write(out,&d9);
-	serializer<int>::write(out,&d10);
-	serializer<int>::write(out,&d11);
+	for (int i = 0; i < OPTION_NUM; i++)
+	{
+		switch (m_DataType[OPTION_START + i])
+		{
+		case OPTION_TYPE_DOUBLE:
+			dbl = m_wndPropList.GetProperty(OPTION_START + i)->GetValue().dblVal;
+			serializer<double>::write(out,&dbl);
+			break;
+		case OPTION_TYPE_STRING:
+			cstr = m_wndPropList.GetProperty(OPTION_START + i)->GetValue().bstrVal;
+			serializer<string>::writeString(out,&CStringToString(cstr));
+			break;
+		case OPTION_TYPE_COLOR:
+			intv = m_wndPropList.GetProperty(OPTION_START + i)->GetValue().intVal;
+			serializer<int>::write(out,&intv);
+			break;
+
+		}
+	}
+
+
 }
 void COptionWnd::load(ifstream& in)
 {
-	double d0;
-	double d1;
-	string d2;
-	string d3;
-	string d4;
-	string d5;
-	string d6;
-	double d7;
-	double d8;
-	double d9;
-	int d10;
-	int d11;
-	serializer<double>::read(in,&d0);
-	serializer<double>::read(in,&d1);
-	serializer<string>::readString(in,&d2);
-	serializer<string>::readString(in,&d3);
-	serializer<string>::readString(in,&d4);
-	serializer<string>::readString(in,&d5);
-	serializer<string>::readString(in,&d6);
-	serializer<double>::read(in,&d7);
-	serializer<double>::read(in,&d8);
-	serializer<double>::read(in,&d9);
-	serializer<int>::read(in,&d10);
-	serializer<int>::read(in,&d11);
+	double dbl;
+	int intv;
+	string str;
+	CString cstr;
 
+	for (int i = 0; i < OPTION_NUM; i++)
+	{
+		switch (m_DataType[OPTION_START + i])
+		{
+		case OPTION_TYPE_DOUBLE:
+			serializer<double>::read(in,&dbl);
+			m_wndPropList.GetProperty(OPTION_START + i)->SetValue(dbl);
+			break;
+		case OPTION_TYPE_STRING:
+			serializer<string>::readString(in,&str);
+			m_wndPropList.GetProperty(OPTION_START + i)->SetValue(StringToCString(str));
+			break;
+		case OPTION_TYPE_COLOR:
+			serializer<int>::read(in,&intv);
+			_variant_t var;
+			var = intv;var.vt = VT_I4;
+			((CMFCPropertyGridColorProperty*)m_wndPropList.GetProperty(OPTION_START + i))->SetColor(var);
+			break;
 
-	m_wndPropList.GetProperty(0)->SetValue(d0);
-	m_wndPropList.GetProperty(1)->SetValue(d1);
-	m_wndPropList.GetProperty(2)->SetValue(stringToCString(d2));
-	m_wndPropList.GetProperty(3)->SetValue(stringToCString(d3));
-	m_wndPropList.GetProperty(4)->SetValue(stringToCString(d4));
-	m_wndPropList.GetProperty(5)->SetValue(stringToCString(d5));
-	m_wndPropList.GetProperty(6)->SetValue(stringToCString(d6));
-	m_wndPropList.GetProperty(7)->SetValue(d7);
-	m_wndPropList.GetProperty(8)->SetValue(d8);
-	m_wndPropList.GetProperty(9)->SetValue(d9);
-	_variant_t var;
-	var = d10;var.vt = VT_I4;
-	((CMFCPropertyGridColorProperty*)m_wndPropList.GetProperty(10))->SetColor(var);
-	var = d11;var.vt = VT_I4;
-	((CMFCPropertyGridColorProperty*)m_wndPropList.GetProperty(11))->SetColor(var);
+		}
+	}
+
+}
+
+void COptionWnd::ResetAllOption()
+{
+	m_wndPropList.RemoveAll();
+	InitPropList();
+
 }

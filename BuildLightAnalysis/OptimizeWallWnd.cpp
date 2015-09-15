@@ -101,22 +101,16 @@ void COptimizeWallWnd::OnUpdateSortProperties(CCmdUI* pCmdUI)
 {
 	pCmdUI->SetCheck(m_wndPropList.IsAlphabeticMode());
 }
-void COptimizeWallWnd::DeletePos()
+void COptimizeWallWnd::DeleteAllPos()
 {
 	CMFCPropertyGridProperty* pGroup = getCoodOutWallGroup();
-	for (int i = 0; i < pGroup->GetSubItemsCount(); i++)
-	{
-		CMFCPropertyGridProperty* subItem = pGroup->GetSubItem(i);
-		pGroup->RemoveSubItem(subItem);
-		i--;
-	}
+	((PropertyGridProperty*)pGroup)->RemoveAllSubItem();
+
 	CMFCPropertyGridProperty* pGroup1 = getCoodInWallGroup();
-	for (int i = 0; i < pGroup1->GetSubItemsCount(); i++)
-	{
-		CMFCPropertyGridProperty* subItem = pGroup1->GetSubItem(i);
-		pGroup1->RemoveSubItem(subItem);
-		i--;
-	}
+	((PropertyGridProperty*)pGroup1)->RemoveAllSubItem();
+
+	m_wndPropList.AdjustLayout();
+
 }
 void COptimizeWallWnd::InsertPos(bool isOutWall, double x, double y, double x1, double y1, CString mat)
 {
@@ -157,7 +151,7 @@ void COptimizeWallWnd::InsertPos(bool isOutWall, double x, double y, double x1, 
 	vector<Material>& mats = pDoc->getMaterials();
 	for (int i = 0; i < mats.size(); i++)
 	{
-		pMat->AddOption(stringToCString(mats[i].name));
+		pMat->AddOption(StringToCString(mats[i].name));
 	}
 	pPos->AddSubItem(pStart);
 	pPos->AddSubItem(pEnd);
@@ -257,7 +251,7 @@ void COptimizeWallWnd::SetPropListFont()
 
 void COptimizeWallWnd::inputFromLines(vector<sOpWall>& sOpWalls)
 {
-	DeletePos();	
+	DeleteAllPos();	
 	for (int i = 0; i < sOpWalls.size(); i++)
 	{
 		if (sOpWalls[i].line.type == sLine::OUT_WALL)

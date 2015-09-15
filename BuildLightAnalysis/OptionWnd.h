@@ -2,26 +2,38 @@
 #pragma once
 
 
+enum
+{
+	OPTION_START = 0,
+	OPTION_LEVEL_HEIGHT = OPTION_START,  //层高
+	OPTION_OPTIMIZE_TH, //处理阈值，毫米
+	OPTION_OUTWALL_MAT,	//外墙材质
+	OPTION_INWALL_MAT,
+	OPTION_WINDOW_MAT,
+	OPTION_FLOOR_MAT,
+	OPTION_ROOF_MAT,
+	OPTION_PIX_MM_SCALE,
+	OPTION_ORIGIN_X,
+	OPTION_ORIGIN_Y,
+	OPTION_OUTWALL_COLOR,
+	OPTION_INWALL_COLOR,
+	OPTION_KEYGRID_COLOR,
+
+	OPTION_NUM
+};
+enum
+{
+	OPTION_TYPE_INT = 0,
+	OPTION_TYPE_DOUBLE,
+	OPTION_TYPE_STRING,
+	OPTION_TYPE_COLOR
+};
+
+
 class COptionWnd : public CDockablePane
 {
 public:
-	enum
-	{
-		OPTION_LEVEL_HEIGHT = 0,  //层高
-		OPTION_OPTIMIZE_TH, //处理阈值，毫米
-		OPTION_OUTWALL_MAT,	//外墙材质
-		OPTION_INWALL_MAT,
-		OPTION_WINDOW_MAT,
-		OPTION_FLOOR_MAT,
-		OPTION_ROOF_MAT,
-		OPTION_PIX_MM_SCALE,
-		OPTION_ORIGIN_X,
-		OPTION_ORIGIN_Y,
-		OPTION_OUTWALL_COLOR,
-		OPTION_INWALL_COLOR,
-
-		OPTION_NUM
-	};
+	
 // Construction
 public:
 	COptionWnd();
@@ -40,7 +52,16 @@ public:
 		return &m_wndPropList;
 	}
 
-	double getProperty(int dataIndex)
+	int GetDataInt(int dataIndex)
+	{
+		CMFCPropertyGridProperty* data = m_wndPropList.GetProperty(dataIndex);
+		if (data)
+		{
+			return data->GetValue().intVal;
+		}
+		return 0;
+	}
+	double GetDataDouble(int dataIndex)
 	{
 		CMFCPropertyGridProperty* data = m_wndPropList.GetProperty(dataIndex);
 		if (data)
@@ -49,37 +70,29 @@ public:
 		}
 		return 0.0;
 	}
+	CString GetDataCString(int dataIndex)
+	{
+		CString tmp;
+		CMFCPropertyGridProperty* data = m_wndPropList.GetProperty(dataIndex);
+		if (data)
+		{
+			tmp = data->GetValue().bstrVal;
+		}
+		return tmp;
+	}
 	void loadMaterialTemplate();
 	void GetTransform(double s, double centerX, double centerY);
 	void SetTransform();
 	void save(ofstream& out);
 	void load(ifstream& in);
-
-	COLORREF GetOutWallColor()
-	{
-		return ((CMFCPropertyGridColorProperty*)m_wndPropList.GetProperty(OPTION_OUTWALL_COLOR))->GetColor();
-	}
-	COLORREF GetInWallColor()
-	{
-		return ((CMFCPropertyGridColorProperty*)m_wndPropList.GetProperty(OPTION_INWALL_COLOR))->GetColor();
-	}
-	CString GetOutWallMat()
-	{
-		return m_wndPropList.GetProperty(OPTION_OUTWALL_MAT)->GetValue().bstrVal;
-	}
-	CString GetInWallMat()
-	{
-		return m_wndPropList.GetProperty(OPTION_INWALL_MAT)->GetValue().bstrVal;
-	}
-	CString GetWindowMat()
-	{
-		return m_wndPropList.GetProperty(OPTION_WINDOW_MAT)->GetValue().bstrVal;
-	}
+	void ResetAllOption();
 	
 
 protected:
 	CFont m_fntPropList;
 	PropertyGridCtrl m_wndPropList;
+
+	int m_DataType[OPTION_NUM];
 
 // Implementation
 public:

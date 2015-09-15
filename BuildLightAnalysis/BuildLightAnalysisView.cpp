@@ -80,14 +80,14 @@ void CBuildLightAnalysisView::optimize()
 	pMain->GetOutWallProperty().OutputToLines(sLines);
 	pMain->GetInWallProperty().OutputToLines(sLines);
 	
-	double wTh = pMain->GetOptionProperty().getProperty(1);
+	double wTh = pMain->GetOptionProperty().GetDataDouble(OPTION_OPTIMIZE_TH);
 
 	OptimizeLine(sLines,outLines, wTh);
 
 	//设置处理后的墙
-	CString outMat = pMain->GetOptionProperty().GetOutWallMat();
-	CString inMat = pMain->GetOptionProperty().GetInWallMat();
-	pMain->GetOptimizeWallProperty().DeletePos();
+	CString outMat = pMain->GetOptionProperty().GetDataCString(OPTION_OUTWALL_MAT);
+	CString inMat = pMain->GetOptionProperty().GetDataCString(OPTION_OUTWALL_MAT);
+	pMain->GetOptimizeWallProperty().DeleteAllPos();
 	for (int i = 0; i < outLines.size(); i++)
 	{
 		if (outLines[i].type == sLine::OUT_WALL)
@@ -150,8 +150,9 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 	graph->DrawLine(&ArrowYPen, (float)Oaxis.x, (float)Oaxis.y, (float)Yaxis.x, (float)Yaxis.y);
 
 	//取配置中的内外墙颜色
-	COLORREF outWallColor = pMain->GetOptionProperty().GetOutWallColor();
-	COLORREF inWallColor = pMain->GetOptionProperty().GetInWallColor();
+	COLORREF outWallColor = pMain->GetOptionProperty().GetDataInt(OPTION_OUTWALL_COLOR);
+	COLORREF inWallColor = pMain->GetOptionProperty().GetDataInt(OPTION_INWALL_COLOR);
+	COLORREF keyGridColor = pMain->GetOptionProperty().GetDataInt(OPTION_KEYGRID_COLOR);
 
 	Gdiplus::SolidBrush pointBrush(Gdiplus::Color(255,100,100,100));
 
@@ -353,8 +354,9 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 			}
 		}
 		//画计算点
-		SolidBrush selectPen(Gdiplus::Color(255,100,255,100));
-		SolidBrush keyPen(Gdiplus::Color(255,0,255,255));
+		Gdiplus::Pen selectPen(Gdiplus::Color(180,GetRValue(keyGridColor),GetGValue(keyGridColor),GetBValue(keyGridColor)),3);
+		Gdiplus::Pen keyPen(Gdiplus::Color(255,GetRValue(keyGridColor),GetGValue(keyGridColor),GetBValue(keyGridColor)),3);
+
 		PropertyGridCtrl* pGridList = pMain->GetGridProperty().getPropList();
 		for (int i = 0; i < pGridList->GetPropertyCount(); i++)
 		{
@@ -369,14 +371,17 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 				CString _name = pGrid->GetSubItem(j)->GetName();
 				if (i == m_iSelectGridSetIndex && j == m_iSelectGridIndex)//如果是拾取的计算点
 				{
-					graph->FillEllipse(&selectPen, (float)p.x - 5, (float)p.y - 5, 10.0, 10.0);
+					graph->DrawLine(&selectPen, (float)p.x - 4, (float)p.y, (float)p.x + 4, (float)p.y);
+					graph->DrawLine(&selectPen, (float)p.x, (float)p.y - 4, (float)p.x, (float)p.y + 4);
 				}
 				else if (_name == _T("关键点"))
 				{
-					graph->FillEllipse(&keyPen, (float)p.x - 4, (float)p.y - 4, 8.0, 8.0);
+					graph->DrawLine(&keyPen, (float)p.x - 4, (float)p.y, (float)p.x + 4, (float)p.y);
+					graph->DrawLine(&keyPen, (float)p.x, (float)p.y - 4, (float)p.x, (float)p.y + 4);
+
 				}
 				else
-					graph->FillEllipse(&pointBrush, (float)p.x - 1, (float)p.y - 1, 2.0, 2.0);
+					graph->FillEllipse(&pointBrush, (float)p.x - 2, (float)p.y - 2, 4.0, 4.0);
 					
 			}
 		}
@@ -763,7 +768,10 @@ void CBuildLightAnalysisView::OnEditOptimize()
 
 	pMain->GetOutWallProperty().ShowPane(FALSE,FALSE,TRUE);
 	pMain->GetInWallProperty().ShowPane(FALSE,FALSE,TRUE);
-	pMain->GetOptimizeWallProperty().ShowPane(TRUE,FALSE,TRUE);
+	if (pMain->GetOptimizeWallProperty().IsPaneVisible())
+		pMain->GetOptimizeWallProperty().ShowPane(FALSE,FALSE,TRUE);
+	else
+		pMain->GetOptimizeWallProperty().ShowPane(TRUE,FALSE,TRUE);
 
 	Invalidate();
 	
@@ -775,7 +783,7 @@ void CBuildLightAnalysisView::OnPopAddWindow()
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 	pMain->GetWindowProperty().ShowPane(TRUE,FALSE,TRUE);
 
-	pMain->GetWindowProperty().InsertWindow(m_iSelectOutWallIndex, m_iSelectInWallIndex, m_iSelectWindowIndex, pMain->GetOptionProperty().GetWindowMat());
+	pMain->GetWindowProperty().InsertWindow(m_iSelectOutWallIndex, m_iSelectInWallIndex, m_iSelectWindowIndex, pMain->GetOptionProperty().GetDataCString(OPTION_WINDOW_MAT));
 }
 
 
@@ -784,15 +792,15 @@ void CBuildLightAnalysisView::OnPopAddtoRoom()
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 	pMain->GetRoomProperty().ShowPane(TRUE,FALSE,TRUE);
 	
-	if (m_iSelectOutWallIndex >= 0 && pMain->GetRoomProperty().AddToSelectedRoom(_T("外墙号"), m_iSelectOutWallIndex))
+	if (m_iSelectOutWallIndex >= 0 && pMain->GetRoomProperty().AddToSelectedRoom(ROOM_OUT_WALL, m_iSelectOutWallIndex))
 	{
 
 	}
-	if (m_iSelectInWallIndex >= 0 && pMain->GetRoomProperty().AddToSelectedRoom(_T("内墙号"), m_iSelectInWallIndex))
+	if (m_iSelectInWallIndex >= 0 && pMain->GetRoomProperty().AddToSelectedRoom(ROOM_IN_WALL, m_iSelectInWallIndex))
 	{
 
 	}
-	if (m_iSelectWindowIndex >= 0 && pMain->GetRoomProperty().AddToSelectedRoom(_T("窗户号"), m_iSelectWindowIndex))
+	if (m_iSelectWindowIndex >= 0 && pMain->GetRoomProperty().AddToSelectedRoom(ROOM_WINDOW, m_iSelectWindowIndex))
 	{
 
 	}
