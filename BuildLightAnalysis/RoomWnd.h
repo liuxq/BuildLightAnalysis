@@ -5,7 +5,14 @@ enum
 {
 	ROOM_OUT_WALL = 0,
 	ROOM_IN_WALL,
-	ROOM_WINDOW
+	ROOM_WINDOW,
+	ROOM_GRID
+};
+enum
+{
+	GRID_OFFSET,
+	GRID_MESHLEN,
+	GRID_POINTS
 };
 
 
@@ -31,6 +38,8 @@ public:
 
 	bool AddToSelectedRoom(int type, int index);
 	void DeleteAllRoom();
+	CMFCPropertyGridProperty* InsertGrid(double offset, double meshLen);
+	void CalGrid(CMFCPropertyGridProperty* pGrid);
 
 	void save(ofstream& out);
 	void load(ifstream& in);
@@ -60,6 +69,7 @@ protected:
 	afx_msg void OnUpdateProperties2(CCmdUI* pCmdUI);
 
 	afx_msg LRESULT OnPropertyChanged(WPARAM,LPARAM);
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 
 	DECLARE_MESSAGE_MAP()
 
