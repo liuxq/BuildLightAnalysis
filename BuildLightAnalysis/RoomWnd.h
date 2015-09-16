@@ -75,5 +75,7 @@ protected:
 
 	void InitPropList();
 	void SetPropListFont();
+public:
+	afx_msg void OnRoomCalGrid();
 };
 

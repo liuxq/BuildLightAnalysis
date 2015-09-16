@@ -49,6 +49,7 @@ BEGIN_MESSAGE_MAP(CRoomWnd, CDockablePane)
 	ON_WM_SETFOCUS()
 	ON_WM_SETTINGCHANGE()
 	ON_REGISTERED_MESSAGE(AFX_WM_PROPERTY_CHANGED, OnPropertyChanged)
+	ON_COMMAND(ID_ROOM_CAL_GRID, &CRoomWnd::OnRoomCalGrid)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -182,8 +183,8 @@ void CRoomWnd::OnNewRoom()
 	PropertyGridProperty* pRoom = new PropertyGridProperty(strCount, 0, FALSE);
 	PropertyGridProperty* pOutWall = new PropertyGridProperty(_T("外墙"), 0, TRUE);
 	PropertyGridProperty* pInWall = new PropertyGridProperty(_T("内墙"), 0, TRUE);
-	PropertyGridProperty* pWin = new PropertyGridProperty(_T("窗户"), 0, TRUE);
-	PropertyGridProperty* pGrid = new PropertyGridProperty(_T("计算点"), 0, TRUE);
+	PropertyGridProperty* pWin = new PropertyGridProperty(_T("窗户"), ROOM_WINDOW, TRUE);
+	PropertyGridProperty* pGrid = new PropertyGridProperty(_T("计算点"), ROOM_GRID, TRUE);
 	
 	PropertyGridProperty* pOffset = new PropertyGridProperty(_T("内偏移"), (_variant_t)120.0, _T("内偏移"));
 	PropertyGridProperty* pMeshLen = new PropertyGridProperty(_T("网格边长"), (_variant_t)120.0, _T("网格边长"));
@@ -273,6 +274,8 @@ void CRoomWnd::CalGrid(CMFCPropertyGridProperty* pGrid)
 	pGrid->AddSubItem(pGridList);
 
 	m_wndPropList.UpdateProperty((PropertyGridProperty*)(pGrid));
+
+	m_wndPropList.AdjustLayout();
 }
 
 void CRoomWnd::OnUpdateProperties1(CCmdUI* pCmdUI)
@@ -304,7 +307,7 @@ void CRoomWnd::OnDeleteRoom()
 bool CRoomWnd::AddToSelectedRoom(int type, int index)
 {
 	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
-	while (selItem->GetParent())
+	while (selItem && selItem->GetParent())
 	{
 		selItem = selItem->GetParent();
 	}
@@ -340,6 +343,18 @@ void CRoomWnd::DeleteAllRoom()
 }
 LRESULT CRoomWnd::OnPropertyChanged (WPARAM,LPARAM lParam)
 {
+	CMFCPropertyGridProperty* pProp = (CMFCPropertyGridProperty*) lParam;
+
+	if (pProp->GetParent() && pProp->GetParent()->GetData() == ROOM_GRID)
+	{
+		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+		if (!pMain)
+			return 0;
+		CMFCPropertyGridProperty* grid = pProp->GetParent();
+		CalGrid(grid);
+		//更新视图     
+		pMain->GetActiveView()->Invalidate(); 
+	}
 	return 0;
 }
 
@@ -425,7 +440,26 @@ void CRoomWnd::load(ifstream& in)
 
 void CRoomWnd::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 {
+	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
+	if (selItem)
+	{
 #ifndef SHARED_HANDLERS
-	theApp.GetContextMenuManager()->ShowPopupMenu(IDR_MENU_ROOM, point.x, point.y, this, TRUE);
+		theApp.GetContextMenuManager()->ShowPopupMenu(IDR_MENU_ROOM, point.x, point.y, this, TRUE);
 #endif
+	}
+
+}
+
+void CRoomWnd::OnRoomCalGrid()
+{
+	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
+	while (selItem->GetParent())
+	{
+		selItem = selItem->GetParent();
+	}
+	if (selItem)
+	{
+		CMFCPropertyGridProperty* pGrid = selItem->GetSubItem(ROOM_GRID);
+		CalGrid(pGrid);
+	}
 }

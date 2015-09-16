@@ -184,6 +184,7 @@ void CBuildLightAnalysisApp::PreLoadState()
 	bNameValid = strName.LoadString(IDS_EDIT_MENU);
 	ASSERT(bNameValid);
 	GetContextMenuManager()->AddMenu(strName, IDR_POPUP_EDIT);
+	GetContextMenuManager()->AddMenu(_T("·¿¼ä"), IDR_MENU_ROOM);
 }
 
 void CBuildLightAnalysisApp::LoadCustomState()
