@@ -45,7 +45,7 @@ private:
 	int m_iSelectInWallIndex;
 	int m_iSelectWindowIndex;
 
-	int m_iSelectGridSetIndex;
+	int m_iSelectGridRoomIndex;
 	int m_iSelectGridIndex;
 
 	bool m_bIsPullTranslate;

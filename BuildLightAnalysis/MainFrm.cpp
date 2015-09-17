@@ -30,7 +30,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_COMMAND(ID_EDIT_OPTION, &CMainFrame::OnEditOption)
 	ON_COMMAND(ID_EDIT_WINDOW, &CMainFrame::OnEditWindow)
 	ON_COMMAND(ID_EDIT_ROOM, &CMainFrame::OnEditRoom)
-	ON_COMMAND(ID_EDIT_GRID, &CMainFrame::OnEditGrid)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -141,11 +140,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	DockPane(&m_wndRoomProperties);
 	m_wndRoomProperties.ShowPane(FALSE,FALSE,TRUE);
 
-	m_wndGridProperties.EnableDocking(CBRS_ALIGN_ANY);
-	DockPane(&m_wndGridProperties);
-	m_wndGridProperties.ShowPane(FALSE,FALSE,TRUE);
-
-
 	// Enable toolbar and docking window menu replacement
 	EnablePaneMenu(TRUE, ID_VIEW_CUSTOMIZE, strCustomize, ID_VIEW_TOOLBAR);
 
@@ -211,12 +205,6 @@ BOOL CMainFrame::CreateDockingWindows()
 	if (!m_wndRoomProperties.Create(_T("房间"), this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_ROOM_PROPERTIESWND, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
 	{
 		TRACE0("Failed to create ROOM window\n");
-		return FALSE; // failed to create
-	}
-
-	if (!m_wndGridProperties.Create(_T("计算点"), this, CRect(0, 0, 200, 200), TRUE, ID_VIEW_GRID_PROPERTIESWND, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
-	{
-		TRACE0("Failed to create Grid window\n");
 		return FALSE; // failed to create
 	}
 
@@ -316,13 +304,4 @@ void CMainFrame::OnEditRoom()
 		m_wndRoomProperties.ShowPane(FALSE,FALSE,TRUE);
 	else
 		m_wndRoomProperties.ShowPane(TRUE,FALSE,TRUE);
-}
-
-
-void CMainFrame::OnEditGrid()
-{
-	if (m_wndGridProperties.IsPaneVisible())
-		m_wndGridProperties.ShowPane(FALSE,FALSE,TRUE);
-	else
-		m_wndGridProperties.ShowPane(TRUE,FALSE,TRUE);
 }

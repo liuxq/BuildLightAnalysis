@@ -316,25 +316,22 @@ void CBuildLightAnalysisDoc::loadMaterial()
 void CBuildLightAnalysisDoc::clear()
 {
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
-	//读取外墙
+	//清除外墙
 	pMain->GetOutWallProperty().DeleteAllPos();
 
-	//读取内墙
+	//清除内墙
 	pMain->GetInWallProperty().DeleteAllPos();
 
-	//读取处理后墙
+	//清除处理后墙
 	pMain->GetOptimizeWallProperty().DeleteAllPos();
 
-	//读取窗户
+	//清除窗户
 	pMain->GetWindowProperty().DeleteAllWindow();
 
-	//读取房间信息
+	//清除房间信息
 	pMain->GetRoomProperty().DeleteAllRoom();
 
-	//读取计算点信息
-	pMain->GetGridProperty().DeleteAllGrid();
-
-	//读取选项
+	//清除选项
 	pMain->GetOptionProperty().ResetAllOption();
 	pMain->GetOptionProperty().loadMaterialTemplate();
 	pMain->GetOptionProperty().SetTransform();
@@ -355,10 +352,7 @@ void CBuildLightAnalysisDoc::load(ifstream& inputFile)
 	pMain->GetWindowProperty().load(inputFile);
 
 	//读取房间信息
-	//pMain->GetRoomProperty().load(inputFile);
-
-	//读取计算点信息
-	pMain->GetGridProperty().load(inputFile);
+	pMain->GetRoomProperty().load(inputFile);
 
 	//读取选项
 	pMain->GetOptionProperty().load(inputFile);
@@ -381,10 +375,7 @@ void CBuildLightAnalysisDoc::save(ofstream& outputFile)
 	pMain->GetWindowProperty().save(outputFile);
 
 	//写入房间信息
-	//pMain->GetRoomProperty().save(outputFile);
-
-	//写入计算点信息
-	pMain->GetGridProperty().save(outputFile);
+	pMain->GetRoomProperty().save(outputFile);
 
 	//写入选项
 	pMain->GetOptionProperty().save(outputFile);

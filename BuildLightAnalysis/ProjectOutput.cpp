@@ -350,8 +350,8 @@ void RoomOutput(string filename)
 	if (!pMain)
 		return;
 
-	vector<Grid> grids;
-	pMain->GetGridProperty().OutputToGrids(grids);
+	vector<Room> rooms;
+	pMain->GetRoomProperty().OutputToRooms(rooms);
 
 	ofstream out(filename);
 	if (!out.is_open())
@@ -360,7 +360,6 @@ void RoomOutput(string filename)
 		return;
 	}
 
-	PropertyGridCtrl* pRoomlist = pMain->GetRoomProperty().getPropList();
 	CMFCPropertyGridProperty* optimizeOutWallPos = pMain->GetOptimizeWallProperty().getCoodOutWallGroup();
 	CMFCPropertyGridProperty* optimizeInWallPos = pMain->GetOptimizeWallProperty().getCoodInWallGroup();
 	PropertyGridCtrl* pWindowlist = pMain->GetWindowProperty().getPropList();
@@ -368,61 +367,56 @@ void RoomOutput(string filename)
 	double h = pMain->GetOptionProperty().GetDataDouble(OPTION_LEVEL_HEIGHT);
 	CString roofMat = pMain->GetOptionProperty().GetDataCString(OPTION_ROOF_MAT);
 	CString floorMat = pMain->GetOptionProperty().GetDataCString(OPTION_FLOOR_MAT);
-	for (int i = 0; i < pRoomlist->GetPropertyCount(); i++)
+	for (int i = 0; i < rooms.size(); i++)
 	{
 		//导出第i个房间
 		vector<Surface> surfaces;
-		CMFCPropertyGridProperty* pRoom = pRoomlist->GetProperty(i);
 		Wall wall;
 		list<Wall> roomWalls;
 		stWindow window;
 		vector<stWindow> roomWindows;
-		for (int j = 0; j < pRoom->GetSubItemsCount(); j++)
+		for (int j = 0; j < rooms[i].outWalls.size(); j++)
 		{
-			CString wallType = pRoom->GetSubItem(j)->GetName();
-			if (wallType == _T("外墙号"))
-			{
-				int index = pRoom->GetSubItem(j)->GetValue().intVal;
-				wall.line.s.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
-				wall.line.s.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
-				wall.line.e.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
-				wall.line.e.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
-				wall.wallInfo.index = index;
-				wall.wallInfo.type = sLine::OUT_WALL;
-				wall.isOrder = true;
-				roomWalls.push_back(wall);
-			}
-			else if (wallType == _T("内墙号"))
-			{
-				int index = pRoom->GetSubItem(j)->GetValue().intVal;
-				wall.line.s.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
-				wall.line.s.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
-				wall.line.e.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
-				wall.line.e.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
-				wall.wallInfo.index = index;
-				wall.wallInfo.type = sLine::IN_WALL;
-				wall.isOrder = true;
-				roomWalls.push_back(wall);
-			}
-			else if (wallType == _T("窗户号"))
-			{
-				int index = pRoom->GetSubItem(j)->GetValue().intVal;
-				stWindow win;
-				CMFCPropertyGridProperty* pWin = pWindowlist->GetProperty(index);
-				CString wallType = pWin->GetSubItem(0)->GetValue().bstrVal;
-				_tcscpy_s(win.wallType, wallType);
-				win.wallIndex = pWin->GetSubItem(1)->GetValue().intVal;
-				win.pos = pWin->GetSubItem(2)->GetValue().dblVal;
-				win.WinUpHeight = pWin->GetSubItem(3)->GetValue().dblVal;
-				win.WinDownHeight = pWin->GetSubItem(4)->GetValue().dblVal;
-				win.WinWidth = pWin->GetSubItem(5)->GetValue().dblVal;
-				CString mat = pWin->GetSubItem(6)->GetValue().bstrVal;
-				_tcscpy_s(win.WinMaterial, mat);
-
-				roomWindows.push_back(win);
-			}
-
+			int index = rooms[i].outWalls[j];
+			wall.line.s.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+			wall.line.s.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+			wall.line.e.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+			wall.line.e.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+			wall.wallInfo.index = index;
+			wall.wallInfo.type = sLine::OUT_WALL;
+			wall.isOrder = true;
+			roomWalls.push_back(wall);
 		}
+		for (int j = 0; j < rooms[i].inWalls.size(); j++)
+		{
+			int index = rooms[i].inWalls[j];
+			wall.line.s.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+			wall.line.s.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+			wall.line.e.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+			wall.line.e.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+			wall.wallInfo.index = index;
+			wall.wallInfo.type = sLine::IN_WALL;
+			wall.isOrder = true;
+			roomWalls.push_back(wall);
+		}
+		for (int j = 0; j < rooms[i].windows.size(); j++)
+		{
+			int index = rooms[i].windows[j];
+			stWindow win;
+			CMFCPropertyGridProperty* pWin = pWindowlist->GetProperty(index);
+			CString wallType = pWin->GetSubItem(0)->GetValue().bstrVal;
+			_tcscpy_s(win.wallType, wallType);
+			win.wallIndex = pWin->GetSubItem(1)->GetValue().intVal;
+			win.pos = pWin->GetSubItem(2)->GetValue().dblVal;
+			win.WinUpHeight = pWin->GetSubItem(3)->GetValue().dblVal;
+			win.WinDownHeight = pWin->GetSubItem(4)->GetValue().dblVal;
+			win.WinWidth = pWin->GetSubItem(5)->GetValue().dblVal;
+			CString mat = pWin->GetSubItem(6)->GetValue().bstrVal;
+			_tcscpy_s(win.WinMaterial, mat);
+
+			roomWindows.push_back(win);
+		}
+
 		vector<Vec2d> outPolygon;
 		vector<Wall> outWalls;
 		if (!CalClosedPolygon(roomWalls, outWalls, outPolygon))
@@ -695,18 +689,16 @@ void RoomOutput(string filename)
 
 		out << "end geometry" << endl << endl;
 
-		for (int k = 0; k < grids.size(); k++)
+		if (!rooms[i].grid.points.empty())
 		{
-			if (grids[k].roomIndex == i)
+			vector<GridPoint>& points = rooms[i].grid.points;
+			out << "start pts" << endl;
+			for (int a = 0; a < points.size(); a++)
 			{
-				out << "start pts" << endl;
-				for (int a = 0; a < grids[k].points.size(); a++)
-				{
-					out << grids[k].points[a].isKey << " " << grids[k].points[a].p.x << " " << grids[k].points[a].p.y << endl;
-				}
-				out << "end pts" << endl << endl;
-				break;
+				out << points[a].isKey << " " << points[a].p.x << " " << points[a].p.y << endl;
 			}
+			out << "end pts" << endl << endl;
 		}
+		
 	}
 }

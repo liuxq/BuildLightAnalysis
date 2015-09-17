@@ -47,7 +47,7 @@ END_MESSAGE_MAP()
 
 CBuildLightAnalysisView::CBuildLightAnalysisView():m_selectedOutWallPoint(-1),m_isDrawInWall(false),
 	m_iSelectOutWallIndex(-1), m_iSelectInWallIndex(-1), m_iSelectWindowIndex(-1),m_bIsPullTranslate(false),
-	m_iSelectGridSetIndex(-1),m_iSelectGridIndex(-1)
+	m_iSelectGridRoomIndex(-1),m_iSelectGridIndex(-1)
 {
 	// TODO: add construction code here
 	m_transform.scale = 0.1;
@@ -302,39 +302,38 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 				graph->DrawLine(&winPen, (float)pWins.x, (float)pWins.y, (float)pWine.x, (float)pWine.y);
 			
 		}
-		//画房间
+		//画房间和计算点
+		Gdiplus::Pen selectGridPen(Gdiplus::Color(180,GetRValue(keyGridColor),GetGValue(keyGridColor),GetBValue(keyGridColor)),3);
+		Gdiplus::Pen keyGridPen(Gdiplus::Color(255,GetRValue(keyGridColor),GetGValue(keyGridColor),GetBValue(keyGridColor)),3);
 		Gdiplus::Pen roomPen(Gdiplus::Color(255,100,255,100), 20);
 		PropertyGridCtrl* pRoomlist = pMain->GetRoomProperty().getPropList();
 		for (int i = 0; i < pRoomlist->GetPropertyCount(); i++)
 		{
 			CMFCPropertyGridProperty* pRoom = pRoomlist->GetProperty(i);
+			CMFCPropertyGridProperty* pOutWall = pRoom->GetSubItem(ROOM_OUT_WALL);
+			CMFCPropertyGridProperty* pInWall = pRoom->GetSubItem(ROOM_IN_WALL);
+			CMFCPropertyGridProperty* pWindow = pRoom->GetSubItem(ROOM_WINDOW);
 			Vec2d pos = Vec2d::ZERO;
 			int sumCount = 0;
-			for (int j = 0; j < pRoom->GetSubItemsCount(); j++)
+			for (int j = 0; j < pOutWall->GetSubItemsCount(); j++)
 			{
-				CString na = pRoom->GetSubItem(j)->GetName();
-				if (na == _T("外墙号"))
-				{
-					int index = pRoom->GetSubItem(j)->GetValue().intVal;
-					p.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
-					p.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
-					p1.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
-					p1.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
-					
-					pos += p + p1;
-					sumCount += 2;
-				}
-				else if (na == _T("内墙号"))
-				{
-					int index = pRoom->GetSubItem(j)->GetValue().intVal;
-					p.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
-					p.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
-					p1.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
-					p1.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
-
-					pos += p + p1;
-					sumCount += 2;
-				}				
+				int index = pOutWall->GetSubItem(j)->GetValue().intVal;
+				p.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+				p.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+				p1.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+				p1.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+				pos += p + p1;
+				sumCount += 2;
+			}
+			for (int j = 0; j < pInWall->GetSubItemsCount(); j++)
+			{
+				int index = pRoom->GetSubItem(j)->GetValue().intVal;
+				p.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+				p.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+				p1.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+				p1.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+				pos += p + p1;
+				sumCount += 2;
 			}
 			if (sumCount)
 			{
@@ -352,38 +351,34 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 				posf.Y -= 6;
 				graph->DrawString(wch ,na.GetLength(), &font,posf, &brush);
 			}
-		}
-		//画计算点
-		Gdiplus::Pen selectPen(Gdiplus::Color(180,GetRValue(keyGridColor),GetGValue(keyGridColor),GetBValue(keyGridColor)),3);
-		Gdiplus::Pen keyPen(Gdiplus::Color(255,GetRValue(keyGridColor),GetGValue(keyGridColor),GetBValue(keyGridColor)),3);
-
-		PropertyGridCtrl* pGridList = pMain->GetGridProperty().getPropList();
-		for (int i = 0; i < pGridList->GetPropertyCount(); i++)
-		{
-			if (pGridList->GetProperty(i)->GetSubItemsCount() < 4)
-				continue;
-			CMFCPropertyGridProperty* pGrid = pGridList->GetProperty(i)->GetSubItem(3);
-			for (int j = 0; j < pGrid->GetSubItemsCount(); j++)
+			//计算点
+			CMFCPropertyGridProperty* pGrid = pRoom->GetSubItem(ROOM_GRID);
+			if (pGrid->GetSubItemsCount() == GRID_POINTS+1)//如果存在计算点
 			{
-				p.x = pGrid->GetSubItem(j)->GetSubItem(0)->GetValue().dblVal;
-				p.y = pGrid->GetSubItem(j)->GetSubItem(1)->GetValue().dblVal;
-				p = m_transform.RealToScreen(p);
-				CString _name = pGrid->GetSubItem(j)->GetName();
-				if (i == m_iSelectGridSetIndex && j == m_iSelectGridIndex)//如果是拾取的计算点
-				{
-					graph->DrawLine(&selectPen, (float)p.x - 4, (float)p.y, (float)p.x + 4, (float)p.y);
-					graph->DrawLine(&selectPen, (float)p.x, (float)p.y - 4, (float)p.x, (float)p.y + 4);
-				}
-				else if (_name == _T("关键点"))
-				{
-					graph->DrawLine(&keyPen, (float)p.x - 4, (float)p.y, (float)p.x + 4, (float)p.y);
-					graph->DrawLine(&keyPen, (float)p.x, (float)p.y - 4, (float)p.x, (float)p.y + 4);
+				CMFCPropertyGridProperty* pPoints = pGrid->GetSubItem(GRID_POINTS);
 
+				for (int j = 0; j < pPoints->GetSubItemsCount(); j++)
+				{
+					p.x = pPoints->GetSubItem(j)->GetSubItem(0)->GetValue().dblVal;
+					p.y = pPoints->GetSubItem(j)->GetSubItem(1)->GetValue().dblVal;
+					p = m_transform.RealToScreen(p);
+					CString _name = pPoints->GetSubItem(j)->GetName();
+					if (i == m_iSelectGridRoomIndex && j == m_iSelectGridIndex)//如果是拾取的计算点
+					{
+						graph->DrawLine(&selectGridPen, (float)p.x - 4, (float)p.y, (float)p.x + 4, (float)p.y);
+						graph->DrawLine(&selectGridPen, (float)p.x, (float)p.y - 4, (float)p.x, (float)p.y + 4);
+					}
+					else if (_name == _T("关键点"))
+					{
+						graph->DrawLine(&keyGridPen, (float)p.x - 4, (float)p.y, (float)p.x + 4, (float)p.y);
+						graph->DrawLine(&keyGridPen, (float)p.x, (float)p.y - 4, (float)p.x, (float)p.y + 4);
+
+					}
+					else
+						graph->FillEllipse(&pointBrush, (float)p.x - 2, (float)p.y - 2, 4.0, 4.0);
 				}
-				else
-					graph->FillEllipse(&pointBrush, (float)p.x - 2, (float)p.y - 2, 4.0, 4.0);
-					
 			}
+			
 		}
 	}
 	/*Graphics graphics(pDC->GetSafeHdc());
@@ -542,24 +537,25 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 		}
 
 		//计算点拾取
-		m_iSelectGridSetIndex = -1;
+		m_iSelectGridRoomIndex = -1;
 		m_iSelectGridIndex = -1;
 		Vec2d gridP;
-		PropertyGridCtrl* pGridList = pMain->GetGridProperty().getPropList();
-		for (int i = 0; i < pGridList->GetPropertyCount(); i++)
+		PropertyGridCtrl* pRoomList = pMain->GetRoomProperty().getPropList();
+		for (int i = 0; i < pRoomList->GetPropertyCount(); i++)
 		{
-			if (pGridList->GetProperty(i)->GetSubItemsCount() < 4)
+			CMFCPropertyGridProperty* pGrid = pRoomList->GetProperty(i)->GetSubItem(ROOM_GRID);
+			if (pGrid->GetSubItemsCount() < GRID_POINTS+1)
 				continue;
 			bool flag = false;
-			CMFCPropertyGridProperty* pGrid = pGridList->GetProperty(i)->GetSubItem(3);
-			for (int j = 0; j < pGrid->GetSubItemsCount(); j++)
+			CMFCPropertyGridProperty* points = pGrid->GetSubItem(GRID_POINTS);
+			for (int j = 0; j < points->GetSubItemsCount(); j++)
 			{
-				gridP.x = pGrid->GetSubItem(j)->GetSubItem(0)->GetValue().dblVal;
-				gridP.y = pGrid->GetSubItem(j)->GetSubItem(1)->GetValue().dblVal;
+				gridP.x = points->GetSubItem(j)->GetSubItem(0)->GetValue().dblVal;
+				gridP.y = points->GetSubItem(j)->GetSubItem(1)->GetValue().dblVal;
 				
 				if ((p-gridP).Length() < 100.0)
 				{
-					m_iSelectGridSetIndex = i;
+					m_iSelectGridRoomIndex = i;
 					m_iSelectGridIndex = j;
 					flag = true;
 					break;
@@ -620,9 +616,9 @@ void CBuildLightAnalysisView::OnLButtonDown(UINT nFlags, CPoint point)
 	}
 
 	//添加关键计算点
-	if (MK_CONTROL&nFlags && m_iSelectGridSetIndex >= 0 && m_iSelectGridIndex >= 0)
+	if (MK_CONTROL&nFlags && m_iSelectGridRoomIndex >= 0 && m_iSelectGridIndex >= 0)
 	{
-		CMFCPropertyGridProperty* pPoint = pMain->GetGridProperty().getPropList()->GetProperty(m_iSelectGridSetIndex)->GetSubItem(3)->GetSubItem(m_iSelectGridIndex);
+		CMFCPropertyGridProperty* pPoint = pMain->GetRoomProperty().getPropList()->GetProperty(m_iSelectGridRoomIndex)->GetSubItem(ROOM_GRID)->GetSubItem(GRID_POINTS)->GetSubItem(m_iSelectGridIndex);
 		CString _name = pPoint->GetName();
 		if (_name == _T("关键点"))
 		{
@@ -748,7 +744,6 @@ void CBuildLightAnalysisView::OnEditDoOptimize()
 
 	pMain->GetWindowProperty().DeleteAllWindow();
 	pMain->GetRoomProperty().DeleteAllRoom();
-	pMain->GetGridProperty().DeleteAllGrid();
 
 	optimize();
 

@@ -1,6 +1,7 @@
-#include "PropertyGridCtrl.h"
 #pragma once
 
+#include "PropertyGridCtrl.h"
+#include "CommonData.h"
 enum
 {
 	ROOM_OUT_WALL = 0,
@@ -36,10 +37,12 @@ public:
 		return &m_wndPropList;
 	}
 
+	PropertyGridProperty* AddRoom(CString);
 	bool AddToSelectedRoom(int type, int index);
 	void DeleteAllRoom();
 	CMFCPropertyGridProperty* InsertGrid(double offset, double meshLen);
 	void CalGrid(CMFCPropertyGridProperty* pGrid);
+	void OutputToRooms(vector<Room>& rooms);
 
 	void save(ofstream& out);
 	void load(ifstream& in);

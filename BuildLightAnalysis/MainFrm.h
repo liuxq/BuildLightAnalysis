@@ -9,7 +9,6 @@
 #include "OptionWnd.h"
 #include "WindowWnd.h"
 #include "RoomWnd.h"
-#include "GridWnd.h"
 
 
 class CMainFrame : public CFrameWndEx
@@ -48,10 +47,6 @@ public:
 	{
 		return m_wndRoomProperties;
 	}
-	CGridWnd& GetGridProperty()
-	{
-		return m_wndGridProperties;
-	}
 	CMFCStatusBar& GetStatusBar()
 	{
 		return m_wndStatusBar;
@@ -78,7 +73,6 @@ protected:  // control bar embedded members
 	COptionWnd		  m_wndOptionProperties;
 	CWindowWnd		  m_wndWindowProperties;
 	CRoomWnd		  m_wndRoomProperties;
-	CGridWnd		  m_wndGridProperties;
 	
 public:
 	
