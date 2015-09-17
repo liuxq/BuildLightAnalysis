@@ -239,122 +239,6 @@ CMFCPropertyGridProperty* CGridWnd::InsertGrid(int roomIndex, double offset, dou
 
 	return pGrid;
 }
-void CGridWnd::LoadGrid(CMFCPropertyGridProperty* pGrid, vector<GridPoint>& points)
-{
-	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
-	if (!pMain)
-		return;
-
-	if (pGrid->GetSubItemsCount() >= 4)
-	{
-		CMFCPropertyGridProperty* pl = pGrid->GetSubItem(3);
-		if (pl)
-			pGrid->RemoveSubItem(pl);
-	}
-
-	CMFCPropertyGridProperty* pGridList = new CMFCPropertyGridProperty(_T("计算点"),0,TRUE);
-
-	CString strp;
-	for (int i = 0; i < points.size(); i++)
-	{
-		if (points[i].isKey)
-			strp = _T("关键点");
-		else
-			strp = _T("点");
-		CMFCPropertyGridProperty* pGridPoint = new CMFCPropertyGridProperty(strp,0,TRUE);
-		CMFCPropertyGridProperty* pGridPointX = new CMFCPropertyGridProperty(_T("X"),(_variant_t)points[i].p.x,_T("X"));
-		CMFCPropertyGridProperty* pGridPointY = new CMFCPropertyGridProperty(_T("Y"),(_variant_t)points[i].p.y,_T("Y"));
-		pGridPoint->AddSubItem(pGridPointX);
-		pGridPoint->AddSubItem(pGridPointY);
-
-		pGridList->AddSubItem(pGridPoint);
-	}
-	pGrid->AddSubItem(pGridList);
-
-	m_wndPropList.UpdateProperty((PropertyGridProperty*)(pGrid));
-
-}
-void CGridWnd::CalGrid(CMFCPropertyGridProperty* pGrid)
-{
-	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
-	if (!pMain || !pGrid)
-		return;
-
-	if (pGrid->GetSubItemsCount() >= 4)
-	{
-		CMFCPropertyGridProperty* pl = pGrid->GetSubItem(3);
-		if (pl)
-			pGrid->RemoveSubItem(pl);
-	}
-	
-
-	int roomIndex = pGrid->GetSubItem(0)->GetValue().intVal;
-	int offset = pGrid->GetSubItem(1)->GetValue().dblVal;
-	int meshLen = pGrid->GetSubItem(2)->GetValue().dblVal;
-
-	if (roomIndex == -1)
-		return;
-
-	CMFCPropertyGridProperty* pGridList = new CMFCPropertyGridProperty(_T("计算点"),0,TRUE);
-
-	PropertyGridCtrl* pRoomlist = pMain->GetRoomProperty().getPropList();
-	CMFCPropertyGridProperty* optimizeOutWallPos = pMain->GetOptimizeWallProperty().getCoodOutWallGroup();
-	CMFCPropertyGridProperty* optimizeInWallPos = pMain->GetOptimizeWallProperty().getCoodInWallGroup();
-	//导出第i个房间
-	CMFCPropertyGridProperty* pRoom = pRoomlist->GetProperty(roomIndex);
-	Wall wall;
-	list<Wall> roomWalls;
-	for (int j = 0; j < pRoom->GetSubItemsCount(); j++)
-	{
-		CString wallType = pRoom->GetSubItem(j)->GetName();
-		if (wallType == _T("外墙号"))
-		{
-			int index = pRoom->GetSubItem(j)->GetValue().intVal;
-			wall.line.s.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
-			wall.line.s.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
-			wall.line.e.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
-			wall.line.e.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
-			wall.wallInfo.index = index;
-			wall.wallInfo.type = sLine::OUT_WALL;
-			wall.isOrder = true;
-			roomWalls.push_back(wall);
-		}
-		else if (wallType == _T("内墙号"))
-		{
-			int index = pRoom->GetSubItem(j)->GetValue().intVal;
-			wall.line.s.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
-			wall.line.s.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
-			wall.line.e.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
-			wall.line.e.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
-			wall.wallInfo.index = index;
-			wall.wallInfo.type = sLine::IN_WALL;
-			wall.isOrder = true;
-			roomWalls.push_back(wall);
-		}
-	}
-	vector<Vec2d> outPolygon;
-	vector<Wall> outWalls;
-	if (!CalClosedPolygon(roomWalls, outWalls, outPolygon))
-	{
-		return;
-	}
-	vector<Vec2d> gridPoints;
-	CalGridFromPolygon(outPolygon,offset,meshLen,gridPoints);
-
-	for (int i = 0; i < gridPoints.size(); i++)
-	{
-		CMFCPropertyGridProperty* pGridPoint = new CMFCPropertyGridProperty(_T("点"),0,TRUE);
-		CMFCPropertyGridProperty* pGridPointX = new CMFCPropertyGridProperty(_T("X"),(_variant_t)gridPoints[i].x,_T("X"));
-		CMFCPropertyGridProperty* pGridPointY = new CMFCPropertyGridProperty(_T("Y"),(_variant_t)gridPoints[i].y,_T("Y"));
-		pGridPoint->AddSubItem(pGridPointX);
-		pGridPoint->AddSubItem(pGridPointY);
-
-		pGridList->AddSubItem(pGridPoint);
-	}
-	pGrid->AddSubItem(pGridList);
-
-	m_wndPropList.UpdateProperty((PropertyGridProperty*)(pGrid));
-}
 
 void CGridWnd::DeleteAllGrid()
 {
@@ -362,31 +246,12 @@ void CGridWnd::DeleteAllGrid()
 	m_wndPropList.AdjustLayout();
 }
 
-LRESULT CGridWnd::OnPropertyChanged (WPARAM,LPARAM lParam)
-{
-	CMFCPropertyGridProperty* pProp = (CMFCPropertyGridProperty*) lParam;
-
-	if (pProp->GetParent() && pProp->GetParent()->GetData() == 1000)
-	{
-		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
-		if (!pMain)
-			0;
-		CMFCPropertyGridProperty* grid = pProp->GetParent();
-		CalGrid(grid);
-		m_wndPropList.AdjustLayout();
-
-		//更新视图     
-		pMain->GetActiveView()->Invalidate(); 
-	}
-	return 0;
-}
 void CGridWnd::OutputToGrids(vector<Grid>& grids)
 {
 	for (int i = 0; i < m_wndPropList.GetPropertyCount(); i++)
 	{
 		Grid g;
 		CMFCPropertyGridProperty* pG = m_wndPropList.GetProperty(i);
-		g.roomIndex = pG->GetSubItem(0)->GetValue().intVal;
 		g.offset = pG->GetSubItem(1)->GetValue().dblVal;
 		g.meshLen = pG->GetSubItem(2)->GetValue().dblVal;
 		if (pG->GetSubItemsCount() < 4)

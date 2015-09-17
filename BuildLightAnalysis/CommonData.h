@@ -82,12 +82,20 @@ struct GridPoint
 	Vec2d p;
 	bool isKey;
 };
+
 struct Grid
 {
-	int roomIndex;
 	double offset;
 	double meshLen;
 	vector<GridPoint> points;
+};
+struct Room
+{
+	vector<int> outWalls;
+	vector<int> inWalls;
+	vector<int> windows;
+	//º∆À„µ„
+	Grid grid;
 };
 
 struct Surface

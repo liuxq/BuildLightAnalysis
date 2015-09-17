@@ -360,27 +360,48 @@ LRESULT CRoomWnd::OnPropertyChanged (WPARAM,LPARAM lParam)
 
 void CRoomWnd::save(ofstream& out)
 {
-	vector<vector<WallIndex> > rooms;
+	vector<Room> rooms;
 	for (int i = 0; i < m_wndPropList.GetPropertyCount(); i++)
 	{
-		vector<WallIndex> room;
+		Room room;
 		CMFCPropertyGridProperty* pRoom = m_wndPropList.GetProperty(i);
-		for (int j = 0; j < pRoom->GetSubItemsCount(); j++)
+		CMFCPropertyGridProperty* pOutWall = pRoom->GetSubItem(ROOM_OUT_WALL);
+		CMFCPropertyGridProperty* pInWall = pRoom->GetSubItem(ROOM_IN_WALL);
+		CMFCPropertyGridProperty* pWindow = pRoom->GetSubItem(ROOM_WINDOW);
+		for (int j = 0; j < pInWall->GetSubItemsCount(); j++)
 		{
-			CString name = pRoom->GetSubItem(j)->GetName();
-			if (name == _T("外墙号"))
-			{
-				room.push_back(WallIndex(1,pRoom->GetSubItem(j)->GetValue().intVal));
-			}
-			if (name == _T("内墙号"))
-			{
-				room.push_back(WallIndex(2,pRoom->GetSubItem(j)->GetValue().intVal));
-			}
-			if (name == _T("窗户号"))
-			{
-				room.push_back(WallIndex(3,pRoom->GetSubItem(j)->GetValue().intVal));
-			}
+			int index = pInWall->GetSubItem(j)->GetValue().intVal;
+			room.outWalls.push_back(index);
 		}
+		for (int j = 0; j < pOutWall->GetSubItemsCount(); j++)
+		{
+			int index = pOutWall->GetSubItem(j)->GetValue().intVal;
+			room.outWalls.push_back(index);
+		}
+		for (int j = 0; j < pWindow->GetSubItemsCount(); j++)
+		{
+			int index = pWindow->GetSubItem(j)->GetValue().intVal;
+			room.outWalls.push_back(index);
+		}
+
+		//计算点
+		CMFCPropertyGridProperty* pGrid = pRoom->GetSubItem(ROOM_GRID);
+		room.grid.offset = pGrid->GetSubItem(GRID_OFFSET)->GetValue().dblVal;
+		room.grid.meshLen = pGrid->GetSubItem(GRID_MESHLEN)->GetValue().dblVal;
+		CMFCPropertyGridProperty* pPoints = pGrid->GetSubItem(GRID_POINTS);
+		for (int j = 0; j < pPoints->GetSubItemsCount(); j++)
+		{
+			GridPoint p;
+			CString _name = pPoints->GetSubItem(j)->GetName();
+			if (_name == _T("关键点"))
+				p.isKey = true;
+			else
+				p.isKey = false;
+			p.p.x = pPoints->GetSubItem(j)->GetSubItem(0)->GetValue().dblVal;
+			p.p.y = pPoints->GetSubItem(j)->GetSubItem(1)->GetValue().dblVal;
+			room.grid.points.push_back(p);
+		}
+		
 		rooms.push_back(room);
 	}
 
@@ -388,7 +409,9 @@ void CRoomWnd::save(ofstream& out)
 	out.write((char *)&size, sizeof(size));
 	for (int i = 0; i < size; i++)
 	{
-		serializer<WallIndex>::write(out, &rooms[i]);
+		serializer<int>::write(out, &rooms[i].outWalls);
+		serializer<int>::write(out, &rooms[i].inWalls);
+		serializer<int>::write(out, &rooms[i].windows);
 	}
 	
 }
