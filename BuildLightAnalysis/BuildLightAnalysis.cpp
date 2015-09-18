@@ -24,7 +24,7 @@ ULONG_PTR    m_GdiplusToken;  //±£¥ÊGDI+±ª≥ı ºªØ∫Û‘⁄”¶”√≥Ã–Ú÷–µƒGDI+±Í ∂,¿‡À∆”⁄æ
 // CBuildLightAnalysisApp
 
 BEGIN_MESSAGE_MAP(CBuildLightAnalysisApp, CWinAppEx)
-	ON_COMMAND(ID_APP_ABOUT, &CBuildLightAnalysisApp::OnAppAbout)
+	ON_COMMAND(ID_ABOUT, &CBuildLightAnalysisApp::OnAppAbout)
 	// Standard file based document commands
 END_MESSAGE_MAP()
 

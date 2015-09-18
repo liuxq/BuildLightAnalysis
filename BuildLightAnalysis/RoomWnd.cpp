@@ -36,11 +36,6 @@ BEGIN_MESSAGE_MAP(CRoomWnd, CDockablePane)
 	ON_WM_SIZE()
 	ON_WM_CONTEXTMENU()
 
-	ON_COMMAND(ID_EXPAND_ALL, OnExpandAllProperties)
-	ON_UPDATE_COMMAND_UI(ID_EXPAND_ALL, OnUpdateExpandAllProperties)
-	ON_COMMAND(ID_SORTPROPERTIES, OnSortProperties)
-	ON_UPDATE_COMMAND_UI(ID_SORTPROPERTIES, OnUpdateSortProperties)
-
 	ON_COMMAND(IDC_ROOM_INSERT_BUTTON, OnNewRoom)
 	ON_UPDATE_COMMAND_UI(IDC_ROOM_INSERT_BUTTON, OnUpdateProperties1)
 	ON_COMMAND(IDC_ROOM_DELETE_BUTTON, OnDeleteRoom)
@@ -390,20 +385,22 @@ void CRoomWnd::OutputToRooms(vector<Room>& rooms)
 		CMFCPropertyGridProperty* pGrid = pRoom->GetSubItem(ROOM_GRID);
 		room.grid.offset = pGrid->GetSubItem(GRID_OFFSET)->GetValue().dblVal;
 		room.grid.meshLen = pGrid->GetSubItem(GRID_MESHLEN)->GetValue().dblVal;
-		CMFCPropertyGridProperty* pPoints = pGrid->GetSubItem(GRID_POINTS);
-		for (int j = 0; j < pPoints->GetSubItemsCount(); j++)
+		if (pGrid->GetSubItemsCount() == GRID_POINTS+1)
 		{
-			GridPoint p;
-			CString _name = pPoints->GetSubItem(j)->GetName();
-			if (_name == _T("关键点"))
-				p.isKey = true;
-			else
-				p.isKey = false;
-			p.p.x = pPoints->GetSubItem(j)->GetSubItem(0)->GetValue().dblVal;
-			p.p.y = pPoints->GetSubItem(j)->GetSubItem(1)->GetValue().dblVal;
-			room.grid.points.push_back(p);
+			CMFCPropertyGridProperty* pPoints = pGrid->GetSubItem(GRID_POINTS);
+			for (int j = 0; j < pPoints->GetSubItemsCount(); j++)
+			{
+				GridPoint p;
+				CString _name = pPoints->GetSubItem(j)->GetName();
+				if (_name == _T("关键点"))
+					p.isKey = true;
+				else
+					p.isKey = false;
+				p.p.x = pPoints->GetSubItem(j)->GetSubItem(0)->GetValue().dblVal;
+				p.p.y = pPoints->GetSubItem(j)->GetSubItem(1)->GetValue().dblVal;
+				room.grid.points.push_back(p);
+			}
 		}
-
 		rooms.push_back(room);
 	}
 }
@@ -501,7 +498,7 @@ void CRoomWnd::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 void CRoomWnd::OnRoomCalGrid()
 {
 	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
-	while (selItem->GetParent())
+	while (selItem && selItem->GetParent())
 	{
 		selItem = selItem->GetParent();
 	}
@@ -513,5 +510,9 @@ void CRoomWnd::OnRoomCalGrid()
 		if (!pMain)
 			return;
 		pMain->GetActiveView()->Invalidate(); 
+	}
+	else
+	{
+		AfxMessageBox(_T("没有选择任何房间！"));
 	}
 }

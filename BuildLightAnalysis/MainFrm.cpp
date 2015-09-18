@@ -30,6 +30,10 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_COMMAND(ID_EDIT_OPTION, &CMainFrame::OnEditOption)
 	ON_COMMAND(ID_EDIT_WINDOW, &CMainFrame::OnEditWindow)
 	ON_COMMAND(ID_EDIT_ROOM, &CMainFrame::OnEditRoom)
+	ON_COMMAND(ID_ROOM_CAL_GRID, &CMainFrame::OnRoomCalGrid)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_OUTWALL, &CMainFrame::OnUpdateEditOutwall)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_INWALL, &CMainFrame::OnUpdateEditInwall)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_OPTIMIZE, &CMainFrame::OnUpdateEditOptimize)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -42,7 +46,7 @@ static UINT indicators[] =
 
 // CMainFrame construction/destruction
 
-CMainFrame::CMainFrame()
+CMainFrame::CMainFrame():m_eMode(MODE_OUTWALL)
 {
 	// TODO: add member initialization code here
 }
@@ -265,6 +269,7 @@ LRESULT CMainFrame::OnToolbarCreateNew(WPARAM wp,LPARAM lp)
 
 void CMainFrame::OnEditOutwall()
 {
+	m_eMode = MODE_OUTWALL;
 	m_wndOutWallProperties.ShowPane(TRUE,FALSE,TRUE);
 	m_wndInWallProperties.ShowPane(FALSE,FALSE,TRUE);
 	m_wndOptimizeWallProperties.ShowPane(FALSE,FALSE,TRUE);
@@ -273,6 +278,7 @@ void CMainFrame::OnEditOutwall()
 
 void CMainFrame::OnEditInwall()
 {
+	m_eMode = MODE_INWALL;
 	m_wndOutWallProperties.ShowPane(FALSE,FALSE,TRUE);
 	m_wndInWallProperties.ShowPane(TRUE,FALSE,TRUE);
 	m_wndOptimizeWallProperties.ShowPane(FALSE,FALSE,TRUE);
@@ -304,4 +310,35 @@ void CMainFrame::OnEditRoom()
 		m_wndRoomProperties.ShowPane(FALSE,FALSE,TRUE);
 	else
 		m_wndRoomProperties.ShowPane(TRUE,FALSE,TRUE);
+}
+void CMainFrame::saveMode(ofstream& out)
+{
+	serializer<int>::write(out, &m_eMode);
+}
+void CMainFrame::loadMode(ifstream& in)
+{
+	serializer<int>::read(in, &m_eMode);
+}
+
+void CMainFrame::OnRoomCalGrid()
+{
+	m_wndRoomProperties.OnRoomCalGrid();
+}
+
+
+void CMainFrame::OnUpdateEditOutwall(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(m_eMode == MODE_OUTWALL);    
+}
+
+
+void CMainFrame::OnUpdateEditInwall(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(m_eMode == MODE_INWALL);
+}
+
+
+void CMainFrame::OnUpdateEditOptimize(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(m_eMode == MODE_OPTIMIZE);
 }

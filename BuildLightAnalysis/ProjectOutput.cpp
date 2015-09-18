@@ -20,8 +20,9 @@ void geometryOutput(string filename, set<CString>& outMats)
 		AfxMessageBox(_T("文件创建失败"));
 		return;
 	}
+	vector<Room> rooms;
+	pMain->GetRoomProperty().OutputToRooms(rooms);
 
-	PropertyGridCtrl* pRoomlist = pMain->GetRoomProperty().getPropList();
 	CMFCPropertyGridProperty* optimizeOutWallPos = pMain->GetOptimizeWallProperty().getCoodOutWallGroup();
 	CMFCPropertyGridProperty* optimizeInWallPos = pMain->GetOptimizeWallProperty().getCoodInWallGroup();
 	PropertyGridCtrl* pWindowlist = pMain->GetWindowProperty().getPropList();
@@ -33,59 +34,56 @@ void geometryOutput(string filename, set<CString>& outMats)
 	outMats.insert(roofMat);
 	outMats.insert(floorMat);
 
-	for (int i = 0; i < pRoomlist->GetPropertyCount(); i++)
+	for (int i = 0; i < rooms.size(); i++)
 	{
 		//导出第i个房间
-		CMFCPropertyGridProperty* pRoom = pRoomlist->GetProperty(i);
+		vector<Surface> surfaces;
 		Wall wall;
 		list<Wall> roomWalls;
+		stWindow window;
 		vector<stWindow> roomWindows;
-		for (int j = 0; j < pRoom->GetSubItemsCount(); j++)
+		for (int j = 0; j < rooms[i].outWalls.size(); j++)
 		{
-			CString wallType = pRoom->GetSubItem(j)->GetName();
-			if (wallType == _T("外墙号"))
-			{
-				int index = pRoom->GetSubItem(j)->GetValue().intVal;
-				wall.line.s.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
-				wall.line.s.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
-				wall.line.e.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
-				wall.line.e.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
-				wall.wallInfo.index = index;
-				wall.wallInfo.type = sLine::OUT_WALL;
-				wall.isOrder = true;
-				roomWalls.push_back(wall);
-			}
-			else if (wallType == _T("内墙号"))
-			{
-				int index = pRoom->GetSubItem(j)->GetValue().intVal;
-				wall.line.s.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
-				wall.line.s.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
-				wall.line.e.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
-				wall.line.e.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
-				wall.wallInfo.index = index;
-				wall.wallInfo.type = sLine::IN_WALL;
-				wall.isOrder = true;
-				roomWalls.push_back(wall);
-			}
-			else if (wallType == _T("窗户号"))
-			{
-				int index = pRoom->GetSubItem(j)->GetValue().intVal;
-				stWindow win;
-				CMFCPropertyGridProperty* pWin = pWindowlist->GetProperty(index);
-				CString wallType = pWin->GetSubItem(0)->GetValue().bstrVal;
-				_tcscpy_s(win.wallType, wallType);
-				win.wallIndex = pWin->GetSubItem(1)->GetValue().intVal;
-				win.pos = pWin->GetSubItem(2)->GetValue().dblVal;
-				win.WinUpHeight = pWin->GetSubItem(3)->GetValue().dblVal;
-				win.WinDownHeight = pWin->GetSubItem(4)->GetValue().dblVal;
-				win.WinWidth = pWin->GetSubItem(5)->GetValue().dblVal;
-				CString mat = pWin->GetSubItem(6)->GetValue().bstrVal;
-				_tcscpy_s(win.WinMaterial, mat);
-
-				roomWindows.push_back(win);
-			}
-
+			int index = rooms[i].outWalls[j];
+			wall.line.s.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+			wall.line.s.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+			wall.line.e.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+			wall.line.e.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+			wall.wallInfo.index = index;
+			wall.wallInfo.type = sLine::OUT_WALL;
+			wall.isOrder = true;
+			roomWalls.push_back(wall);
 		}
+		for (int j = 0; j < rooms[i].inWalls.size(); j++)
+		{
+			int index = rooms[i].inWalls[j];
+			wall.line.s.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+			wall.line.s.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+			wall.line.e.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+			wall.line.e.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+			wall.wallInfo.index = index;
+			wall.wallInfo.type = sLine::IN_WALL;
+			wall.isOrder = true;
+			roomWalls.push_back(wall);
+		}
+		for (int j = 0; j < rooms[i].windows.size(); j++)
+		{
+			int index = rooms[i].windows[j];
+			stWindow win;
+			CMFCPropertyGridProperty* pWin = pWindowlist->GetProperty(index);
+			CString wallType = pWin->GetSubItem(0)->GetValue().bstrVal;
+			_tcscpy_s(win.wallType, wallType);
+			win.wallIndex = pWin->GetSubItem(1)->GetValue().intVal;
+			win.pos = pWin->GetSubItem(2)->GetValue().dblVal;
+			win.WinUpHeight = pWin->GetSubItem(3)->GetValue().dblVal;
+			win.WinDownHeight = pWin->GetSubItem(4)->GetValue().dblVal;
+			win.WinWidth = pWin->GetSubItem(5)->GetValue().dblVal;
+			CString mat = pWin->GetSubItem(6)->GetValue().bstrVal;
+			_tcscpy_s(win.WinMaterial, mat);
+
+			roomWindows.push_back(win);
+		}
+
 		vector<Vec2d> outPolygon;
 		vector<Wall> outWalls;
 		if (!CalClosedPolygon(roomWalls, outWalls, outPolygon))
@@ -344,7 +342,7 @@ void materialOutput(string filename, MaterialSet& materials, set<CString>& mats 
 	}
 }
 
-void RoomOutput(string filename)
+void RoomOutput(string roomFile, string grid1File, string grid2File)
 {
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 	if (!pMain)
@@ -353,8 +351,10 @@ void RoomOutput(string filename)
 	vector<Room> rooms;
 	pMain->GetRoomProperty().OutputToRooms(rooms);
 
-	ofstream out(filename);
-	if (!out.is_open())
+	ofstream out(roomFile);
+	ofstream grid1Out(grid1File);
+	ofstream grid2Out(grid2File);
+	if (!out.is_open() || !grid1Out.is_open() || !grid2Out.is_open())
 	{
 		AfxMessageBox(_T("文件创建失败"));
 		return;
@@ -367,6 +367,7 @@ void RoomOutput(string filename)
 	double h = pMain->GetOptionProperty().GetDataDouble(OPTION_LEVEL_HEIGHT);
 	CString roofMat = pMain->GetOptionProperty().GetDataCString(OPTION_ROOF_MAT);
 	CString floorMat = pMain->GetOptionProperty().GetDataCString(OPTION_FLOOR_MAT);
+	int GridPointCount = 0;
 	for (int i = 0; i < rooms.size(); i++)
 	{
 		//导出第i个房间
@@ -680,11 +681,7 @@ void RoomOutput(string filename)
 
 		for (int a = 0; a < surfaces.size(); a++)
 		{
-			out << "Surface" << a <<": " << surfaces[a].type << " " << surfaces[a].mat <<endl;
-			for(int b = 0; b < surfaces[a].points.size(); b++)
-			{
-				out << surfaces[a].points[b].x << " "<<surfaces[a].points[b].y << " "<<surfaces[a].points[b].z << endl;
-			}
+			out << surfaces[a].name <<endl;
 		}
 
 		out << "end geometry" << endl << endl;
@@ -695,7 +692,14 @@ void RoomOutput(string filename)
 			out << "start pts" << endl;
 			for (int a = 0; a < points.size(); a++)
 			{
-				out << points[a].isKey << " " << points[a].p.x << " " << points[a].p.y << endl;
+				out << GridPointCount << endl;
+				grid1Out << points[a].p.x << " " << points[a].p.y<<" "<<0 << " "<<0<<" "<<0<<" "<<1<<endl;
+
+				if (points[a].isKey)
+				{
+					grid2Out << points[a].p.x << " " << points[a].p.y<<" "<<0 << " "<<0<<" "<<0<<" "<<1<<endl;
+				}
+				GridPointCount++;
 			}
 			out << "end pts" << endl << endl;
 		}

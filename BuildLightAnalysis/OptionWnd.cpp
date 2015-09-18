@@ -32,10 +32,7 @@ COptionWnd::~COptionWnd()
 BEGIN_MESSAGE_MAP(COptionWnd, CDockablePane)
 	ON_WM_CREATE()
 	ON_WM_SIZE()
-	ON_COMMAND(ID_EXPAND_ALL, OnExpandAllProperties)
-	ON_UPDATE_COMMAND_UI(ID_EXPAND_ALL, OnUpdateExpandAllProperties)
-	ON_COMMAND(ID_SORTPROPERTIES, OnSortProperties)
-	ON_UPDATE_COMMAND_UI(ID_SORTPROPERTIES, OnUpdateSortProperties)
+	
 	ON_WM_SETFOCUS()
 	ON_WM_SETTINGCHANGE()
 	ON_REGISTERED_MESSAGE(AFX_WM_PROPERTY_CHANGED, OnPropertyChanged)
@@ -125,6 +122,7 @@ void COptionWnd::InitPropList()
 	CMFCPropertyGridColorProperty* pOutWallColor = new CMFCPropertyGridColorProperty(_T("外墙颜色"),RGB(0, 111, 200));
 	CMFCPropertyGridColorProperty* pInWallColor = new CMFCPropertyGridColorProperty(_T("内墙颜色"),RGB(0, 111, 200));
 	CMFCPropertyGridColorProperty* pInKeyGridColor = new CMFCPropertyGridColorProperty(_T("关键点颜色"),RGB(255, 0, 0));
+	CMFCPropertyGridProperty* pCity = new PropertyGridProperty(_T("城市"), _T("Beijing.Beijing"), _T("默认城市"));
 
 	
 	m_wndPropList.AddProperty(pLevelHigh);m_DataType[OPTION_LEVEL_HEIGHT] = OPTION_TYPE_DOUBLE;
@@ -140,9 +138,10 @@ void COptionWnd::InitPropList()
 	m_wndPropList.AddProperty(pOutWallColor);m_DataType[OPTION_OUTWALL_COLOR] = OPTION_TYPE_COLOR;
 	m_wndPropList.AddProperty(pInWallColor);m_DataType[OPTION_INWALL_COLOR] = OPTION_TYPE_COLOR;
 	m_wndPropList.AddProperty(pInKeyGridColor);m_DataType[OPTION_KEYGRID_COLOR] = OPTION_TYPE_COLOR;
+	m_wndPropList.AddProperty(pCity);m_DataType[OPTION_CITY] = OPTION_TYPE_STRING;
 }
 
-void COptionWnd::loadMaterialTemplate()
+void COptionWnd::loadMaterialTemplateAndCity()
 {
 	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;  
 	CBuildLightAnalysisDoc* pDoc = (CBuildLightAnalysisDoc*)pMain->GetActiveDocument();
@@ -163,6 +162,13 @@ void COptionWnd::loadMaterialTemplate()
 		pWindowMaterial->AddOption(strMat);
 		pFloorMaterial->AddOption(strMat);
 		pRoofMaterial->AddOption(strMat);
+	}
+
+	CMFCPropertyGridProperty* pCitys = m_wndPropList.GetProperty(OPTION_CITY);
+	vector<CString>& citys = pDoc->getCitys();
+	for (int i = 0; i < citys.size(); i++)
+	{
+		pCitys->AddOption(citys[i]);
 	}
 
 }

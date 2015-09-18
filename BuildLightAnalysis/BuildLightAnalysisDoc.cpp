@@ -241,7 +241,8 @@ void CBuildLightAnalysisDoc::OnFileNew()
 		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 		//读取材料
 		loadMaterial();
-		pMain->GetOptionProperty().loadMaterialTemplate();
+		loadCity();
+		pMain->GetOptionProperty().loadMaterialTemplateAndCity();
 		pMain->GetOptionProperty().SetTransform();
 
 		OnFileSave();
@@ -294,6 +295,7 @@ void CBuildLightAnalysisDoc::OnFileOpen()
 		}
 		//读取文件
 		loadMaterial();
+		loadCity();
 		load(inFile);
 		
 
@@ -311,6 +313,22 @@ void CBuildLightAnalysisDoc::loadMaterial()
 	CString path;
 	path.Format(_T("%s\\Template_material.rad"), m_projectLocation);
 	m_material.loadTemplate(path);
+}
+void CBuildLightAnalysisDoc::loadCity()
+{
+	CString path;
+	path.Format(_T("%s\\city_list.txt"), m_projectLocation);
+	ifstream inputFile(CStringToString(path));
+	if (!inputFile.is_open())
+	{
+		AfxMessageBox(_T("缺少城市模板，请将city_list.txt文件放入工程文件夹下"));
+		return;
+	}
+	string name;
+	while(inputFile >> name)
+	{
+		m_citys.push_back(StringToCString(name));
+	}
 }
 
 void CBuildLightAnalysisDoc::clear()
@@ -333,7 +351,7 @@ void CBuildLightAnalysisDoc::clear()
 
 	//清除选项
 	pMain->GetOptionProperty().ResetAllOption();
-	pMain->GetOptionProperty().loadMaterialTemplate();
+	pMain->GetOptionProperty().loadMaterialTemplateAndCity();
 	pMain->GetOptionProperty().SetTransform();
 }
 void CBuildLightAnalysisDoc::load(ifstream& inputFile)
@@ -354,9 +372,14 @@ void CBuildLightAnalysisDoc::load(ifstream& inputFile)
 	//读取房间信息
 	pMain->GetRoomProperty().load(inputFile);
 
+	//读取模式
+	pMain->loadMode(inputFile);
+
 	//读取选项
 	pMain->GetOptionProperty().load(inputFile);
-	pMain->GetOptionProperty().loadMaterialTemplate();
+
+	//一些设置
+	pMain->GetOptionProperty().loadMaterialTemplateAndCity();
 	pMain->GetOptionProperty().SetTransform();
 }
 void CBuildLightAnalysisDoc::save(ofstream& outputFile)
@@ -377,6 +400,9 @@ void CBuildLightAnalysisDoc::save(ofstream& outputFile)
 	//写入房间信息
 	pMain->GetRoomProperty().save(outputFile);
 
+	//读取模式
+	pMain->saveMode(outputFile);
+
 	//写入选项
 	pMain->GetOptionProperty().save(outputFile);
 
@@ -389,5 +415,7 @@ void CBuildLightAnalysisDoc::OnFileOutput()
 	set<CString> mats;
 	geometryOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_geometry.rad", mats);
 	materialOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_material.rad", m_material, mats);
-	RoomOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) +"_room_info.txt");
+	string grid1file = CStringToString(m_projectLocation) + "\\" + "grid1.pts";
+	string grid2file = CStringToString(m_projectLocation) + "\\" + "grid2.pts";
+	RoomOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) +"_room_info.txt", grid1file, grid2file);
 }

@@ -22,8 +22,13 @@ public:
 	{
 		return m_material.m_materials;
 	}
+	vector<CString>& getCitys()
+	{
+		return m_citys;
+	}
 private:
 	MaterialSet m_material;
+	vector<CString> m_citys;
 // Operations
 public:
 
@@ -48,6 +53,7 @@ protected:
 	void clear();
 	void load(ifstream& in);
 	void loadMaterial();
+	void loadCity();
 	void save(ofstream& out);
 // Generated message map functions
 protected:

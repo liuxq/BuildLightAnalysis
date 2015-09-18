@@ -18,6 +18,7 @@ enum
 	OPTION_OUTWALL_COLOR,
 	OPTION_INWALL_COLOR,
 	OPTION_KEYGRID_COLOR,
+	OPTION_CITY,
 
 	OPTION_NUM
 };
@@ -80,7 +81,7 @@ public:
 		}
 		return tmp;
 	}
-	void loadMaterialTemplate();
+	void loadMaterialTemplateAndCity();
 	void GetTransform(double s, double centerX, double centerY);
 	void SetTransform();
 	void save(ofstream& out);

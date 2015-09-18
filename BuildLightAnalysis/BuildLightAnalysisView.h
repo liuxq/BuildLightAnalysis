@@ -71,6 +71,7 @@ public:
 	afx_msg void OnPopAddtoRoom();
 	afx_msg void OnEditTranslate();
 	afx_msg void OnEditDoOptimize();
+	afx_msg void OnUpdateEditTranslate(CCmdUI *pCmdUI);
 };
 
 #ifndef _DEBUG  // debug version in BuildLightAnalysisView.cpp

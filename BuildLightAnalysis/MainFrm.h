@@ -10,6 +10,12 @@
 #include "WindowWnd.h"
 #include "RoomWnd.h"
 
+enum
+{
+	MODE_OUTWALL = 0,
+	MODE_INWALL,
+	MODE_OPTIMIZE
+};
 
 class CMainFrame : public CFrameWndEx
 {
@@ -23,6 +29,16 @@ public:
 
 // Operations
 public:
+	void SetMode(int m)
+	{
+		m_eMode = m;
+	}
+	int GetMode()
+	{
+		return m_eMode;
+	}
+	void saveMode(ofstream& out);
+	void loadMode(ifstream& in);
 	COutWallWnd& GetOutWallProperty()
 	{
 		return m_wndOutWallProperties;
@@ -73,6 +89,8 @@ protected:  // control bar embedded members
 	COptionWnd		  m_wndOptionProperties;
 	CWindowWnd		  m_wndWindowProperties;
 	CRoomWnd		  m_wndRoomProperties;
+
+	int m_eMode;
 	
 public:
 	
@@ -100,6 +118,10 @@ public:
 	afx_msg void OnEditWindow();
 	afx_msg void OnEditRoom();
 	afx_msg void OnEditGrid();
+	afx_msg void OnRoomCalGrid();
+	afx_msg void OnUpdateEditOutwall(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateEditInwall(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateEditOptimize(CCmdUI *pCmdUI);
 };
 
 

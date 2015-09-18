@@ -41,6 +41,7 @@ BEGIN_MESSAGE_MAP(CBuildLightAnalysisView, CView)
 	ON_COMMAND(ID_POP_ADDTO_ROOM, &CBuildLightAnalysisView::OnPopAddtoRoom)
 	ON_COMMAND(ID_EDIT_TRANSLATE, &CBuildLightAnalysisView::OnEditTranslate)
 	ON_COMMAND(ID_EDIT_DO_OPTIMIZE, &CBuildLightAnalysisView::OnEditDoOptimize)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_TRANSLATE, &CBuildLightAnalysisView::OnUpdateEditTranslate)
 END_MESSAGE_MAP()
 
 // CBuildLightAnalysisView construction/destruction
@@ -156,7 +157,7 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 
 	Gdiplus::SolidBrush pointBrush(Gdiplus::Color(255,100,100,100));
 
-	if (!pMain->GetOptimizeWallProperty().IsPaneVisible())
+	if (pMain->GetMode() != MODE_OPTIMIZE)
 	{
 		//画外墙
 		Pen outPen(Color(255,GetRValue(outWallColor),GetGValue(outWallColor),GetBValue(outWallColor)), 10);
@@ -327,7 +328,7 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 			}
 			for (int j = 0; j < pInWall->GetSubItemsCount(); j++)
 			{
-				int index = pRoom->GetSubItem(j)->GetValue().intVal;
+				int index = pInWall->GetSubItem(j)->GetValue().intVal;
 				p.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
 				p.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
 				p1.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
@@ -425,7 +426,7 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 	}
 
 	//如果是外墙模式，有选中的外墙点，则移动它
-	if (pMain->GetOutWallProperty().IsPaneVisible() && m_selectedOutWallPoint >= 0)
+	if (pMain->GetMode() == MODE_OUTWALL && m_selectedOutWallPoint >= 0)
 	{
 		CMFCPropertyGridProperty* outWallPos = pMain->GetOutWallProperty().getCoodGroup();
 		if (!outWallPos)
@@ -436,7 +437,7 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 		Invalidate();
 	}
 	//如果是内墙模式
-	if (m_isDrawInWall && pMain->GetInWallProperty().IsPaneVisible())
+	if (pMain->GetMode() == MODE_INWALL && m_isDrawInWall)
 	{
 		CMFCPropertyGridProperty* inWallPos = pMain->GetInWallProperty().getCoodGroup();
 		if (!inWallPos)
@@ -450,7 +451,7 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 		Invalidate();
 	}
 	//如果是处理后模式
-	if (pMain->GetOptimizeWallProperty().IsPaneVisible())
+	if (pMain->GetMode() == MODE_OPTIMIZE)
 	{
 		//外墙拾取
 		CMFCPropertyGridProperty* outWallPos = pMain->GetOptimizeWallProperty().getCoodOutWallGroup();
@@ -571,7 +572,6 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 }
 void CBuildLightAnalysisView::OnLButtonDown(UINT nFlags, CPoint point)
 {
-
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 	CBuildLightAnalysisDoc* pDoc = GetDocument();
 
@@ -590,33 +590,40 @@ void CBuildLightAnalysisView::OnLButtonDown(UINT nFlags, CPoint point)
 		return;
 	}
 	//如果是外墙模式
-	if (pMain->GetOutWallProperty().IsPaneVisible())
+	if (pMain->GetMode() == MODE_OUTWALL)
 	{
-		CMFCPropertyGridProperty* outWallPos = pMain->GetOutWallProperty().getCoodGroup();
-		if (!outWallPos)
-			return;
-		for (int i = 0; i < outWallPos->GetSubItemsCount(); i++)
+		if (MK_CONTROL&nFlags)//如果ctrl键，则添加外墙点
 		{
-			double x = outWallPos->GetSubItem(i)->GetSubItem(0)->GetValue().dblVal;
-			double y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetValue().dblVal;
-
-			if (sqrt((x - p.x)*(x - p.x) + (y - p.y)*(y - p.y)) < 100)
+			pMain->GetOutWallProperty().InsertPos(p.x, p.y);
+		}
+		else//否则是拖动外墙点
+		{
+			CMFCPropertyGridProperty* outWallPos = pMain->GetOutWallProperty().getCoodGroup();
+			if (!outWallPos)
+				return;
+			for (int i = 0; i < outWallPos->GetSubItemsCount(); i++)
 			{
-				m_selectedOutWallPoint = i;
-				break;
+				double x = outWallPos->GetSubItem(i)->GetSubItem(0)->GetValue().dblVal;
+				double y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetValue().dblVal;
+
+				if (sqrt((x - p.x)*(x - p.x) + (y - p.y)*(y - p.y)) < 100)
+				{
+					m_selectedOutWallPoint = i;
+					break;
+				}
 			}
 		}
 	}
 
 	//如果是内墙模式
-	if (pMain->GetInWallProperty().IsPaneVisible())
+	if (pMain->GetMode() == MODE_INWALL)
 	{
 		pMain->GetInWallProperty().InsertPos(p.x,p.y,p.x,p.y);
 		m_isDrawInWall = true;
 	}
 
 	//添加关键计算点
-	if (MK_CONTROL&nFlags && m_iSelectGridRoomIndex >= 0 && m_iSelectGridIndex >= 0)
+	if (pMain->GetMode() == MODE_OPTIMIZE && MK_CONTROL&nFlags && m_iSelectGridRoomIndex >= 0 && m_iSelectGridIndex >= 0)
 	{
 		CMFCPropertyGridProperty* pPoint = pMain->GetRoomProperty().getPropList()->GetProperty(m_iSelectGridRoomIndex)->GetSubItem(ROOM_GRID)->GetSubItem(GRID_POINTS)->GetSubItem(m_iSelectGridIndex);
 		CString _name = pPoint->GetName();
@@ -629,11 +636,6 @@ void CBuildLightAnalysisView::OnLButtonDown(UINT nFlags, CPoint point)
 			pPoint->SetName(_T("关键点"));
 		}
 	}
-	//画外墙
-	if (MK_CONTROL&nFlags && pMain->GetOutWallProperty().IsPaneVisible())
-	{
-		pMain->GetOutWallProperty().InsertPos(p.x, p.y);
-	}
 	
 }
 void CBuildLightAnalysisView::OnLButtonUp(UINT nFlags, CPoint point)
@@ -645,12 +647,12 @@ void CBuildLightAnalysisView::OnLButtonUp(UINT nFlags, CPoint point)
 		return;
 
 	//如果是外墙模式，并且有选中的外墙点，则移动它
-	if (pMain->GetOutWallProperty().IsPaneVisible() && m_selectedOutWallPoint >= 0)
+	if (pMain->GetMode() == MODE_OUTWALL && m_selectedOutWallPoint >= 0)
 	{
 		m_selectedOutWallPoint = -1;
 	}
 	//如果是内墙模式
-	if (m_isDrawInWall && pMain->GetInWallProperty().IsPaneVisible())
+	if (pMain->GetMode() == MODE_INWALL && m_isDrawInWall)
 	{
 		m_isDrawInWall = false;
 	}
@@ -750,7 +752,7 @@ void CBuildLightAnalysisView::OnEditDoOptimize()
 	pMain->GetOutWallProperty().ShowPane(FALSE,FALSE,TRUE);
 	pMain->GetInWallProperty().ShowPane(FALSE,FALSE,TRUE);
 	pMain->GetOptimizeWallProperty().ShowPane(TRUE,FALSE,TRUE);
-
+	pMain->SetMode(MODE_OPTIMIZE);
 	Invalidate();
 }
 
@@ -767,7 +769,7 @@ void CBuildLightAnalysisView::OnEditOptimize()
 		pMain->GetOptimizeWallProperty().ShowPane(FALSE,FALSE,TRUE);
 	else
 		pMain->GetOptimizeWallProperty().ShowPane(TRUE,FALSE,TRUE);
-
+	pMain->SetMode(MODE_OPTIMIZE);
 	Invalidate();
 	
 }
@@ -817,3 +819,9 @@ void CBuildLightAnalysisView::OnEditTranslate()
 	
 }
 
+
+
+void CBuildLightAnalysisView::OnUpdateEditTranslate(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(m_bIsPullTranslate);
+}
