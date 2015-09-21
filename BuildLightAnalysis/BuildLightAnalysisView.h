@@ -72,6 +72,8 @@ public:
 	afx_msg void OnEditTranslate();
 	afx_msg void OnEditDoOptimize();
 	afx_msg void OnUpdateEditTranslate(CCmdUI *pCmdUI);
+	afx_msg void OnPopDeleteWall();
+	afx_msg void OnPopDeleteWin();
 };
 
 #ifndef _DEBUG  // debug version in BuildLightAnalysisView.cpp

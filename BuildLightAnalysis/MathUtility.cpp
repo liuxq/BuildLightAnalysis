@@ -426,3 +426,32 @@ void CalGridFromPolygon(vector<Vec2d>& polygon, double offset,double meshLen, ve
 		}
 	}
 }
+
+
+//求多边形面积
+double CalArea(vector<Vec2d>& polygon)
+{
+	double l = 0;
+	int sz = polygon.size();
+	Vec2d p1, p2;
+
+	for (int i = 0; i < sz; i++)
+	{
+		p1 = polygon[i];
+		p2 = polygon[(i+1)%sz];
+		l += p1.x*p2.y - p2.x*p1.y;
+	}
+	return fabs(l*0.5);
+}
+
+//求多边形周长
+double CalGirth(vector<Vec2d>& polygon)
+{
+	double l = 0;
+	int sz = polygon.size();
+	for (int i = 0; i < sz; i++)
+	{
+		l += (polygon[i] - polygon[(i+1)%sz]).Length();
+	}
+	return l;
+}

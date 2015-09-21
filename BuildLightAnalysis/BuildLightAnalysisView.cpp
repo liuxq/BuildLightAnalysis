@@ -42,6 +42,8 @@ BEGIN_MESSAGE_MAP(CBuildLightAnalysisView, CView)
 	ON_COMMAND(ID_EDIT_TRANSLATE, &CBuildLightAnalysisView::OnEditTranslate)
 	ON_COMMAND(ID_EDIT_DO_OPTIMIZE, &CBuildLightAnalysisView::OnEditDoOptimize)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_TRANSLATE, &CBuildLightAnalysisView::OnUpdateEditTranslate)
+	ON_COMMAND(ID_POP_DELETE_WALL, &CBuildLightAnalysisView::OnPopDeleteWall)
+	ON_COMMAND(ID_POP_DELETE_WIN, &CBuildLightAnalysisView::OnPopDeleteWin)
 END_MESSAGE_MAP()
 
 // CBuildLightAnalysisView construction/destruction
@@ -824,4 +826,16 @@ void CBuildLightAnalysisView::OnEditTranslate()
 void CBuildLightAnalysisView::OnUpdateEditTranslate(CCmdUI *pCmdUI)
 {
 	pCmdUI->SetCheck(m_bIsPullTranslate);
+}
+
+
+void CBuildLightAnalysisView::OnPopDeleteWall()
+{
+	// TODO: Add your command handler code here
+}
+
+
+void CBuildLightAnalysisView::OnPopDeleteWin()
+{
+	// TODO: Add your command handler code here
 }

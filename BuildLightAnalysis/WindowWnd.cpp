@@ -204,6 +204,11 @@ double WinWidth )
 		return;
 
 	int count = m_wndPropList.GetPropertyCount();
+	/*if (count == 0)
+	{
+	}
+	CString name = m_wndPropList.GetProperty(count-1)->GetValue().bstrVal;
+	CString num = name.Right(1);*/
 	CString strCount;
 	strCount.Format(_T("´°%d"),count);
 

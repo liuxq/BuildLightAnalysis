@@ -40,7 +40,6 @@ void geometryOutput(string filename, set<CString>& outMats)
 		vector<Surface> surfaces;
 		Wall wall;
 		list<Wall> roomWalls;
-		stWindow window;
 		vector<stWindow> roomWindows;
 		for (int j = 0; j < rooms[i].outWalls.size(); j++)
 		{
@@ -374,7 +373,6 @@ void RoomOutput(string roomFile, string grid1File, string grid2File)
 		vector<Surface> surfaces;
 		Wall wall;
 		list<Wall> roomWalls;
-		stWindow window;
 		vector<stWindow> roomWindows;
 		for (int j = 0; j < rooms[i].outWalls.size(); j++)
 		{
@@ -430,7 +428,8 @@ void RoomOutput(string roomFile, string grid1File, string grid2File)
 		if (isAntiClock(outPolygon))//逆时针
 		{
 			//地面
-			surf.name = "room" + i; 
+			surf.name = "room";
+			surf.name += '0'+ i; 
 			surf.name += ".Floor";
 			surf.type = "polygon";
 			surf.mat = CStringToString(floorMat);
@@ -443,7 +442,8 @@ void RoomOutput(string roomFile, string grid1File, string grid2File)
 			surfaces.push_back(surf);
 
 			//棚顶
-			surf.name = "room" + i; 
+			surf.name = "room";
+			surf.name += '0' + i; 
 			surf.name += ".Roof";
 			surf.type = "polygon";
 			surf.mat = CStringToString(roofMat);
@@ -464,8 +464,10 @@ void RoomOutput(string roomFile, string grid1File, string grid2File)
 				else
 					mat = optimizeInWallPos->GetSubItem(outWalls[j].wallInfo.index)->GetSubItem(2)->GetValue().bstrVal;
 
-				surf.name = "room" + i; 
-				surf.name += ".Flank";
+				surf.name = "room";
+				surf.name += '0'+ i; 
+				surf.name += ".Wall";
+				surf.name += '0'+j;
 				surf.type = "polygon";
 				surf.mat = CStringToString(mat);
 				surf.points.clear();
@@ -489,7 +491,8 @@ void RoomOutput(string roomFile, string grid1File, string grid2File)
 			Vec2d p,p1;
 			for (int j = 0; j < roomWindows.size(); j ++)
 			{
-				surf.name = "room" + i; 
+				surf.name = "room";
+				surf.name += '0' + i; 
 				surf.name += ".Window";
 				surf.type = "polygon";
 				surf.mat = CStringToString(CString(roomWindows[j].WinMaterial));
@@ -548,7 +551,8 @@ void RoomOutput(string roomFile, string grid1File, string grid2File)
 		else
 		{
 			//地面
-			surf.name = "room" + i; 
+			surf.name = "room";
+			surf.name += '0' + i; 
 			surf.name += ".Floor";
 			surf.type = "polygon";
 			surf.mat = CStringToString(floorMat);
@@ -559,7 +563,8 @@ void RoomOutput(string roomFile, string grid1File, string grid2File)
 			}
 			surfaces.push_back(surf);
 			//棚顶
-			surf.name = "room" + i; 
+			surf.name = "room";
+			surf.name += '0'+ i; 
 			surf.name += ".Roof";
 			surf.type = "polygon";
 			surf.mat = CStringToString(roofMat);
@@ -578,8 +583,10 @@ void RoomOutput(string roomFile, string grid1File, string grid2File)
 				else
 					mat = optimizeInWallPos->GetSubItem(outWalls[j].wallInfo.index)->GetSubItem(2)->GetValue().bstrVal;
 
-				surf.name = "room" + i; 
-				surf.name += ".Flank";
+				surf.name = "room";
+				surf.name += '0'+ i; 
+				surf.name += ".Wall";
+				surf.name += '0'+j;
 				surf.type = "polygon";
 				surf.mat = CStringToString(mat);
 				surf.points.clear();
@@ -604,7 +611,8 @@ void RoomOutput(string roomFile, string grid1File, string grid2File)
 			Vec2d p,p1;
 			for (int j = 0; j < roomWindows.size(); j ++)
 			{
-				surf.name = "room" + i; 
+				surf.name = "room";
+				surf.name += '0' + i; 
 				surf.name += ".Window";
 				surf.type = "polygon";
 				surf.mat = CStringToString(CString(roomWindows[j].WinMaterial));
@@ -661,22 +669,14 @@ void RoomOutput(string roomFile, string grid1File, string grid2File)
 		}
 
 		//写入当前的房间信息
-		Vec3d boxMin(1.0e9,1.0e9,1.0e9), boxMax(-1.0e9,-1.0e9,-1.0e9);
-		for (int a = 0; a < surfaces.size(); a++)
-		{
-			for(int b = 0; b < surfaces[a].points.size(); b++)
-			{
-				surfaces[a].points[b].UpdateMinMax(boxMin,boxMax);
-			}
-		}
-		double xLen = boxMax.x - boxMin.x;
-		double yLen = boxMax.y - boxMin.y;
-		double zLen = boxMax.z - boxMin.z;
+		double girth = CalGirth(outPolygon);
+		double area = CalArea(outPolygon);
 
 		out << "void Room_"  << i << endl;
-		out << "room_l " << xLen << endl;
-		out << "room_w " << yLen << endl;
-		out << "room_h " << zLen << endl << endl;
+		out << "room_Type " << CStringToString(CString(rooms[i].type.name)) << endl;
+		out << "room_Girth " << girth << endl;
+		out << "room_Area " << area / 1000000 << "米" << endl;
+		out << "room_Height " << h << endl << endl;
 		out << "start geometry" << endl;
 
 		for (int a = 0; a < surfaces.size(); a++)
@@ -692,12 +692,18 @@ void RoomOutput(string roomFile, string grid1File, string grid2File)
 			out << "start pts" << endl;
 			for (int a = 0; a < points.size(); a++)
 			{
-				out << GridPointCount << endl;
-				grid1Out << points[a].p.x << " " << points[a].p.y<<" "<<0 << " "<<0<<" "<<0<<" "<<1<<endl;
+				out << GridPointCount << " ";
+				if (points[a].isKey)
+				{
+					out <<"key";
+				}
+				out << endl;
+				
+				grid1Out << points[a].p.x << " " << points[a].p.y<<" "<<750 << " "<<0<<" "<<0<<" "<<1<<endl;
 
 				if (points[a].isKey)
 				{
-					grid2Out << points[a].p.x << " " << points[a].p.y<<" "<<0 << " "<<0<<" "<<0<<" "<<1<<endl;
+					grid2Out << points[a].p.x << " " << points[a].p.y<<" "<<750 << " "<<0<<" "<<0<<" "<<1<<endl;
 				}
 				GridPointCount++;
 			}

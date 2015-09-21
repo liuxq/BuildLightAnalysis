@@ -89,8 +89,15 @@ struct Grid
 	double meshLen;
 	vector<GridPoint> points;
 };
+struct RoomType
+{
+	WCHAR name[80];
+	int num;
+};
+
 struct Room
 {
+	RoomType type;
 	vector<int> outWalls;
 	vector<int> inWalls;
 	vector<int> windows;
@@ -105,3 +112,4 @@ struct Surface
 	string mat;
 	vector<Vec3d> points;
 };
+

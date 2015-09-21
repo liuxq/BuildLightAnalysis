@@ -242,6 +242,7 @@ void CBuildLightAnalysisDoc::OnFileNew()
 		//读取材料
 		loadMaterial();
 		loadCity();
+		loadRoomType();
 		pMain->GetOptionProperty().loadMaterialTemplateAndCity();
 		pMain->GetOptionProperty().SetTransform();
 
@@ -296,6 +297,7 @@ void CBuildLightAnalysisDoc::OnFileOpen()
 		//读取文件
 		loadMaterial();
 		loadCity();
+		loadRoomType();
 		load(inFile);
 		
 
@@ -330,7 +332,27 @@ void CBuildLightAnalysisDoc::loadCity()
 		m_citys.push_back(StringToCString(name));
 	}
 }
-
+void CBuildLightAnalysisDoc::loadRoomType()
+{
+	CString path;
+	path.Format(_T("%s\\room_type.txt"), m_projectLocation);
+	ifstream inputFile(CStringToString(path));
+	if (!inputFile.is_open())
+	{
+		AfxMessageBox(_T("缺少房间类型模板，请将room_type.txt文件放入工程文件夹下"));
+		return;
+	}
+	string name;
+	int num;
+	while(inputFile >> name >> num )
+	{
+		RoomType rt;
+		CString nameCs = StringToCString(name);
+		_tcscpy_s(rt.name, nameCs);
+		rt.num = num;
+		m_roomTypes.push_back(rt);
+	}
+}
 void CBuildLightAnalysisDoc::clear()
 {
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
@@ -415,7 +437,9 @@ void CBuildLightAnalysisDoc::OnFileOutput()
 	set<CString> mats;
 	geometryOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_geometry.rad", mats);
 	materialOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_material.rad", m_material, mats);
-	string grid1file = CStringToString(m_projectLocation) + "\\" + "grid1.pts";
-	string grid2file = CStringToString(m_projectLocation) + "\\" + "grid2.pts";
+	string grid1file = CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_grid1.pts";
+	string grid2file = CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_grid2.pts";
 	RoomOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) +"_room_info.txt", grid1file, grid2file);
+
+	AfxMessageBox(_T("导出成功"));
 }

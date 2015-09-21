@@ -170,17 +170,30 @@ void CRoomWnd::SetPropListFont()
 }
 PropertyGridProperty* CRoomWnd::AddRoom(CString roomName)
 {
+	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;  
+	CBuildLightAnalysisDoc* pDoc = (CBuildLightAnalysisDoc*)pMain->GetActiveDocument();
+	if (!pMain || !pDoc)
+		return NULL;
+
 	PropertyGridProperty* pRoom = new PropertyGridProperty(roomName, 0, FALSE);
+
+	PropertyGridProperty* pType = new PropertyGridProperty(_T("类型"), _T("普通办公室"), _T("房间类型"));
+	vector<RoomType>& roomTypes = pDoc->getRoomTypes();
+	for (int i = 0; i < roomTypes.size(); i++)
+	{
+		pType->AddOption(CString(roomTypes[i].name));
+	}
 	PropertyGridProperty* pOutWall = new PropertyGridProperty(_T("外墙"), 0, TRUE);
 	PropertyGridProperty* pInWall = new PropertyGridProperty(_T("内墙"), 0, TRUE);
 	PropertyGridProperty* pWin = new PropertyGridProperty(_T("窗户"), ROOM_WINDOW, TRUE);
-	PropertyGridProperty* pGrid = new PropertyGridProperty(_T("计算点"), ROOM_GRID, FALSE);
+	PropertyGridProperty* pGrid = new PropertyGridProperty(_T("计算网格"), ROOM_GRID, FALSE);
 
 	PropertyGridProperty* pOffset = new PropertyGridProperty(_T("内偏移"), (_variant_t)120.0, _T("内偏移"));
 	PropertyGridProperty* pMeshLen = new PropertyGridProperty(_T("网格边长"), (_variant_t)120.0, _T("网格边长"));
 	pGrid->AddSubItem(pOffset);
 	pGrid->AddSubItem(pMeshLen);
 
+	pRoom->AddSubItem(pType);
 	pRoom->AddSubItem(pOutWall);
 	pRoom->AddSubItem(pInWall);
 	pRoom->AddSubItem(pWin);
@@ -362,9 +375,12 @@ void CRoomWnd::OutputToRooms(vector<Room>& rooms)
 	{
 		Room room;
 		CMFCPropertyGridProperty* pRoom = m_wndPropList.GetProperty(i);
+		CMFCPropertyGridProperty* pType = pRoom->GetSubItem(ROOM_TYPE);
 		CMFCPropertyGridProperty* pOutWall = pRoom->GetSubItem(ROOM_OUT_WALL);
 		CMFCPropertyGridProperty* pInWall = pRoom->GetSubItem(ROOM_IN_WALL);
 		CMFCPropertyGridProperty* pWindow = pRoom->GetSubItem(ROOM_WINDOW);
+		CString type = pType->GetValue().bstrVal;
+		_tcscpy_s(room.type.name, type);
 		for (int j = 0; j < pOutWall->GetSubItemsCount(); j++)
 		{
 			int index = pOutWall->GetSubItem(j)->GetValue().intVal;
@@ -413,6 +429,7 @@ void CRoomWnd::save(ofstream& out)
 	out.write((char *)&size, sizeof(size));
 	for (int i = 0; i < size; i++)
 	{
+		serializer<RoomType>::write(out, &rooms[i].type);
 		serializer<int>::write(out, &rooms[i].outWalls);
 		serializer<int>::write(out, &rooms[i].inWalls);
 		serializer<int>::write(out, &rooms[i].windows);
@@ -431,6 +448,7 @@ void CRoomWnd::load(ifstream& in)
 	vector<Room> rooms(size);
 	for (int i = 0; i < size; i++)
 	{
+		serializer<RoomType>::read(in, &rooms[i].type);
 		serializer<int>::read(in, &rooms[i].outWalls);
 		serializer<int>::read(in, &rooms[i].inWalls);
 		serializer<int>::read(in, &rooms[i].windows);
@@ -443,11 +461,13 @@ void CRoomWnd::load(ifstream& in)
 		CString strCount;
 		strCount.Format(_T("房间%d"),i);
 		PropertyGridProperty* pRoom = AddRoom(strCount);
+		CMFCPropertyGridProperty* pType = pRoom->GetSubItem(ROOM_TYPE);
 		CMFCPropertyGridProperty* pOutWall = pRoom->GetSubItem(ROOM_OUT_WALL);
 		CMFCPropertyGridProperty* pInWall = pRoom->GetSubItem(ROOM_IN_WALL);
 		CMFCPropertyGridProperty* pWindow = pRoom->GetSubItem(ROOM_WINDOW);
 		CMFCPropertyGridProperty* pGrid = pRoom->GetSubItem(ROOM_GRID);
 		
+		pType->SetValue(rooms[i].type.name);
 		for (int j = 0; j < rooms[i].outWalls.size(); j++)
 		{
 			CMFCPropertyGridProperty* outWallindex = new CMFCPropertyGridProperty(_T("编号"),(_variant_t)rooms[i].outWalls[j], _T("外墙编号"));

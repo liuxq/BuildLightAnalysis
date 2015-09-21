@@ -274,7 +274,7 @@ void COptimizeWallWnd::OutputToLines(vector<sOpWall>& sOpWalls)
 		w.line.e.y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
 		w.line.type = sLine::OUT_WALL;
 		CString mat = outWallPos->GetSubItem(i)->GetSubItem(2)->GetValue().bstrVal;
-		_tcscpy(w.mat, mat);
+		_tcscpy_s(w.mat, mat);
 
 		sOpWalls.push_back(w);
 	}
@@ -289,7 +289,7 @@ void COptimizeWallWnd::OutputToLines(vector<sOpWall>& sOpWalls)
 		w.line.e.y = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
 		w.line.type = sLine::IN_WALL;
 		CString mat = inWallPos->GetSubItem(i)->GetSubItem(2)->GetValue().bstrVal;
-		_tcscpy(w.mat, mat);
+		_tcscpy_s(w.mat, mat);
 
 		sOpWalls.push_back(w);
 	}

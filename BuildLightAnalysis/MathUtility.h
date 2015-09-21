@@ -23,3 +23,9 @@ bool isAntiClock(vector<Vec2d>& polygon);
 
 //求多边形内的计算点
 void CalGridFromPolygon(vector<Vec2d>& polygon, double offset, double meshLen, vector<Vec2d>& outPoints);
+
+//求多边形面积
+double CalArea(vector<Vec2d>& polygon);
+
+//求多边形周长
+double CalGirth(vector<Vec2d>& polygon);

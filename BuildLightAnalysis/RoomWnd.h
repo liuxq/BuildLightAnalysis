@@ -4,7 +4,8 @@
 #include "CommonData.h"
 enum
 {
-	ROOM_OUT_WALL = 0,
+	ROOM_TYPE = 0,
+	ROOM_OUT_WALL,
 	ROOM_IN_WALL,
 	ROOM_WINDOW,
 	ROOM_GRID

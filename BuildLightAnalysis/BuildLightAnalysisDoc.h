@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Material.h"
+#include "CommonData.h"
 
 class CBuildLightAnalysisDoc : public CDocument
 {
@@ -26,9 +27,14 @@ public:
 	{
 		return m_citys;
 	}
+	vector<RoomType>& getRoomTypes()
+	{
+		return m_roomTypes;
+	}
 private:
 	MaterialSet m_material;
 	vector<CString> m_citys;
+	vector<RoomType> m_roomTypes;
 // Operations
 public:
 
@@ -54,6 +60,7 @@ protected:
 	void load(ifstream& in);
 	void loadMaterial();
 	void loadCity();
+	void loadRoomType();
 	void save(ofstream& out);
 // Generated message map functions
 protected:
