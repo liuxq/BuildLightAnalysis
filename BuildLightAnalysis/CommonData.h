@@ -105,11 +105,21 @@ struct Room
 	Grid grid;
 };
 
-struct Surface
+//以下结构体用于导出-----------------------
+struct OutSurface
 {
-	string name;
-	string type;
 	string mat;
+	string type;
+	string name;
 	vector<Vec3d> points;
+	int args[3];
 };
+struct OutRoom
+{
+	vector<OutSurface> surfaces;
+	double girth;
+	double area;
+	double height;
+};
+
 

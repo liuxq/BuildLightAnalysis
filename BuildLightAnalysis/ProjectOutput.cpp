@@ -31,13 +31,80 @@ void geometryOutput(string filename, set<CString>& outMats)
 	CString roofMat = pMain->GetOptionProperty().GetDataCString(OPTION_ROOF_MAT);
 	CString floorMat = pMain->GetOptionProperty().GetDataCString(OPTION_FLOOR_MAT);
 
-	outMats.insert(roofMat);
-	outMats.insert(floorMat);
+	vector<OutRoom> outRooms;
+	RoomOutToVector(outRooms, outMats);
 
 	for (int i = 0; i < rooms.size(); i++)
 	{
 		//导出第i个房间
-		vector<Surface> surfaces;
+
+		for (int j = 0; j < outRooms[i].surfaces.size(); j++)
+		{
+			OutSurface& surf = outRooms[i].surfaces[j];
+			out << surf.mat << " polygon ";//材料 类型
+			out << surf.name << endl;//名字
+			out << "0 0 9 ";
+			for (int k = 0; k < surf.points.size(); k++)
+			{
+				out << surf.points[k].x << " " << surf.points[k].y << " " << surf.points[k].z << endl;
+			}
+			out << endl;
+		}
+	}
+
+				
+			}
+		
+		}
+	}
+}
+
+void materialOutput(string filename, MaterialSet& materials, set<CString>& mats )
+{
+	ofstream out(filename);
+	if (!out.is_open())
+	{
+		return;
+	}
+
+	for (int i = 0; i < materials.m_materials.size(); i++)
+	{
+		if (mats.find(StringToCString(materials.m_materials[i].name)) == mats.end())
+			continue;
+		out << "void " << materials.m_materials[i].type << " " << materials.m_materials[i].name;
+		for (int j = 0; j < materials.m_materials[i].args.size(); j++)
+		{
+			out <<" " << materials.m_materials[i].args[j];
+		}
+		out << endl;
+	}
+}
+
+void RoomOutToVector(vector<OutRoom> outRooms, set<CString>& mats)
+{
+	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+	if (!pMain)
+		return;
+
+	vector<Room> rooms;
+	pMain->GetRoomProperty().OutputToRooms(rooms);
+	outRooms.resize(rooms.size());
+
+	CMFCPropertyGridProperty* optimizeOutWallPos = pMain->GetOptimizeWallProperty().getCoodOutWallGroup();
+	CMFCPropertyGridProperty* optimizeInWallPos = pMain->GetOptimizeWallProperty().getCoodInWallGroup();
+	PropertyGridCtrl* pWindowlist = pMain->GetWindowProperty().getPropList();
+
+	double h = pMain->GetOptionProperty().GetDataDouble(OPTION_LEVEL_HEIGHT);
+	CString roofMat = pMain->GetOptionProperty().GetDataCString(OPTION_ROOF_MAT);
+	CString floorMat = pMain->GetOptionProperty().GetDataCString(OPTION_FLOOR_MAT);
+	mats.insert(roofMat);
+	mats.insert(floorMat);
+
+	int GridPointCount = 0;
+	for (int i = 0; i < rooms.size(); i++)
+	{
+		//导出第i个房间
+		vector<OutSurface> surfaces;
 		Wall wall;
 		list<Wall> roomWalls;
 		vector<stWindow> roomWindows;
@@ -90,28 +157,39 @@ void geometryOutput(string filename, set<CString>& outMats)
 			CString msg;
 			msg.Format(_T("房间%d没有封闭，不能导出"),i);
 			AfxMessageBox(msg);
+			return;
 		}
+		OutSurface surf;
 		if (isAntiClock(outPolygon))//逆时针
 		{
 			//地面
-			out << CStringToString(floorMat) << " polygon ";//材料 类型
-			out << "room" << i << ".Floor" << endl;//名称
-			out << "0 0 9 ";
+			surf.name = "room";
+			surf.name += '0'+ i; 
+			surf.name += ".Floor";
+			surf.type = "polygon";
+			surf.mat = CStringToString(floorMat);
+			surf.points.clear();
 			for (int j = 0; j < outPolygon.size(); j++)
 			{
-				out << outPolygon[j].x << " " << outPolygon[j].y << " "<< 0.0 << endl;
+				Vec3d p(outPolygon[j].x, outPolygon[j].y, 0.0);
+				surf.points.push_back(p);
 			}
-			out << endl;
+			surfaces.push_back(surf);
+
 			//棚顶
-			
-			out << CStringToString(roofMat)<< " polygon "; 
-			out << "room" << i << ".Roof" << endl;
-			out << "0 0 9 ";
+			surf.name = "room";
+			surf.name += '0' + i; 
+			surf.name += ".Roof";
+			surf.type = "polygon";
+			surf.mat = CStringToString(roofMat);
+			surf.points.clear();
 			for (int j = outPolygon.size()-1; j >= 0 ; j--)
 			{
-				out << outPolygon[j].x << " " << outPolygon[j].y << " "<< h << endl;
+				Vec3d p(outPolygon[j].x, outPolygon[j].y, h);
+				surf.points.push_back(p);
 			}
-			out << endl;
+			surfaces.push_back(surf);
+
 			//侧墙
 			for (int j = 0; j < outWalls.size(); j++)
 			{
@@ -121,38 +199,43 @@ void geometryOutput(string filename, set<CString>& outMats)
 				else
 					mat = optimizeInWallPos->GetSubItem(outWalls[j].wallInfo.index)->GetSubItem(2)->GetValue().bstrVal;
 
-				outMats.insert(mat);
+				mats.insert(mat);
 
-				
-				out << CStringToString(mat) << " polygon "; 
-				out << "room" << i << ".Flank" << j << endl;
-				out << "0 0 9 ";
+				surf.name = "room";
+				surf.name += '0'+ i; 
+				surf.name += ".Wall";
+				surf.name += '0'+j;
+				surf.type = "polygon";
+				surf.mat = CStringToString(mat);
+				surf.points.clear();
 				if (outWalls[j].isOrder)
 				{
-					out << outWalls[j].line.s.x << " "<< outWalls[j].line.s.y << " "<< h << endl;
-					out << outWalls[j].line.e.x << " "<< outWalls[j].line.e.y << " "<< h << endl;
-					out << outWalls[j].line.e.x << " "<< outWalls[j].line.e.y << " "<< 0.0 << endl;
-					out << outWalls[j].line.s.x << " "<< outWalls[j].line.s.y << " "<< 0.0 << endl;
+					surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, h));
+					surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, h));
+					surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, 0.0));
+					surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, 0.0));
 				}
 				else
 				{
-					out << outWalls[j].line.e.x << " "<< outWalls[j].line.e.y << " "<< h << endl;
-					out << outWalls[j].line.s.x << " "<< outWalls[j].line.s.y << " "<< h << endl;
-					out << outWalls[j].line.s.x << " "<< outWalls[j].line.s.y << " "<< 0.0 << endl;
-					out << outWalls[j].line.e.x << " "<< outWalls[j].line.e.y << " "<< 0.0 << endl;
+					surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, h));
+					surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, h));
+					surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, 0.0));
+					surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, 0.0));
 				}
-				out << endl;
+				surfaces.push_back(surf);
 			}
 			//窗户
 			Vec2d p,p1;
 			for (int j = 0; j < roomWindows.size(); j ++)
 			{
-				
-				out << CStringToString(CString(roomWindows[j].WinMaterial)) << " polygon "; 
-				out << "room" << i << ".Window" << j << endl;
-				out << "0 0 9 ";
+				surf.name = "room";
+				surf.name += '0' + i; 
+				surf.name += ".Window";
+				surf.name += '0' + j;
+				surf.type = "polygon";
+				surf.mat = CStringToString(CString(roomWindows[j].WinMaterial));
 
-				outMats.insert(CString(roomWindows[j].WinMaterial));
+				mats.insert(CString(roomWindows[j].WinMaterial));
 
 				CMFCPropertyGridProperty* wallProperty = NULL;
 				sLine::W_TYPE type;
@@ -186,48 +269,66 @@ void geometryOutput(string filename, set<CString>& outMats)
 				Vec2d pWins = pWinc - dir * roomWindows[j].WinWidth * 0.5;
 				Vec2d pWine = pWinc + dir * roomWindows[j].WinWidth * 0.5;
 
-				double hUp = roomWindows[j].WinUpHeight;
-
-
+				surf.points.clear();
 				if (isOrder)
 				{
-					out << pWins.x << " "<< pWins.y << " "<< roomWindows[j].WinUpHeight << endl;
-					out << pWine.x << " "<< pWine.y << " "<< roomWindows[j].WinUpHeight << endl;
-					out << pWine.x << " "<< pWine.y << " "<< roomWindows[j].WinDownHeight << endl;
-					out << pWins.x << " "<< pWins.y << " "<< roomWindows[j].WinDownHeight << endl;
+					surf.points.push_back(Vec3d(pWins.x,pWins.y, roomWindows[j].WinUpHeight));
+					surf.points.push_back(Vec3d(pWine.x,pWine.y, roomWindows[j].WinUpHeight));
+					surf.points.push_back(Vec3d(pWine.x,pWine.y, roomWindows[j].WinDownHeight));
+					surf.points.push_back(Vec3d(pWins.x,pWins.y, roomWindows[j].WinDownHeight));
 				}
 				else
 				{
-					out << pWine.x << " "<< pWine.y << " "<< roomWindows[j].WinUpHeight << endl;
-					out << pWins.x << " "<< pWins.y << " "<< roomWindows[j].WinUpHeight << endl;
-					out << pWins.x << " "<< pWins.y << " "<< roomWindows[j].WinDownHeight << endl;
-					out << pWine.x << " "<< pWine.y << " "<< roomWindows[j].WinDownHeight << endl;
+					surf.points.push_back(Vec3d(pWine.x,pWine.y, roomWindows[j].WinUpHeight));
+					surf.points.push_back(Vec3d(pWins.x,pWins.y, roomWindows[j].WinUpHeight));
+					surf.points.push_back(Vec3d(pWins.x,pWins.y, roomWindows[j].WinDownHeight));
+					surf.points.push_back(Vec3d(pWine.x,pWine.y, roomWindows[j].WinDownHeight));
 				}
-				out << endl;
+				surfaces.push_back(surf);
+
+				//写反物质
+
+				surf.name = "room";
+				surf.name += '0' + i; 
+				surf.name += ".hole";
+				surf.name += '0' + j; 
+				surf.type = "polygon";
+				CString winOnWallmat = _T("anti_mat_");
+				winOnWallmat += wallProperty->GetSubItem(roomWindows[j].wallIndex)->GetSubItem(2)->GetValue().bstrVal;
+				surf.mat = CStringToString(winOnWallmat);
+
+
+				out << CStringToString(winOnWallmat) << " polygon "; 
+				out << "room" << i << ".hole" << j << endl;
+				out << "0 0 12 ";
 			}
 		}
 		else
 		{
 			//地面
-			
-			out << CStringToString(floorMat) << " polygon "; 
-			out << "room" << i << ".Floor" << endl;
-			out << "0 0 9 ";
+			surf.name = "room";
+			surf.name += '0' + i; 
+			surf.name += ".Floor";
+			surf.type = "polygon";
+			surf.mat = CStringToString(floorMat);
+			surf.points.clear();
 			for (int j = outPolygon.size()-1; j >= 0 ; j--)
 			{
-				out << outPolygon[j].x << " " << outPolygon[j].y << " "<< 0.0 << endl;
+				surf.points.push_back(Vec3d(outPolygon[i].x,outPolygon[i].y, 0.0));
 			}
-			out << endl;
+			surfaces.push_back(surf);
 			//棚顶
-			
-			out << CStringToString(roofMat) << " polygon "; 
-			out << "room" << i << ".Roof" << endl;
-			out << "0 0 9 ";
+			surf.name = "room";
+			surf.name += '0'+ i; 
+			surf.name += ".Roof";
+			surf.type = "polygon";
+			surf.mat = CStringToString(roofMat);
+			surf.points.clear();
 			for (int j = 0; j < outPolygon.size(); j++)
 			{
-				out << outPolygon[j].x << " " << outPolygon[j].y << " "<< h << endl;
+				surf.points.push_back(Vec3d(outPolygon[i].x,outPolygon[i].y, h));
 			}
-			out << endl;
+			surfaces.push_back(surf);
 			//侧墙
 			for (int j = 0; j < outWalls.size(); j++)
 			{
@@ -237,39 +338,43 @@ void geometryOutput(string filename, set<CString>& outMats)
 				else
 					mat = optimizeInWallPos->GetSubItem(outWalls[j].wallInfo.index)->GetSubItem(2)->GetValue().bstrVal;
 
-				outMats.insert(mat);
+				mats.insert(mat);
 
-				out << CStringToString(mat) << " polygon "; 
-				out << "room" << i << ".Flank" << j << endl;
-				out << "0 0 9 ";
+				surf.name = "room";
+				surf.name += '0'+ i; 
+				surf.name += ".Wall";
+				surf.name += '0'+j;
+				surf.type = "polygon";
+				surf.mat = CStringToString(mat);
+				surf.points.clear();
 				if (!outWalls[j].isOrder)
 				{
-					out << outWalls[j].line.s.x << " "<< outWalls[j].line.s.y << " "<< h << endl;
-					out << outWalls[j].line.e.x << " "<< outWalls[j].line.e.y << " "<< h << endl;
-					out << outWalls[j].line.e.x << " "<< outWalls[j].line.e.y << " "<< 0.0 << endl;
-					out << outWalls[j].line.s.x << " "<< outWalls[j].line.s.y << " "<< 0.0 << endl;
+					surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, h));
+					surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, h));
+					surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, 0.0));
+					surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, 0.0));
 				}
 				else
 				{
-					out << outWalls[j].line.e.x << " "<< outWalls[j].line.e.y << " "<< h << endl;
-					out << outWalls[j].line.s.x << " "<< outWalls[j].line.s.y << " "<< h << endl;
-					out << outWalls[j].line.s.x << " "<< outWalls[j].line.s.y << " "<< 0.0 << endl;
-					out << outWalls[j].line.e.x << " "<< outWalls[j].line.e.y << " "<< 0.0 << endl;
+					surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, h));
+					surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, h));
+					surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, 0.0));
+					surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, 0.0));
 				}
-				out << endl;
-
+				surfaces.push_back(surf);
 			}
 
 			//窗户
 			Vec2d p,p1;
 			for (int j = 0; j < roomWindows.size(); j ++)
 			{
-				
-				out << CStringToString(CString(roomWindows[j].WinMaterial)) << " polygon "; 
-				out << "room" << i << ".Window" << j << endl;
-				out << "0 0 9 ";
+				surf.name = "room";
+				surf.name += '0' + i; 
+				surf.name += ".Window";
+				surf.type = "polygon";
+				surf.mat = CStringToString(CString(roomWindows[j].WinMaterial));
 
-				outMats.insert(CString(roomWindows[j].WinMaterial));
+				mats.insert(CString(roomWindows[j].WinMaterial));
 
 				CMFCPropertyGridProperty* wallProperty = NULL;
 				sLine::W_TYPE type;
@@ -303,47 +408,29 @@ void geometryOutput(string filename, set<CString>& outMats)
 				Vec2d pWins = pWinc - dir * roomWindows[j].WinWidth * 0.5;
 				Vec2d pWine = pWinc + dir * roomWindows[j].WinWidth * 0.5;
 
-				double hUp = roomWindows[j].WinUpHeight;
-
-
+				surf.points.clear();
 				if (!isOrder)
 				{
-					out << pWins.x << " "<< pWins.y << " "<< roomWindows[j].WinUpHeight << endl;
-					out << pWine.x << " "<< pWine.y << " "<< roomWindows[j].WinUpHeight << endl;
-					out << pWine.x << " "<< pWine.y << " "<< roomWindows[j].WinDownHeight << endl;
-					out << pWins.x << " "<< pWins.y << " "<< roomWindows[j].WinDownHeight << endl;
+					surf.points.push_back(Vec3d(pWins.x,pWins.y, roomWindows[j].WinUpHeight));
+					surf.points.push_back(Vec3d(pWine.x,pWine.y, roomWindows[j].WinUpHeight));
+					surf.points.push_back(Vec3d(pWine.x,pWine.y, roomWindows[j].WinDownHeight));
+					surf.points.push_back(Vec3d(pWins.x,pWins.y, roomWindows[j].WinDownHeight));
 				}
 				else
 				{
-					out << pWine.x << " "<< pWine.y << " "<< roomWindows[j].WinUpHeight << endl;
-					out << pWins.x << " "<< pWins.y << " "<< roomWindows[j].WinUpHeight << endl;
-					out << pWins.x << " "<< pWins.y << " "<< roomWindows[j].WinDownHeight << endl;
-					out << pWine.x << " "<< pWine.y << " "<< roomWindows[j].WinDownHeight << endl;
+					surf.points.push_back(Vec3d(pWine.x,pWine.y, roomWindows[j].WinUpHeight));
+					surf.points.push_back(Vec3d(pWins.x,pWins.y, roomWindows[j].WinUpHeight));
+					surf.points.push_back(Vec3d(pWins.x,pWins.y, roomWindows[j].WinDownHeight));
+					surf.points.push_back(Vec3d(pWine.x,pWine.y, roomWindows[j].WinDownHeight));
 				}
-				out << endl;
+				surfaces.push_back(surf);
 			}
 		}
-	}
-}
 
-void materialOutput(string filename, MaterialSet& materials, set<CString>& mats )
-{
-	ofstream out(filename);
-	if (!out.is_open())
-	{
-		return;
-	}
-
-	for (int i = 0; i < materials.m_materials.size(); i++)
-	{
-		if (mats.find(StringToCString(materials.m_materials[i].name)) == mats.end())
-			continue;
-		out << "void " << materials.m_materials[i].type << " " << materials.m_materials[i].name;
-		for (int j = 0; j < materials.m_materials[i].args.size(); j++)
-		{
-			out <<" " << materials.m_materials[i].args[j];
-		}
-		out << endl;
+		outRooms[i].surfaces = surfaces;
+		outRooms[i].girth = CalGirth(outPolygon);
+		outRooms[i].area = CalArea(outPolygon);
+		outRooms[i].height = h;
 	}
 }
 
@@ -376,7 +463,7 @@ void RoomOutput(string roomFile, string grid1File, string grid2File)
 	for (int i = 0; i < rooms.size(); i++)
 	{
 		//导出第i个房间
-		vector<Surface> surfaces;
+		vector<OutSurface> surfaces;
 		Wall wall;
 		list<Wall> roomWalls;
 		vector<stWindow> roomWindows;
@@ -430,7 +517,7 @@ void RoomOutput(string roomFile, string grid1File, string grid2File)
 			msg.Format(_T("房间%d没有封闭，不能导出"),i);
 			AfxMessageBox(msg);
 		}
-		Surface surf;
+		OutSurface surf;
 		if (isAntiClock(outPolygon))//逆时针
 		{
 			//地面
