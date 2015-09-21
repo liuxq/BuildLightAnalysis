@@ -94,8 +94,8 @@ void geometryOutput(string filename, set<CString>& outMats)
 		if (isAntiClock(outPolygon))//逆时针
 		{
 			//地面
-			out << "room" << i << ".Floor";
-			out << " polygon " << CStringToString(floorMat) << endl; 
+			out << CStringToString(floorMat) << " polygon ";//材料 类型
+			out << "room" << i << ".Floor" << endl;//名称
 			out << "0 0 9 ";
 			for (int j = 0; j < outPolygon.size(); j++)
 			{
@@ -103,8 +103,9 @@ void geometryOutput(string filename, set<CString>& outMats)
 			}
 			out << endl;
 			//棚顶
-			out << "room" << i << ".Roof";
-			out << " polygon " << CStringToString(roofMat) << endl; 
+			
+			out << CStringToString(roofMat)<< " polygon "; 
+			out << "room" << i << ".Roof" << endl;
 			out << "0 0 9 ";
 			for (int j = outPolygon.size()-1; j >= 0 ; j--)
 			{
@@ -122,8 +123,9 @@ void geometryOutput(string filename, set<CString>& outMats)
 
 				outMats.insert(mat);
 
-				out << "room" << i << ".Flank" << j;
-				out << " polygon " << CStringToString(mat) << endl; 
+				
+				out << CStringToString(mat) << " polygon "; 
+				out << "room" << i << ".Flank" << j << endl;
 				out << "0 0 9 ";
 				if (outWalls[j].isOrder)
 				{
@@ -145,8 +147,9 @@ void geometryOutput(string filename, set<CString>& outMats)
 			Vec2d p,p1;
 			for (int j = 0; j < roomWindows.size(); j ++)
 			{
-				out << "room" << i << ".Window" << j;
-				out << " polygon " << CStringToString(CString(roomWindows[j].WinMaterial)) << endl; 
+				
+				out << CStringToString(CString(roomWindows[j].WinMaterial)) << " polygon "; 
+				out << "room" << i << ".Window" << j << endl;
 				out << "0 0 9 ";
 
 				outMats.insert(CString(roomWindows[j].WinMaterial));
@@ -206,8 +209,9 @@ void geometryOutput(string filename, set<CString>& outMats)
 		else
 		{
 			//地面
-			out << "room" << i << ".Floor";
-			out << " polygon " << CStringToString(floorMat) << endl; 
+			
+			out << CStringToString(floorMat) << " polygon "; 
+			out << "room" << i << ".Floor" << endl;
 			out << "0 0 9 ";
 			for (int j = outPolygon.size()-1; j >= 0 ; j--)
 			{
@@ -215,8 +219,9 @@ void geometryOutput(string filename, set<CString>& outMats)
 			}
 			out << endl;
 			//棚顶
-			out << "room" << i << ".Roof";
-			out << " polygon " << CStringToString(roofMat) << endl; 
+			
+			out << CStringToString(roofMat) << " polygon "; 
+			out << "room" << i << ".Roof" << endl;
 			out << "0 0 9 ";
 			for (int j = 0; j < outPolygon.size(); j++)
 			{
@@ -234,8 +239,8 @@ void geometryOutput(string filename, set<CString>& outMats)
 
 				outMats.insert(mat);
 
-				out << "room" << i << ".Flank" << j;
-				out << " polygon " << CStringToString(mat) << endl; 
+				out << CStringToString(mat) << " polygon "; 
+				out << "room" << i << ".Flank" << j << endl;
 				out << "0 0 9 ";
 				if (!outWalls[j].isOrder)
 				{
@@ -259,8 +264,9 @@ void geometryOutput(string filename, set<CString>& outMats)
 			Vec2d p,p1;
 			for (int j = 0; j < roomWindows.size(); j ++)
 			{
-				out << "room" << i << ".Window" << j;
-				out << " polygon " << CStringToString(CString(roomWindows[j].WinMaterial)) << endl; 
+				
+				out << CStringToString(CString(roomWindows[j].WinMaterial)) << " polygon "; 
+				out << "room" << i << ".Window" << j << endl;
 				out << "0 0 9 ";
 
 				outMats.insert(CString(roomWindows[j].WinMaterial));
@@ -675,7 +681,7 @@ void RoomOutput(string roomFile, string grid1File, string grid2File)
 		out << "void Room_"  << i << endl;
 		out << "room_Type " << CStringToString(CString(rooms[i].type.name)) << endl;
 		out << "room_Girth " << girth << endl;
-		out << "room_Area " << area / 1000000 << "米" << endl;
+		out << "room_Area " << area / 1000000 << "平方米" << endl;
 		out << "room_Height " << h << endl << endl;
 		out << "start geometry" << endl;
 
