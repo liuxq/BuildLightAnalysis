@@ -28,5 +28,6 @@ public:
 	void UpdateProperty(PropertyGridProperty* pProp);
 	void ClearSel();
 	BOOL EndEditItem(BOOL bUpdateData = TRUE);
+	void OnChangeSelection(CMFCPropertyGridProperty* /*pNewSel*/, CMFCPropertyGridProperty* /*pOldSel*/);
 };
 

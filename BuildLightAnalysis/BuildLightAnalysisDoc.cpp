@@ -435,8 +435,9 @@ void CBuildLightAnalysisDoc::OnFileOutput()
 	OnFileSave();
 
 	set<CString> mats;
-	geometryOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_geometry.rad", mats);
-	materialOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_material.rad", m_material, mats);
+	set<Material> antiMaterials;
+	geometryOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_geometry.rad", mats, antiMaterials);
+	materialOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_material.rad", m_material, mats, antiMaterials);
 	string grid1file = CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_grid1.pts";
 	string grid2file = CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_grid2.pts";
 	RoomOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) +"_room_info.txt", grid1file, grid2file);

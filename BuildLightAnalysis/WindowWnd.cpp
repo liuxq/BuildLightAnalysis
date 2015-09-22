@@ -100,6 +100,30 @@ void CWindowWnd::OnNewWindow()
 {
 	InsertWindow(0, 0, -1);
 }
+void CWindowWnd::DeleteWindowByIndex(int index)
+{
+	if (index < 0 || index >= m_wndPropList.GetPropertyCount())
+	{
+		return;
+	}
+	CMFCPropertyGridProperty* selItem = m_wndPropList.GetProperty(index);
+	if (selItem)
+	{
+		m_wndPropList.DeleteProperty(selItem);
+
+		//重新设置一下坐标编号
+		int count = m_wndPropList.GetPropertyCount();
+		CString strName;
+		for (int i = 0; i < count; i++)
+		{
+			strName.Format(_T("窗%d"),i);
+			m_wndPropList.GetProperty(i)->SetName(strName);
+		}
+	}
+	//更新视图
+	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;     
+	pMain->GetActiveView()->Invalidate(); 
+}
 void CWindowWnd::OnDeleteWindow()
 {
 	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
@@ -204,11 +228,6 @@ double WinWidth )
 		return;
 
 	int count = m_wndPropList.GetPropertyCount();
-	/*if (count == 0)
-	{
-	}
-	CString name = m_wndPropList.GetProperty(count-1)->GetValue().bstrVal;
-	CString num = name.Right(1);*/
 	CString strCount;
 	strCount.Format(_T("窗%d"),count);
 

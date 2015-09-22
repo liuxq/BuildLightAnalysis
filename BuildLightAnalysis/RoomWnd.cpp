@@ -315,7 +315,10 @@ void CRoomWnd::OnDeleteRoom()
 	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;     
 	pMain->GetActiveView()->Invalidate(); 
 }
-
+bool CRoomWnd::DeleteWindowFromRoom(int winIndex)
+{
+	
+}
 bool CRoomWnd::AddToSelectedRoom(int type, int index)
 {
 	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();

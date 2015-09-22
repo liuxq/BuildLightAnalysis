@@ -50,3 +50,12 @@ bool MaterialSet::loadTemplate(CString file)
 
 	return true;
 }
+
+bool operator<(const Material& _Left, const Material& _Right)
+{
+	if (_Left.name < _Right.name || (_Left.name == _Right.name && _Left.type < _Right.type))
+	{
+		return true;
+	}
+	return false;
+}

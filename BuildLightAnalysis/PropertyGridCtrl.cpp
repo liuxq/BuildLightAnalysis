@@ -25,6 +25,27 @@ BOOL PropertyGridCtrl::EndEditItem(BOOL bUpdateData)
 	return TRUE;  
 }  
 
+void PropertyGridCtrl::OnChangeSelection(CMFCPropertyGridProperty* pNewSel, CMFCPropertyGridProperty* pOldSel) 
+{
+	while (pNewSel && pNewSel->GetParent())
+	{
+		pNewSel = pNewSel->GetParent();
+	}
+	if (pNewSel)
+	{
+		CString name = pNewSel->GetName();
+		if (name == _T("处理后外墙") || name == _T("处理后内墙"))
+		{
+			//编辑属性后，重绘主视图
+			CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd; 
+			if (pMain && pMain->GetActiveView())
+			{
+				pMain->GetActiveView()->Invalidate(); 
+			}
+		}
+	}
+}
+
 PropertyGridProperty::PropertyGridProperty(const CString& strName, const COleVariant& varValue, LPCTSTR lpszDescr, DWORD_PTR dwData, LPCTSTR lpszEditMask, LPCTSTR lpszEditTemplate, LPCTSTR lpszValidChars)
 	: CMFCPropertyGridProperty(strName,varValue,lpszDescr,dwData,lpszEditMask,lpszEditTemplate, lpszValidChars)
 {

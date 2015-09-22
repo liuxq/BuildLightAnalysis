@@ -42,7 +42,6 @@ BEGIN_MESSAGE_MAP(CBuildLightAnalysisView, CView)
 	ON_COMMAND(ID_EDIT_TRANSLATE, &CBuildLightAnalysisView::OnEditTranslate)
 	ON_COMMAND(ID_EDIT_DO_OPTIMIZE, &CBuildLightAnalysisView::OnEditDoOptimize)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_TRANSLATE, &CBuildLightAnalysisView::OnUpdateEditTranslate)
-	ON_COMMAND(ID_POP_DELETE_WALL, &CBuildLightAnalysisView::OnPopDeleteWall)
 	ON_COMMAND(ID_POP_DELETE_WIN, &CBuildLightAnalysisView::OnPopDeleteWin)
 END_MESSAGE_MAP()
 
@@ -222,7 +221,7 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 			p = m_transform.RealToScreen(p);
 			p1 = m_transform.RealToScreen(p1);
 
-			if (i == m_iSelectOutWallIndex)//如果是拾取的外墙
+			if (i == m_iSelectOutWallIndex || optimizeOutWallPos->GetSubItem(i)->IsSelected())//如果是拾取的外墙
 			{
 				Gdiplus::Pen selectPen(Color(255,GetRValue(outWallColor),GetGValue(outWallColor),GetBValue(outWallColor)), 16);
 				graph->DrawLine(&selectPen, (float)p.x, (float)p.y, (float)p1.x, (float)p1.y);
@@ -250,7 +249,7 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 			p = m_transform.RealToScreen(p);
 			p1 = m_transform.RealToScreen(p1);
 
-			if (i == m_iSelectInWallIndex)//如果是拾取的内墙
+			if (i == m_iSelectInWallIndex || optimizeInWallPos->GetSubItem(i)->IsSelected())//如果是拾取的内墙
 			{
 				Gdiplus::Pen selectPen(Gdiplus::Color(255,GetRValue(inWallColor),GetGValue(inWallColor),GetBValue(inWallColor)), 12);
 				graph->DrawLine(&selectPen, (float)p.x, (float)p.y, (float)p1.x, (float)p1.y);
@@ -829,13 +828,8 @@ void CBuildLightAnalysisView::OnUpdateEditTranslate(CCmdUI *pCmdUI)
 }
 
 
-void CBuildLightAnalysisView::OnPopDeleteWall()
-{
-	// TODO: Add your command handler code here
-}
-
-
 void CBuildLightAnalysisView::OnPopDeleteWin()
 {
-	// TODO: Add your command handler code here
+	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+	pMain->GetWindowProperty().DeleteWindowByIndex(m_iSelectWindowIndex);
 }

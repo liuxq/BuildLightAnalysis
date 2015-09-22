@@ -25,6 +25,7 @@ public:
 	void InsertWindow(int outWallIndex, int inWallIndex, int winIndex, CString mat = _T("GenericDoubleGlazing60_60VisualTransmittance"), double pos = 0.5 ,double WinUpHeight = 2300.0,double WinDownHeight = 900.0,
 		double WinWidth = 1200.0);
 	void DeleteAllWindow();
+	void DeleteWindowByIndex(int);
 
 	void save(ofstream& out);
 	void load(ifstream& in);

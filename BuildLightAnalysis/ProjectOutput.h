@@ -7,10 +7,10 @@
 
 using namespace std;
 
-void geometryOutput(string filename, set<CString>& outMats);
+void geometryOutput(string filename, set<CString>& outMats, set<Material>& antiMaterials);
 
-void materialOutput(string filename, MaterialSet& materials, set<CString>& mats);
+void materialOutput(string filename, MaterialSet& materials, set<CString>& mats, set<Material>& antiMaterials);
 
 void RoomOutput(string roomFile, string grid1File, string grid2File);
 
-void RoomOutToVector(vector<OutSurface> surfaces, set<CString>& Mats);
+void RoomOutToVector(vector<OutRoom>& surfaces, set<CString>& Mats,set<Material>& antiMaterials);
