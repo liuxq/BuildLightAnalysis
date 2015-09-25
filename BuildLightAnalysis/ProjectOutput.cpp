@@ -99,7 +99,7 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 	CMFCPropertyGridProperty* optimizeInWallPos = pMain->GetOptimizeWallProperty().getCoodInWallGroup();
 	PropertyGridCtrl* pWindowlist = pMain->GetWindowProperty().getPropList();
 
-	double h = pMain->GetOptionProperty().GetDataDouble(OPTION_LEVEL_HEIGHT);
+	
 	CString roofMat = pMain->GetOptionProperty().GetDataCString(OPTION_ROOF_MAT);
 	CString floorMat = pMain->GetOptionProperty().GetDataCString(OPTION_FLOOR_MAT);
 	mats.insert(roofMat);
@@ -108,6 +108,7 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 	int GridPointCount = 0;
 	for (int i = 0; i < rooms.size(); i++)
 	{
+		double h = rooms[i].height;
 		//导出第i个房间
 		vector<OutSurface> surfaces;
 		Wall wall;
@@ -582,11 +583,11 @@ void RoomOutput(string roomFile, string grid1File, string grid2File)
 				}
 				out << endl;
 				
-				grid1Out << points[a].p.x << " " << points[a].p.y<<" "<<750 << " "<<0<<" "<<0<<" "<<1<<endl;
+				grid1Out << points[a].p.x << " " << points[a].p.y<<" "<< points[a].p.z << " "<<0<<" "<<0<<" "<<1<<endl;
 
 				if (points[a].isKey)
 				{
-					grid2Out << points[a].p.x << " " << points[a].p.y<<" "<<750 << " "<<0<<" "<<0<<" "<<1<<endl;
+					grid2Out << points[a].p.x << " " << points[a].p.y<<" "<< points[a].p.z << " "<<0<<" "<<0<<" "<<1<<endl;
 				}
 				GridPointCount++;
 			}

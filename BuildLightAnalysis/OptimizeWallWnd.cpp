@@ -132,16 +132,16 @@ void COptimizeWallWnd::InsertPos(bool isOutWall, double x, double y, double x1, 
 
 	PropertyGridProperty* pPos = new PropertyGridProperty(strCount, 0, TRUE);
 
-	PropertyGridProperty* pStart = new PropertyGridProperty(_T("Start"), 0, TRUE);
-	PropertyGridProperty* pProp = new PropertyGridProperty(_T("X"), (_variant_t) x, _T("坐标X"));
+	PropertyGridProperty* pStart = new PropertyGridProperty(_T("起点"), 0, TRUE);
+	PropertyGridProperty* pProp = new PropertyGridProperty(_T("X(mm)"), (_variant_t) x, _T("坐标X"));
 	pStart->AddSubItem(pProp);
-	pProp = new PropertyGridProperty( _T("Y"), (_variant_t) y, _T("坐标Y"));
+	pProp = new PropertyGridProperty( _T("Y(mm)"), (_variant_t) y, _T("坐标Y"));
 	pStart->AddSubItem(pProp);
 
-	PropertyGridProperty* pEnd = new PropertyGridProperty(_T("End"), 0, TRUE);
-	pProp = new PropertyGridProperty(_T("X"), (_variant_t) x1, _T("坐标X"));
+	PropertyGridProperty* pEnd = new PropertyGridProperty(_T("终点"), 0, TRUE);
+	pProp = new PropertyGridProperty(_T("X(mm)"), (_variant_t) x1, _T("坐标X"));
 	pEnd->AddSubItem(pProp);
-	pProp = new PropertyGridProperty( _T("Y"), (_variant_t) y1, _T("坐标Y"));
+	pProp = new PropertyGridProperty( _T("Y(mm)"), (_variant_t) y1, _T("坐标Y"));
 	pEnd->AddSubItem(pProp);
 
 	PropertyGridProperty* pMat = new PropertyGridProperty(_T("材质"), mat, _T("墙材质"));
@@ -150,6 +150,7 @@ void COptimizeWallWnd::InsertPos(bool isOutWall, double x, double y, double x1, 
 	{
 		pMat->AddOption(StringToCString(mats[i].name));
 	}
+	pMat->AllowEdit(FALSE);
 	pPos->AddSubItem(pStart);
 	pPos->AddSubItem(pEnd);
 	pPos->AddSubItem(pMat);

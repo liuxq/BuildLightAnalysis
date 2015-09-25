@@ -109,8 +109,8 @@ void COptionWnd::InitPropList()
 	m_wndPropList.SetVSDotNetLook();
 	m_wndPropList.MarkModifiedProperties();
 
-	CMFCPropertyGridProperty* pLevelHigh = new CMFCPropertyGridProperty(_T("层高"),(_variant_t) 2800.0,_T("层高度"), 1);
-	CMFCPropertyGridProperty* pOptimizeTh = new CMFCPropertyGridProperty(_T("处理阈值"),(_variant_t) 400.0,_T("处理内外墙时低于多少毫米会进行补足和删除"), 2);
+	CMFCPropertyGridProperty* pLevelHigh = new CMFCPropertyGridProperty(_T("层高(mm)"),(_variant_t) 2800.0,_T("层高度，单位：mm"), 1);
+	CMFCPropertyGridProperty* pOptimizeTh = new CMFCPropertyGridProperty(_T("处理阈值(mm)"),(_variant_t) 400.0,_T("处理内外墙时低于多少毫米会进行补足和删除"), 2);
 	CMFCPropertyGridProperty* pOutWallMaterial = new PropertyGridProperty(_T("默认外墙材质"), _T("GenericInteriorWall_50PercentReflectance"), _T("默认外墙材质"));
 	CMFCPropertyGridProperty* pInWallMaterial = new PropertyGridProperty(_T("默认内墙材质"), _T("GenericInteriorWall_50PercentReflectance"), _T("默认内墙材质"));
 	CMFCPropertyGridProperty* pWindowMaterial = new PropertyGridProperty(_T("默认窗户材质"), _T("GenericDoubleGlazing60_60VisualTransmittance"), _T("默认窗户材质"));
@@ -148,11 +148,11 @@ void COptionWnd::loadMaterialTemplateAndCity()
 	CString strMat;
 	vector<Material>& mats = pDoc->getMaterials();
 
-	CMFCPropertyGridProperty* pOutWallMaterial = m_wndPropList.GetProperty(OPTION_OUTWALL_MAT);
-	CMFCPropertyGridProperty* pInWallMaterial = m_wndPropList.GetProperty(OPTION_INWALL_MAT);
-	CMFCPropertyGridProperty* pWindowMaterial = m_wndPropList.GetProperty(OPTION_WINDOW_MAT);
-	CMFCPropertyGridProperty* pFloorMaterial = m_wndPropList.GetProperty(OPTION_FLOOR_MAT);
-	CMFCPropertyGridProperty* pRoofMaterial = m_wndPropList.GetProperty(OPTION_ROOF_MAT);
+	CMFCPropertyGridProperty* pOutWallMaterial = m_wndPropList.GetProperty(OPTION_OUTWALL_MAT);pOutWallMaterial->AllowEdit(FALSE);
+	CMFCPropertyGridProperty* pInWallMaterial = m_wndPropList.GetProperty(OPTION_INWALL_MAT);pInWallMaterial->AllowEdit(FALSE);
+	CMFCPropertyGridProperty* pWindowMaterial = m_wndPropList.GetProperty(OPTION_WINDOW_MAT);pWindowMaterial->AllowEdit(FALSE);
+	CMFCPropertyGridProperty* pFloorMaterial = m_wndPropList.GetProperty(OPTION_FLOOR_MAT);pFloorMaterial->AllowEdit(FALSE);
+	CMFCPropertyGridProperty* pRoofMaterial = m_wndPropList.GetProperty(OPTION_ROOF_MAT);pRoofMaterial->AllowEdit(FALSE);
 
 	for (int i = 0; i < mats.size(); i++)
 	{
@@ -170,6 +170,7 @@ void COptionWnd::loadMaterialTemplateAndCity()
 	{
 		pCitys->AddOption(citys[i]);
 	}
+	pCitys->AllowEdit(FALSE);
 
 }
 void COptionWnd::GetTransform(double s, double centerX, double centerY)

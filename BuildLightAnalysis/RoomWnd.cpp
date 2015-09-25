@@ -175,6 +175,8 @@ PropertyGridProperty* CRoomWnd::AddRoom(CString roomName)
 	if (!pMain || !pDoc)
 		return NULL;
 
+	double h = pMain->GetOptionProperty().GetDataDouble(OPTION_LEVEL_HEIGHT);
+
 	PropertyGridProperty* pRoom = new PropertyGridProperty(roomName, 0, FALSE);
 
 	PropertyGridProperty* pType = new PropertyGridProperty(_T("类型"), _T("普通办公室"), _T("房间类型"));
@@ -183,17 +185,20 @@ PropertyGridProperty* CRoomWnd::AddRoom(CString roomName)
 	{
 		pType->AddOption(CString(roomTypes[i].name));
 	}
+	pType->AllowEdit(FALSE);
+	PropertyGridProperty* pHeight = new PropertyGridProperty(_T("高度(mm)"), (_variant_t)h, _T("房间类型"));
 	PropertyGridProperty* pOutWall = new PropertyGridProperty(_T("外墙"), 0, TRUE);
 	PropertyGridProperty* pInWall = new PropertyGridProperty(_T("内墙"), 0, TRUE);
 	PropertyGridProperty* pWin = new PropertyGridProperty(_T("窗户"), ROOM_WINDOW, TRUE);
 	PropertyGridProperty* pGrid = new PropertyGridProperty(_T("计算网格"), ROOM_GRID, FALSE);
 
-	PropertyGridProperty* pOffset = new PropertyGridProperty(_T("内偏移"), (_variant_t)120.0, _T("内偏移"));
-	PropertyGridProperty* pMeshLen = new PropertyGridProperty(_T("网格边长"), (_variant_t)120.0, _T("网格边长"));
+	PropertyGridProperty* pOffset = new PropertyGridProperty(_T("内偏移(mm)"), (_variant_t)120.0, _T("内偏移"));
+	PropertyGridProperty* pMeshLen = new PropertyGridProperty(_T("网格边长(mm)"), (_variant_t)120.0, _T("网格边长"));
 	pGrid->AddSubItem(pOffset);
 	pGrid->AddSubItem(pMeshLen);
 
 	pRoom->AddSubItem(pType);
+	pRoom->AddSubItem(pHeight);
 	pRoom->AddSubItem(pOutWall);
 	pRoom->AddSubItem(pInWall);
 	pRoom->AddSubItem(pWin);
@@ -229,8 +234,6 @@ void CRoomWnd::CalGrid(CMFCPropertyGridProperty* pGrid)
 
 	double offset = pGrid->GetSubItem(GRID_OFFSET)->GetValue().dblVal;
 	double meshLen = pGrid->GetSubItem(GRID_MESHLEN)->GetValue().dblVal;
-
-	
 
 	CMFCPropertyGridProperty* optimizeOutWallPos = pMain->GetOptimizeWallProperty().getCoodOutWallGroup();
 	CMFCPropertyGridProperty* optimizeInWallPos = pMain->GetOptimizeWallProperty().getCoodInWallGroup();
@@ -276,11 +279,13 @@ void CRoomWnd::CalGrid(CMFCPropertyGridProperty* pGrid)
 	CMFCPropertyGridProperty* pGridList = new CMFCPropertyGridProperty(_T("计算点"),0,FALSE);
 	for (int i = 0; i < gridPoints.size(); i++)
 	{
-		CMFCPropertyGridProperty* pGridPoint = new CMFCPropertyGridProperty(_T("点"),0,TRUE);
+		CMFCPropertyGridProperty* pGridPoint = new CMFCPropertyGridProperty(_T("点(mm)"),0,TRUE);
 		CMFCPropertyGridProperty* pGridPointX = new CMFCPropertyGridProperty(_T("X"),(_variant_t)gridPoints[i].x,_T("X"));
 		CMFCPropertyGridProperty* pGridPointY = new CMFCPropertyGridProperty(_T("Y"),(_variant_t)gridPoints[i].y,_T("Y"));
+		CMFCPropertyGridProperty* pGridPointZ = new CMFCPropertyGridProperty(_T("Z"),(_variant_t)750.0,_T("Z"));
 		pGridPoint->AddSubItem(pGridPointX);
 		pGridPoint->AddSubItem(pGridPointY);
+		pGridPoint->AddSubItem(pGridPointZ);
 
 		pGridList->AddSubItem(pGridPoint);
 	}
@@ -399,11 +404,13 @@ void CRoomWnd::OutputToRooms(vector<Room>& rooms)
 		Room room;
 		CMFCPropertyGridProperty* pRoom = m_wndPropList.GetProperty(i);
 		CMFCPropertyGridProperty* pType = pRoom->GetSubItem(ROOM_TYPE);
+		CMFCPropertyGridProperty* pHeight = pRoom->GetSubItem(ROOM_HEIGHT);
 		CMFCPropertyGridProperty* pOutWall = pRoom->GetSubItem(ROOM_OUT_WALL);
 		CMFCPropertyGridProperty* pInWall = pRoom->GetSubItem(ROOM_IN_WALL);
 		CMFCPropertyGridProperty* pWindow = pRoom->GetSubItem(ROOM_WINDOW);
 		CString type = pType->GetValue().bstrVal;
 		_tcscpy_s(room.type.name, type);
+		room.height = pHeight->GetValue().dblVal;
 		for (int j = 0; j < pOutWall->GetSubItemsCount(); j++)
 		{
 			int index = pOutWall->GetSubItem(j)->GetValue().intVal;
@@ -437,6 +444,7 @@ void CRoomWnd::OutputToRooms(vector<Room>& rooms)
 					p.isKey = false;
 				p.p.x = pPoints->GetSubItem(j)->GetSubItem(0)->GetValue().dblVal;
 				p.p.y = pPoints->GetSubItem(j)->GetSubItem(1)->GetValue().dblVal;
+				p.p.z = pPoints->GetSubItem(j)->GetSubItem(2)->GetValue().dblVal;
 				room.grid.points.push_back(p);
 			}
 		}
@@ -453,6 +461,7 @@ void CRoomWnd::save(ofstream& out)
 	for (int i = 0; i < size; i++)
 	{
 		serializer<RoomType>::write(out, &rooms[i].type);
+		serializer<double>::write(out, &rooms[i].height);
 		serializer<int>::write(out, &rooms[i].outWalls);
 		serializer<int>::write(out, &rooms[i].inWalls);
 		serializer<int>::write(out, &rooms[i].windows);
@@ -472,6 +481,7 @@ void CRoomWnd::load(ifstream& in)
 	for (int i = 0; i < size; i++)
 	{
 		serializer<RoomType>::read(in, &rooms[i].type);
+		serializer<double>::read(in, &rooms[i].height);
 		serializer<int>::read(in, &rooms[i].outWalls);
 		serializer<int>::read(in, &rooms[i].inWalls);
 		serializer<int>::read(in, &rooms[i].windows);
@@ -485,12 +495,14 @@ void CRoomWnd::load(ifstream& in)
 		strCount.Format(_T("房间%d"),i);
 		PropertyGridProperty* pRoom = AddRoom(strCount);
 		CMFCPropertyGridProperty* pType = pRoom->GetSubItem(ROOM_TYPE);
+		CMFCPropertyGridProperty* pHeight = pRoom->GetSubItem(ROOM_HEIGHT);
 		CMFCPropertyGridProperty* pOutWall = pRoom->GetSubItem(ROOM_OUT_WALL);
 		CMFCPropertyGridProperty* pInWall = pRoom->GetSubItem(ROOM_IN_WALL);
 		CMFCPropertyGridProperty* pWindow = pRoom->GetSubItem(ROOM_WINDOW);
 		CMFCPropertyGridProperty* pGrid = pRoom->GetSubItem(ROOM_GRID);
 		
 		pType->SetValue(rooms[i].type.name);
+		pHeight->SetValue(rooms[i].height);
 		for (int j = 0; j < rooms[i].outWalls.size(); j++)
 		{
 			CMFCPropertyGridProperty* outWallindex = new CMFCPropertyGridProperty(_T("编号"),(_variant_t)rooms[i].outWalls[j], _T("外墙编号"));
@@ -513,11 +525,13 @@ void CRoomWnd::load(ifstream& in)
 		for (int j = 0; j < rooms[i].grid.points.size(); j++)
 		{
 			GridPoint& gp = rooms[i].grid.points[j];
-			CMFCPropertyGridProperty* point = new CMFCPropertyGridProperty(gp.isKey?_T("关键点"):_T("点"), 0, TRUE);
+			CMFCPropertyGridProperty* point = new CMFCPropertyGridProperty(gp.isKey?_T("关键点(mm)"):_T("点(mm)"), 0, TRUE);
 			CMFCPropertyGridProperty* pGridPointX = new CMFCPropertyGridProperty(_T("X"),(_variant_t)gp.p.x,_T("X"));
 			CMFCPropertyGridProperty* pGridPointY = new CMFCPropertyGridProperty(_T("Y"),(_variant_t)gp.p.y,_T("Y"));
+			CMFCPropertyGridProperty* pGridPointZ = new CMFCPropertyGridProperty(_T("Z"),(_variant_t)gp.p.z,_T("Z"));
 			point->AddSubItem(pGridPointX);
 			point->AddSubItem(pGridPointY);
+			point->AddSubItem(pGridPointZ);
 			pGridList->AddSubItem(point);
 		}
 

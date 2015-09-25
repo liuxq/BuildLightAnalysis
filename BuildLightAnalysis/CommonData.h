@@ -79,7 +79,7 @@ struct stWindow
 
 struct GridPoint
 {
-	Vec2d p;
+	Vec3d p;
 	bool isKey;
 };
 
@@ -98,6 +98,7 @@ struct RoomType
 struct Room
 {
 	RoomType type;
+	double height;
 	vector<int> outWalls;
 	vector<int> inWalls;
 	vector<int> windows;

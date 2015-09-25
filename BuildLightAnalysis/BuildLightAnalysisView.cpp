@@ -47,9 +47,9 @@ END_MESSAGE_MAP()
 
 // CBuildLightAnalysisView construction/destruction
 
-CBuildLightAnalysisView::CBuildLightAnalysisView():m_selectedOutWallPoint(-1),m_isDrawInWall(false),
+CBuildLightAnalysisView::CBuildLightAnalysisView():m_buttonDownOutWallPoint(-1),m_isDrawInWall(false),
 	m_iSelectOutWallIndex(-1), m_iSelectInWallIndex(-1), m_iSelectWindowIndex(-1),m_bIsPullTranslate(false),
-	m_iSelectGridRoomIndex(-1),m_iSelectGridIndex(-1)
+	m_iSelectGridRoomIndex(-1),m_iSelectGridIndex(-1),m_outModeOutWallSelectIndex(-1)
 {
 	// TODO: add construction code here
 	m_transform.scale = 0.1;
@@ -166,19 +166,25 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 		Vec2d p, p1, startP, lastP;
 		if (outWallPos->GetSubItemsCount() > 0)
 		{
-			startP.x = outWallPos->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
-			startP.y = outWallPos->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
-			startP = m_transform.RealToScreen(startP);
-
-			graph->FillEllipse(&outPointBrush, (float)startP.x - 5, (float)startP.y - 5, 10.0,10.0);
-			lastP = startP;
-			for (int i = 1; i < outWallPos->GetSubItemsCount(); i++)
+			for (int i = 0; i < outWallPos->GetSubItemsCount(); i++)
 			{
 				p.x = outWallPos->GetSubItem(i)->GetSubItem(0)->GetValue().dblVal;
 				p.y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetValue().dblVal;
 				p = m_transform.RealToScreen(p);
-				
-				graph->FillEllipse(&outPointBrush, (float)p.x - 5, (float)p.y - 5, 10.0, 10.0);
+				//画节点
+				if (i == m_outModeOutWallSelectIndex || outWallPos->GetSubItem(i)->IsSelected())
+				{
+					graph->FillEllipse(&outPointBrush, (float)p.x - 8, (float)p.y - 8, 16.0, 16.0);
+				}
+				else 
+					graph->FillEllipse(&outPointBrush, (float)p.x - 5, (float)p.y - 5, 10.0, 10.0);
+				if (i == 0)
+				{
+					startP = p;
+					lastP = p;
+					continue;
+				}
+				//画线段
 				graph->DrawLine(&outPen, (float)lastP.x, (float)lastP.y, (float)p.x, (float)p.y);
 				lastP = p;
 			}
@@ -427,16 +433,37 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 	}
 
 	//如果是外墙模式，有选中的外墙点，则移动它
-	if (pMain->GetMode() == MODE_OUTWALL && m_selectedOutWallPoint >= 0)
+	if (pMain->GetMode() == MODE_OUTWALL && m_buttonDownOutWallPoint >= 0)
 	{
 		CMFCPropertyGridProperty* outWallPos = pMain->GetOutWallProperty().getCoodGroup();
 		if (!outWallPos)
 			return;
-		outWallPos->GetSubItem(m_selectedOutWallPoint)->GetSubItem(0)->SetValue(p.x);
-		outWallPos->GetSubItem(m_selectedOutWallPoint)->GetSubItem(1)->SetValue(p.y);
+		outWallPos->GetSubItem(m_buttonDownOutWallPoint)->GetSubItem(0)->SetValue(p.x);
+		outWallPos->GetSubItem(m_buttonDownOutWallPoint)->GetSubItem(1)->SetValue(p.y);
 
 		Invalidate();
 	}
+	//如果是外墙模式，拾取节点
+	if (pMain->GetMode() == MODE_OUTWALL)
+	{
+		CMFCPropertyGridProperty* outWallPos = pMain->GetOutWallProperty().getCoodGroup();
+		if (!outWallPos)
+			return;
+		m_outModeOutWallSelectIndex = -1;
+		for (int i = 0; i < outWallPos->GetSubItemsCount(); i++)
+		{
+			double x = outWallPos->GetSubItem(i)->GetSubItem(0)->GetValue().dblVal;
+			double y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetValue().dblVal;
+
+			if (sqrt((x - p.x)*(x - p.x) + (y - p.y)*(y - p.y)) < 100)
+			{
+				m_outModeOutWallSelectIndex = i;
+				break;
+			}
+		}
+		Invalidate();
+	}
+	
 	//如果是内墙模式
 	if (pMain->GetMode() == MODE_INWALL && m_isDrawInWall)
 	{
@@ -609,7 +636,7 @@ void CBuildLightAnalysisView::OnLButtonDown(UINT nFlags, CPoint point)
 
 				if (sqrt((x - p.x)*(x - p.x) + (y - p.y)*(y - p.y)) < 100)
 				{
-					m_selectedOutWallPoint = i;
+					m_buttonDownOutWallPoint = i;
 					break;
 				}
 			}
@@ -648,9 +675,9 @@ void CBuildLightAnalysisView::OnLButtonUp(UINT nFlags, CPoint point)
 		return;
 
 	//如果是外墙模式，并且有选中的外墙点，则移动它
-	if (pMain->GetMode() == MODE_OUTWALL && m_selectedOutWallPoint >= 0)
+	if (pMain->GetMode() == MODE_OUTWALL && m_buttonDownOutWallPoint >= 0)
 	{
-		m_selectedOutWallPoint = -1;
+		m_buttonDownOutWallPoint = -1;
 	}
 	//如果是内墙模式
 	if (pMain->GetMode() == MODE_INWALL && m_isDrawInWall)
