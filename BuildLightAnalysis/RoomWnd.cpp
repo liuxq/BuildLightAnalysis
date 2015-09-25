@@ -200,6 +200,7 @@ PropertyGridProperty* CRoomWnd::AddRoom(CString roomName)
 	pRoom->AddSubItem(pGrid);
 
 	m_wndPropList.AddProperty(pRoom);
+	m_wndPropList.SetCurSel(pRoom);
 	//m_wndPropList.UpdateProperty((PropertyGridProperty*)(pWindow));
 	return pRoom;
 }
@@ -315,8 +316,27 @@ void CRoomWnd::OnDeleteRoom()
 	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;     
 	pMain->GetActiveView()->Invalidate(); 
 }
-bool CRoomWnd::DeleteWindowFromRoom(int winIndex)
+void CRoomWnd::DeleteWindowFromRoom(int winIndex)
 {
+	for (int i = 0; i < m_wndPropList.GetPropertyCount(); i++)
+	{
+		CMFCPropertyGridProperty* pWin = m_wndPropList.GetProperty(i)->GetSubItem(ROOM_WINDOW);
+		for (int j = 0; j < pWin->GetSubItemsCount(); j++)
+		{
+			CMFCPropertyGridProperty* p = pWin->GetSubItem(j);
+			int oriIndex = p->GetValue().lVal;
+			if (oriIndex == winIndex)
+			{
+				pWin->RemoveSubItem(p);
+				j--;
+			}
+			else if (oriIndex > winIndex)
+			{
+				p->SetValue((_variant_t)(oriIndex-1));
+			}
+		}
+	}
+	m_wndPropList.AdjustLayout();
 	
 }
 bool CRoomWnd::AddToSelectedRoom(int type, int index)

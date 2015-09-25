@@ -98,7 +98,20 @@ int CWindowWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 void CWindowWnd::OnNewWindow()
 {
-	InsertWindow(0, 0, -1);
+	CMainFrame* pMain = (CMainFrame*)AfxGetApp()->m_pMainWnd;  
+
+	int outWallCount = pMain->GetOptimizeWallProperty().getCoodOutWallGroup()->GetSubItemsCount();
+	int inWallCount = pMain->GetOptimizeWallProperty().getCoodInWallGroup()->GetSubItemsCount();
+	if (outWallCount > 0)
+	{
+		InsertWindow(0,-1,-1);
+	}
+	else if (inWallCount > 0)
+	{
+		InsertWindow(-1,0,-1);
+	}
+	else
+		AfxMessageBox(_T("没有任何可以放窗户的墙！"));
 }
 void CWindowWnd::DeleteWindowByIndex(int index)
 {
@@ -106,6 +119,8 @@ void CWindowWnd::DeleteWindowByIndex(int index)
 	{
 		return;
 	}
+	CMainFrame* pMain = (CMainFrame*)AfxGetApp()->m_pMainWnd;  
+
 	CMFCPropertyGridProperty* selItem = m_wndPropList.GetProperty(index);
 	if (selItem)
 	{
@@ -119,9 +134,11 @@ void CWindowWnd::DeleteWindowByIndex(int index)
 			strName.Format(_T("窗%d"),i);
 			m_wndPropList.GetProperty(i)->SetName(strName);
 		}
+		m_wndPropList.AdjustLayout();
+		//更新房间中的窗口编号
+		pMain->GetRoomProperty().DeleteWindowFromRoom(index);
 	}
 	//更新视图
-	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;     
 	pMain->GetActiveView()->Invalidate(); 
 }
 void CWindowWnd::OnDeleteWindow()
@@ -129,20 +146,12 @@ void CWindowWnd::OnDeleteWindow()
 	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
 	if (selItem && !selItem->GetParent())
 	{
-		m_wndPropList.DeleteProperty(selItem);
+		CString name = selItem->GetName();
+		CString namePost = name.Right(name.GetLength() - 1);
+		int index = _ttoi(namePost);
 
-		//重新设置一下坐标编号
-		int count = m_wndPropList.GetPropertyCount();
-		CString strName;
-		for (int i = 0; i < count; i++)
-		{
-			strName.Format(_T("窗%d"),i);
-			m_wndPropList.GetProperty(i)->SetName(strName);
-		}
+		DeleteWindowByIndex(index);
 	}
-	//更新视图
-	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;     
-	pMain->GetActiveView()->Invalidate(); 
 }
 
 void CWindowWnd::OnSize(UINT nType, int cx, int cy)

@@ -40,7 +40,7 @@ public:
 
 	PropertyGridProperty* AddRoom(CString);
 	bool AddToSelectedRoom(int type, int index);
-	bool DeleteWindowFromRoom(int winIndex);
+	void DeleteWindowFromRoom(int winIndex);
 	void DeleteAllRoom();
 	CMFCPropertyGridProperty* InsertGrid(double offset, double meshLen);
 	void CalGrid(CMFCPropertyGridProperty* pGrid);
