@@ -34,7 +34,8 @@ void PropertyGridCtrl::OnChangeSelection(CMFCPropertyGridProperty* pNewSel, CMFC
 	if (pNewSel)
 	{
 		CString name = pNewSel->GetName();
-		if (name == _T("处理后外墙") || name == _T("处理后内墙") || name == _T("外墙坐标"))
+		if (name == _T("处理后外墙") || name == _T("处理后内墙") || name == _T("外墙坐标") || name == _T("内墙线段")
+			|| name.Left(1) == _T("窗"))
 		{
 			//编辑属性后，重绘主视图
 			CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd; 

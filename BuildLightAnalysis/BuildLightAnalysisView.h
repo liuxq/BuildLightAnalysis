@@ -40,6 +40,7 @@ public:
 protected:
 private:
 	int m_outModeOutWallSelectIndex;
+	int m_inModeInWallSelectIndex;
 	int m_buttonDownOutWallPoint;
 	bool m_isDrawInWall;
 	int m_iSelectOutWallIndex;

@@ -73,11 +73,11 @@ int CInWallWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Create combo:
 	const DWORD dwViewStyle = WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON;
 
-	if (!m_insertButton.Create(_T("插入坐标"),dwViewStyle, rectDummy, this, IDC_IN_INSERT_BUTTON))
+	if (!m_insertButton.Create(_T("插入内墙"),dwViewStyle, rectDummy, this, IDC_IN_INSERT_BUTTON))
 	{
 		return -1;      // fail to create
 	}
-	if (!m_deleteButton.Create(_T("删除坐标"),dwViewStyle, rectDummy, this, IDC_IN_DELETE_BUTTON))
+	if (!m_deleteButton.Create(_T("删除内墙"),dwViewStyle, rectDummy, this, IDC_IN_DELETE_BUTTON))
 	{
 		return -1;      // fail to create
 	}
@@ -154,7 +154,7 @@ void CInWallWnd::InsertPos(double x, double y, double x1, double y1)
 }
 void CInWallWnd::OnInsertPos()
 {
-	InsertPos(100l,200l,200l,300l);
+	InsertPos(0,0,2000,2000);
 }
 void CInWallWnd::DeleteAllPos()
 {

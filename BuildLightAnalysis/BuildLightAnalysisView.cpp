@@ -49,7 +49,7 @@ END_MESSAGE_MAP()
 
 CBuildLightAnalysisView::CBuildLightAnalysisView():m_buttonDownOutWallPoint(-1),m_isDrawInWall(false),
 	m_iSelectOutWallIndex(-1), m_iSelectInWallIndex(-1), m_iSelectWindowIndex(-1),m_bIsPullTranslate(false),
-	m_iSelectGridRoomIndex(-1),m_iSelectGridIndex(-1),m_outModeOutWallSelectIndex(-1)
+	m_iSelectGridRoomIndex(-1),m_iSelectGridIndex(-1),m_outModeOutWallSelectIndex(-1),m_inModeInWallSelectIndex(-1)
 {
 	// TODO: add construction code here
 	m_transform.scale = 0.1;
@@ -192,6 +192,7 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 		}
 		//画内墙
 		Gdiplus::Pen inPen(Gdiplus::Color(255,GetRValue(inWallColor),GetGValue(inWallColor),GetBValue(inWallColor)), 6);
+		Gdiplus::Pen inSelectPen(Gdiplus::Color(255,GetRValue(inWallColor),GetGValue(inWallColor),GetBValue(inWallColor)), 9);
 		for (int i = 0; i < inWallPos->GetSubItemsCount(); i++)
 		{
 			p.x = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
@@ -203,7 +204,11 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 			p = m_transform.RealToScreen(p);
 			p1 = m_transform.RealToScreen(p1);
 
-			graph->DrawLine(&inPen, (float)p.x, (float)p.y, (float)p1.x, (float)p1.y);
+			//画节点
+			if (i == m_inModeInWallSelectIndex || inWallPos->GetSubItem(i)->IsSelected())
+				graph->DrawLine(&inSelectPen, (float)p.x, (float)p.y, (float)p1.x, (float)p1.y);
+			else
+				graph->DrawLine(&inPen, (float)p.x, (float)p.y, (float)p1.x, (float)p1.y);
 		}
 
 	}
@@ -301,7 +306,7 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 			pWins = m_transform.RealToScreen(pWins);
 			pWine = m_transform.RealToScreen(pWine);
 
-			if (i == m_iSelectWindowIndex)//如果是拾取的外墙
+			if (i == m_iSelectWindowIndex || pWindow->IsSelected())//如果是拾取的窗户
 			{
 				Gdiplus::Pen selectPen(Gdiplus::Color(255,100,255,100), 25);
 				graph->DrawLine(&selectPen, (float)pWins.x, (float)pWins.y, (float)pWine.x, (float)pWine.y);
@@ -476,6 +481,31 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 			return;
 		inWallPos->GetSubItem(count-1)->GetSubItem(1)->GetSubItem(0)->SetValue(p.x);
 		inWallPos->GetSubItem(count-1)->GetSubItem(1)->GetSubItem(1)->SetValue(p.y);
+		Invalidate();
+	}
+	//如果是内墙模式，拾取节点
+	if (pMain->GetMode() == MODE_INWALL)
+	{
+		CMFCPropertyGridProperty* inWallPos = pMain->GetInWallProperty().getCoodGroup();
+		if (!inWallPos)
+			return;
+
+		m_inModeInWallSelectIndex = -1;
+		sLine line;
+		for (int i = 0; i < inWallPos->GetSubItemsCount(); i++)
+		{
+			line.s.x = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+			line.s.y = inWallPos->GetSubItem(i)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+
+			line.e.x = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+			line.e.y = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+
+			if (lenOfLinePoint(line, p) < 100.0)
+			{
+				m_inModeInWallSelectIndex = i;
+				break;
+			}
+		}
 		Invalidate();
 	}
 	//如果是处理后模式
