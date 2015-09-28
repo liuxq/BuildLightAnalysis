@@ -188,9 +188,26 @@ void OptimizeTwoLines(sLine& srcLine, sLine& dstLine, bool isStartP)
 	}
 	return;
 }
+
+struct MapInfo
+{
+	MapInfo()
+	{
+		isClose = false;
+		isStart = false;
+	}
+	bool isClose;
+	bool isStart;
+};
 //优化线段，去掉和补充
 void OptimizeLine(vector<sLine>& slines, vector<sLine>& outSlines, double thW)
 {
+	int sz = slines.size();
+	//建立二维数组
+	vector<vector<MapInfo> > mapInfos(sz);
+	for (int i = 0; i < mapInfos.size(); i++)
+		mapInfos[i].resize(sz);
+
 	vector<sLine> optimizeSlines = slines;
 	for (int i = 0; i < slines.size(); i++)
 	{
@@ -216,12 +233,20 @@ void OptimizeLine(vector<sLine>& slines, vector<sLine>& outSlines, double thW)
 		}
 		if (minStartW < thW)//有一个需要修改的
 		{
+			mapInfos[i][minStartI].isClose = true;
+			mapInfos[i][minStartI].isStart = true;
 			OptimizeTwoLines(optimizeSlines[i], slines[minStartI], true);
 		}
 		if (minEndW < thW)//有一个需要修改的
 		{
+			mapInfos[i][minEndI].isClose = true;
+			mapInfos[i][minEndI].isStart = false;
 			OptimizeTwoLines(optimizeSlines[i], slines[minEndI], false);
 		}
+	}
+	for (int i = 0; i < sz; i++)
+	{
+
 	}
 	SegmentLine(optimizeSlines, outSlines);
 }

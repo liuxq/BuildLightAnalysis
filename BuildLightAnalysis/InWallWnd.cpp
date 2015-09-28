@@ -208,6 +208,9 @@ void CInWallWnd::OnDeletePos()
 	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
 	if (selItem && selItem->GetParent() && selItem->GetParent()->GetData() == waiqiangID)
 	{
+		CString name = selItem->GetName();
+		int index = _ttoi(name);
+		
 		m_wndPropList.DeleteProperty(selItem);
 
 		//重新设置一下坐标编号
@@ -221,6 +224,9 @@ void CInWallWnd::OnDeletePos()
 		{
 			strName.Format(_T("%d"),i);
 			pGroup->GetSubItem(i)->SetName(strName);
+
+			if (i == index)
+				m_wndPropList.SetCurSel(pGroup->GetSubItem(i));
 		}
 	}
 	
