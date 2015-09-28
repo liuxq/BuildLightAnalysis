@@ -305,6 +305,10 @@ void CRoomWnd::OnDeleteRoom()
 	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
 	if (selItem && !selItem->GetParent())
 	{
+		CString name = selItem->GetName();
+		CString namePost = name.Right(name.GetLength() - 2);
+		int index = _ttoi(namePost);
+
 		((PropertyGridProperty*)selItem)->RemoveAllSubItem();
 		m_wndPropList.DeleteProperty(selItem);
 
@@ -315,6 +319,9 @@ void CRoomWnd::OnDeleteRoom()
 		{
 			strName.Format(_T("房间%d"),i);
 			m_wndPropList.GetProperty(i)->SetName(strName);
+
+			if (i == index)
+				m_wndPropList.SetCurSel(m_wndPropList.GetProperty(i));
 		}
 	}
 	//更新视图
@@ -438,7 +445,7 @@ void CRoomWnd::OutputToRooms(vector<Room>& rooms)
 			{
 				GridPoint p;
 				CString _name = pPoints->GetSubItem(j)->GetName();
-				if (_name == _T("关键点"))
+				if (_name.Left(3) == _T("关键点"))
 					p.isKey = true;
 				else
 					p.isKey = false;

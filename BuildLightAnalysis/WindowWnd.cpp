@@ -133,6 +133,9 @@ void CWindowWnd::DeleteWindowByIndex(int index)
 		{
 			strName.Format(_T("窗%d"),i);
 			m_wndPropList.GetProperty(i)->SetName(strName);
+
+			if (i == index)
+				m_wndPropList.SetCurSel(m_wndPropList.GetProperty(i));
 		}
 		m_wndPropList.AdjustLayout();
 		//更新房间中的窗口编号

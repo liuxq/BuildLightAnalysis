@@ -189,6 +189,25 @@ void OptimizeTwoLines(sLine& srcLine, sLine& dstLine, bool isStartP)
 	return;
 }
 
+Vec2d IntersectTwoLines(sLine& srcLine, sLine& dstLine)
+{
+	Vec2d d1 = srcLine.e - srcLine.s;
+	Vec2d d2 = dstLine.e - dstLine.s;
+	Vec2d a1 = srcLine.s;
+	Vec2d a2 = dstLine.s;
+
+	double D = d2.y * d1.x - d2.x * d1.y;
+	if (D == 0.0)//平行
+	{
+		return Vec2d::ZERO;
+	}
+	double t1 = ((a1.y - a2.y) * d2.x - (a1.x - a2.x) * d2.y)/D;
+	double t2 = ((a1.y - a2.y) * d1.x - (a1.x - a2.x) * d1.y)/D;
+
+	return srcLine.s + d1 * t1;
+}
+
+
 struct MapInfo
 {
 	MapInfo()
@@ -196,6 +215,7 @@ struct MapInfo
 		isClose = false;
 		isStart = false;
 	}
+	Vec2d iPoint;
 	bool isClose;
 	bool isStart;
 };
@@ -205,6 +225,8 @@ void OptimizeLine(vector<sLine>& slines, vector<sLine>& outSlines, double thW)
 	int sz = slines.size();
 	//建立二维数组
 	vector<vector<MapInfo> > mapInfos(sz);
+	vector<bool> isChangedStart(sz,false);
+	vector<bool> isChangedEnd(sz,false);
 	for (int i = 0; i < mapInfos.size(); i++)
 		mapInfos[i].resize(sz);
 
@@ -235,19 +257,98 @@ void OptimizeLine(vector<sLine>& slines, vector<sLine>& outSlines, double thW)
 		{
 			mapInfos[i][minStartI].isClose = true;
 			mapInfos[i][minStartI].isStart = true;
-			OptimizeTwoLines(optimizeSlines[i], slines[minStartI], true);
+			mapInfos[i][minStartI].iPoint = IntersectTwoLines(slines[i],slines[minStartI]);
+			//OptimizeTwoLines(optimizeSlines[i], slines[minStartI], true);
 		}
 		if (minEndW < thW)//有一个需要修改的
 		{
 			mapInfos[i][minEndI].isClose = true;
 			mapInfos[i][minEndI].isStart = false;
-			OptimizeTwoLines(optimizeSlines[i], slines[minEndI], false);
+			mapInfos[i][minEndI].iPoint = IntersectTwoLines(slines[i],slines[minEndI]);
+			//OptimizeTwoLines(optimizeSlines[i], slines[minEndI], false);
+		}
+	}
+	//先求出首尾相交的线段
+	for (int i = 0; i < sz; i++)
+	{
+		for (int j = i+1; j < sz; j++)
+		{
+			if (mapInfos[i][j].isClose)
+			{
+				if (mapInfos[j][i].isClose)
+				{
+					if (mapInfos[i][j].isStart)
+					{
+						optimizeSlines[i].s = mapInfos[i][j].iPoint;
+						isChangedStart[i] = true;
+					}
+					else
+					{
+						optimizeSlines[i].e = mapInfos[i][j].iPoint;
+						isChangedEnd[i] = true;
+					}
+
+					if (mapInfos[j][i].isStart)
+					{
+						optimizeSlines[j].s = mapInfos[j][i].iPoint;
+						isChangedStart[j] = true;
+					}
+					else
+					{
+						optimizeSlines[j].e = mapInfos[j][i].iPoint;
+						isChangedEnd[j] = true;
+					}
+				}
+			}
 		}
 	}
 	for (int i = 0; i < sz; i++)
 	{
-
+		for (int j = 0; j < sz; j++)
+		{
+			if (mapInfos[i][j].isClose && !mapInfos[j][i].isClose)
+			{
+				if (isChangedStart[j] && (mapInfos[i][j].iPoint - optimizeSlines[j].s).Length() < thW)
+				{
+					if (mapInfos[i][j].isStart)
+					{
+						optimizeSlines[i].s = optimizeSlines[j].s;
+						isChangedStart[i] = true;
+					}
+					else
+					{
+						optimizeSlines[i].e = optimizeSlines[j].s;
+						isChangedEnd[i] = true;
+					}
+				}
+				else if (isChangedEnd[j] && (mapInfos[i][j].iPoint - optimizeSlines[j].e).Length() < thW)
+				{
+					if (mapInfos[i][j].isStart)
+					{
+						optimizeSlines[i].s = optimizeSlines[j].e;
+						isChangedStart[i] = true;
+					}
+					else
+					{
+						optimizeSlines[i].e = optimizeSlines[j].e;
+						isChangedEnd[i] = true;
+					}
+				}
+				else 
+				{
+					if (mapInfos[i][j].isStart)
+					{
+						optimizeSlines[i].s = mapInfos[i][j].iPoint;
+					}
+					else
+					{
+						optimizeSlines[i].e = mapInfos[i][j].iPoint;
+					}
+				}
+			}
+		}
 	}
+	
 	SegmentLine(optimizeSlines, outSlines);
 }
 
