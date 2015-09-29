@@ -22,6 +22,7 @@ using namespace Gdiplus;
 #define new DEBUG_NEW
 #endif
 
+#define SELECT_LEN 50.0
 
 // CBuildLightAnalysisView
 
@@ -507,7 +508,7 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 			line.e.x = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
 			line.e.y = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
 
-			if (lenOfLinePoint(line, p) < 100.0)
+			if (lenOfLinePoint(line, p) < SELECT_LEN)
 			{
 				m_inModeInWallSelectIndex = i;
 				break;
@@ -533,7 +534,7 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 			line.e.x = outWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
 			line.e.y = outWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
 
-			if (lenOfLinePoint(line, p) < 100.0)
+			if (lenOfLinePoint(line, p) < SELECT_LEN)
 			{
 				m_iSelectOutWallIndex = i;
 				break;
@@ -552,7 +553,7 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 			line.e.x = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
 			line.e.y = inWallPos->GetSubItem(i)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
 
-			if (lenOfLinePoint(line, p) < 100.0)
+			if (lenOfLinePoint(line, p) < SELECT_LEN)
 			{
 				m_iSelectInWallIndex = i;
 				m_iSelectOutWallIndex = -1;
@@ -593,7 +594,7 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 			line.s = pWinc - dir * width * 0.5;
 			line.e = pWinc + dir * width * 0.5;
 
-			if (lenOfLinePoint(line, p) < 100.0)
+			if (lenOfLinePoint(line, p) < SELECT_LEN)
 			{
 				m_iSelectWindowIndex = i;
 				m_iSelectInWallIndex = -1;
@@ -619,7 +620,7 @@ void CBuildLightAnalysisView::OnMouseMove(UINT nFlags, CPoint point)
 				gridP.x = points->GetSubItem(j)->GetSubItem(0)->GetValue().dblVal;
 				gridP.y = points->GetSubItem(j)->GetSubItem(1)->GetValue().dblVal;
 				
-				if ((p-gridP).Length() < 100.0)
+				if ((p-gridP).Length() < SELECT_LEN)
 				{
 					m_iSelectGridRoomIndex = i;
 					m_iSelectGridIndex = j;
