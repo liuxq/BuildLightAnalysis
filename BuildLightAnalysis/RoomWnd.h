@@ -9,7 +9,9 @@ enum
 	ROOM_OUT_WALL,
 	ROOM_IN_WALL,
 	ROOM_WINDOW,
-	ROOM_GRID
+	ROOM_GRID,
+	ROOM_SINGLE_LUMINAIRE,
+	ROOM_SET_LUMINAIRE
 };
 enum
 {
@@ -45,6 +47,9 @@ public:
 	void DeleteAllRoom();
 	CMFCPropertyGridProperty* InsertGrid(double offset, double meshLen);
 	void CalGrid(CMFCPropertyGridProperty* pGrid);
+	void AddSingleLuminaire(CMFCPropertyGridProperty* pLuminaire, double x, double y);
+
+
 	void OutputToRooms(vector<Room>& rooms);
 
 	void save(ofstream& out);
@@ -83,5 +88,7 @@ protected:
 	void SetPropListFont();
 public:
 	afx_msg void OnRoomCalGrid();
+
+	afx_msg void OnRoomAddLuminaireSingle();
 };
 

@@ -45,6 +45,7 @@ BEGIN_MESSAGE_MAP(CRoomWnd, CDockablePane)
 	ON_WM_SETTINGCHANGE()
 	ON_REGISTERED_MESSAGE(AFX_WM_PROPERTY_CHANGED, OnPropertyChanged)
 	ON_COMMAND(ID_ROOM_CAL_GRID, &CRoomWnd::OnRoomCalGrid)
+	ON_COMMAND(ID_ROOM_ADD_LUMINAIRE_SINGLE, &CRoomWnd::OnRoomAddLuminaireSingle)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -191,6 +192,8 @@ PropertyGridProperty* CRoomWnd::AddRoom(CString roomName)
 	PropertyGridProperty* pInWall = new PropertyGridProperty(_T("内墙"), 0, TRUE);
 	PropertyGridProperty* pWin = new PropertyGridProperty(_T("窗户"), ROOM_WINDOW, TRUE);
 	PropertyGridProperty* pGrid = new PropertyGridProperty(_T("计算网格"), ROOM_GRID, FALSE);
+	PropertyGridProperty* pSingleLuminaire = new PropertyGridProperty(_T("单个灯具"), ROOM_SINGLE_LUMINAIRE, FALSE);
+	PropertyGridProperty* pSetLuminaire = new PropertyGridProperty(_T("灯具组"), ROOM_SET_LUMINAIRE, FALSE);
 
 	PropertyGridProperty* pOffset = new PropertyGridProperty(_T("内偏移(mm)"), (_variant_t)120.0, _T("内偏移"));
 	PropertyGridProperty* pMeshLen = new PropertyGridProperty(_T("网格边长(mm)"), (_variant_t)120.0, _T("网格边长"));
@@ -203,6 +206,8 @@ PropertyGridProperty* CRoomWnd::AddRoom(CString roomName)
 	pRoom->AddSubItem(pInWall);
 	pRoom->AddSubItem(pWin);
 	pRoom->AddSubItem(pGrid);
+	pRoom->AddSubItem(pSingleLuminaire);
+	pRoom->AddSubItem(pSetLuminaire);
 
 	m_wndPropList.AddProperty(pRoom);
 	m_wndPropList.SetCurSel(pRoom);
@@ -570,6 +575,41 @@ void CRoomWnd::OnRoomCalGrid()
 	{
 		CMFCPropertyGridProperty* pGrid = selItem->GetSubItem(ROOM_GRID);
 		CalGrid(pGrid);
+		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+		if (!pMain)
+			return;
+		pMain->GetActiveView()->Invalidate(); 
+	}
+	else
+	{
+		AfxMessageBox(_T("没有选择任何房间！"));
+	}
+}
+void CRoomWnd::AddSingleLuminaire(CMFCPropertyGridProperty* pLuminaire, double x, double y)
+{
+	int count = pLuminaire->GetSubItemsCount();
+	CString strCount;
+	strCount.Format(_T("灯具%d"),count);
+	
+	PropertyGridProperty* pSingleLum = new PropertyGridProperty(strCount, 0, FALSE);
+
+	PropertyGridProperty* pType = new PropertyGridProperty(_T("类型"), _T("FAC21280P-23W"), _T("灯具类型"));
+	PropertyGridProperty* pLm = new PropertyGridProperty(_T("光通量(lm)"), _T("FAC21280P-23W"), _T("灯具的光通量"));
+	PropertyGridProperty* pW = new PropertyGridProperty(_T("功率(w)"), _T("FAC21280P-23W"), _T("灯具的功率"));
+	vector<RoomType>& roomTypes = pDoc->getRoomTypes();
+}
+
+void CRoomWnd::OnRoomAddLuminaireSingle()
+{
+	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
+	while (selItem && selItem->GetParent())
+	{
+		selItem = selItem->GetParent();
+	}
+	if (selItem)
+	{
+		CMFCPropertyGridProperty* pLuminaire = selItem->GetSubItem(ROOM_SINGLE_LUMINAIRE);
+		AddSingleLuminaire(pLuminaire, 0,0);
 		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 		if (!pMain)
 			return;
