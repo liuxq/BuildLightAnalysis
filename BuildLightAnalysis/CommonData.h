@@ -94,6 +94,12 @@ struct RoomType
 	WCHAR name[80];
 	int num;
 };
+struct LuminaireTem
+{
+	WCHAR type[80];
+	int lm;
+	int w;
+};
 
 struct Room
 {

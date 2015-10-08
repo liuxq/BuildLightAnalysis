@@ -587,6 +587,11 @@ void CRoomWnd::OnRoomCalGrid()
 }
 void CRoomWnd::AddSingleLuminaire(CMFCPropertyGridProperty* pLuminaire, double x, double y)
 {
+	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;  
+	CBuildLightAnalysisDoc* pDoc = (CBuildLightAnalysisDoc*)pMain->GetActiveDocument();
+	if (!pMain || !pDoc)
+		return;
+
 	int count = pLuminaire->GetSubItemsCount();
 	CString strCount;
 	strCount.Format(_T("灯具%d"),count);
@@ -594,9 +599,13 @@ void CRoomWnd::AddSingleLuminaire(CMFCPropertyGridProperty* pLuminaire, double x
 	PropertyGridProperty* pSingleLum = new PropertyGridProperty(strCount, 0, FALSE);
 
 	PropertyGridProperty* pType = new PropertyGridProperty(_T("类型"), _T("FAC21280P-23W"), _T("灯具类型"));
-	PropertyGridProperty* pLm = new PropertyGridProperty(_T("光通量(lm)"), _T("FAC21280P-23W"), _T("灯具的光通量"));
-	PropertyGridProperty* pW = new PropertyGridProperty(_T("功率(w)"), _T("FAC21280P-23W"), _T("灯具的功率"));
-	vector<RoomType>& roomTypes = pDoc->getRoomTypes();
+	PropertyGridProperty* pLm = new PropertyGridProperty(_T("光通量(lm)"),(_variant_t)2100, _T("灯具的光通量"));
+	PropertyGridProperty* pW = new PropertyGridProperty(_T("功率(w)"), (_variant_t)23, _T("灯具的功率"));
+	vector<LuminaireTem>& lumTems = pDoc->getLuminaireTems();
+	for (int i = 0; i < lumTems.size(); i++)
+	{
+		pType->AddOption(CString(lumTems[i].type));
+	}
 }
 
 void CRoomWnd::OnRoomAddLuminaireSingle()

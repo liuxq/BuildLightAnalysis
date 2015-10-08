@@ -243,6 +243,7 @@ void CBuildLightAnalysisDoc::OnFileNew()
 		loadMaterial();
 		loadCity();
 		loadRoomType();
+		loadLumTems();
 		pMain->GetOptionProperty().loadMaterialTemplateAndCity();
 		pMain->GetOptionProperty().SetTransform();
 
@@ -298,9 +299,9 @@ void CBuildLightAnalysisDoc::OnFileOpen()
 		loadMaterial();
 		loadCity();
 		loadRoomType();
+		loadLumTems();
 		load(inFile);
 		
-
 		m_bIsOpen = true;
 		SetTitle(m_projectName);//设置文档名称
 	}
@@ -353,6 +354,31 @@ void CBuildLightAnalysisDoc::loadRoomType()
 		m_roomTypes.push_back(rt);
 	}
 }
+
+void CBuildLightAnalysisDoc::loadLumTems()
+{
+	CString path;
+	path.Format(_T("%s\\luminaire_list.txt"), m_projectLocation);
+	ifstream inputFile(CStringToString(path));
+	if (!inputFile.is_open())
+	{
+		AfxMessageBox(_T("缺少灯具模板，请将luminaire_list.txt文件放入工程文件夹下"));
+		return;
+	}
+	string type;
+	int lm;
+	int w;
+	while(inputFile >> type >> lm >> w )
+	{
+		LuminaireTem lt;
+		CString typeCs = StringToCString(type);
+		_tcscpy_s(lt.type, typeCs);
+		lt.lm = lm;
+		lt.w = w;
+		m_LumTemplates.push_back(lt);
+	}
+}
+
 void CBuildLightAnalysisDoc::clear()
 {
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
