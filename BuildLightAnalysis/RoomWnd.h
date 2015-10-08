@@ -2,6 +2,8 @@
 
 #include "PropertyGridCtrl.h"
 #include "CommonData.h"
+
+//总目录
 enum
 {
 	ROOM_TYPE = 0,
@@ -13,12 +15,48 @@ enum
 	ROOM_SINGLE_LUMINAIRE,
 	ROOM_SET_LUMINAIRE
 };
+//计算点
 enum
 {
 	GRID_OFFSET,
 	GRID_MESHLEN,
 	GRID_POINTS
 };
+
+//单个灯具
+enum
+{
+	LUM_SINGLE_TYPE,
+	LUM_SINGLE_LM,
+	LUM_SINGLE_W,
+	LUM_SINGLE_X,
+	LUM_SINGLE_Y,
+	LUM_SINGLE_Z,
+	LUM_SINGLE_NX,
+	LUM_SINGLE_NY,
+	LUM_SINGLE_NZ,
+};
+
+//灯具组
+enum
+{
+	LUM_SET_TYPE,
+	LUM_SET_LM,
+	LUM_SET_W,
+	LUM_SET_Z,
+	LUM_SET_NX,
+	LUM_SET_NY,
+	LUM_SET_NZ,
+	LUM_SET_ORIGIN_X,
+	LUM_SET_ORIGIN_Y,
+	LUM_SET_ROW_N,
+	LUM_SET_COL_N,
+	LUM_SET_ROW_L,
+	LUM_SET_COL_L,
+	LUM_SET_POINTS
+};
+
+
 
 
 class CRoomWnd : public CDockablePane
@@ -48,7 +86,10 @@ public:
 	CMFCPropertyGridProperty* InsertGrid(double offset, double meshLen);
 	void CalGrid(CMFCPropertyGridProperty* pGrid);
 	void AddSingleLuminaire(CMFCPropertyGridProperty* pLuminaire, double x, double y);
+	void AddSetLuminaire(CMFCPropertyGridProperty* pLuminaire, double x, double y);
 
+	void CalLumSet(CMFCPropertyGridProperty* pLum);
+	void CalMinXY(CMFCPropertyGridProperty* pRoom, Vec2d& minP);
 
 	void OutputToRooms(vector<Room>& rooms);
 
@@ -90,5 +131,6 @@ public:
 	afx_msg void OnRoomCalGrid();
 
 	afx_msg void OnRoomAddLuminaireSingle();
+	afx_msg void OnRoomAddLuminaireSet();
 };
 

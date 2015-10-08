@@ -46,6 +46,7 @@ BEGIN_MESSAGE_MAP(CRoomWnd, CDockablePane)
 	ON_REGISTERED_MESSAGE(AFX_WM_PROPERTY_CHANGED, OnPropertyChanged)
 	ON_COMMAND(ID_ROOM_CAL_GRID, &CRoomWnd::OnRoomCalGrid)
 	ON_COMMAND(ID_ROOM_ADD_LUMINAIRE_SINGLE, &CRoomWnd::OnRoomAddLuminaireSingle)
+	ON_COMMAND(ID_ROOM_ADD_LUMINAIRE_SET, &CRoomWnd::OnRoomAddLuminaireSet)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -601,13 +602,154 @@ void CRoomWnd::AddSingleLuminaire(CMFCPropertyGridProperty* pLuminaire, double x
 	PropertyGridProperty* pType = new PropertyGridProperty(_T("类型"), _T("FAC21280P-23W"), _T("灯具类型"));
 	PropertyGridProperty* pLm = new PropertyGridProperty(_T("光通量(lm)"),(_variant_t)2100, _T("灯具的光通量"));
 	PropertyGridProperty* pW = new PropertyGridProperty(_T("功率(w)"), (_variant_t)23, _T("灯具的功率"));
+	pType->AllowEdit(FALSE);
+	pLm->AllowEdit(FALSE);
+	pW->AllowEdit(FALSE);
 	vector<LuminaireTem>& lumTems = pDoc->getLuminaireTems();
 	for (int i = 0; i < lumTems.size(); i++)
 	{
 		pType->AddOption(CString(lumTems[i].type));
 	}
+	PropertyGridProperty* pX = new PropertyGridProperty(_T("X(mm)"), (_variant_t)x, _T("X坐标"));
+	PropertyGridProperty* pY = new PropertyGridProperty(_T("Y(mm)"), (_variant_t)y, _T("Y坐标"));
+	PropertyGridProperty* pZ = new PropertyGridProperty(_T("Z(mm)"), (_variant_t)750.0, _T("Z坐标"));
+
+	PropertyGridProperty* pNX = new PropertyGridProperty(_T("法矢X"), (_variant_t)0.0, _T("法矢X坐标"));
+	PropertyGridProperty* pNY = new PropertyGridProperty(_T("法矢Y"), (_variant_t)0.0, _T("法矢Y坐标"));
+	PropertyGridProperty* pNZ = new PropertyGridProperty(_T("法矢Z"), (_variant_t)-1.0, _T("法矢Z坐标"));
+
+	pSingleLum->AddSubItem(pType);
+	pSingleLum->AddSubItem(pLm);
+	pSingleLum->AddSubItem(pW);
+	pSingleLum->AddSubItem(pX);
+	pSingleLum->AddSubItem(pY);
+	pSingleLum->AddSubItem(pZ);
+	pSingleLum->AddSubItem(pNX);
+	pSingleLum->AddSubItem(pNY);
+	pSingleLum->AddSubItem(pNZ);
+
+	pLuminaire->AddSubItem(pSingleLum);
 }
 
+void CRoomWnd::AddSetLuminaire(CMFCPropertyGridProperty* pLuminaire, double x, double y)
+{
+	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;  
+	CBuildLightAnalysisDoc* pDoc = (CBuildLightAnalysisDoc*)pMain->GetActiveDocument();
+	if (!pMain || !pDoc)
+		return;
+
+	int count = pLuminaire->GetSubItemsCount();
+	CString strCount;
+	strCount.Format(_T("灯具组%d"),count);
+
+	PropertyGridProperty* pSetLum = new PropertyGridProperty(strCount, 0, FALSE);
+
+	PropertyGridProperty* pType = new PropertyGridProperty(_T("类型"), _T("FAC21280P-23W"), _T("灯具类型"));
+	PropertyGridProperty* pLm = new PropertyGridProperty(_T("光通量(lm)"),(_variant_t)2100, _T("灯具的光通量"));
+	PropertyGridProperty* pW = new PropertyGridProperty(_T("功率(w)"), (_variant_t)23, _T("灯具的功率"));
+	pType->AllowEdit(FALSE);
+	pLm->AllowEdit(FALSE);
+	pW->AllowEdit(FALSE);
+	vector<LuminaireTem>& lumTems = pDoc->getLuminaireTems();
+	for (int i = 0; i < lumTems.size(); i++)
+	{
+		pType->AddOption(CString(lumTems[i].type));
+	}
+	PropertyGridProperty* pZ = new PropertyGridProperty(_T("Z(mm)"), (_variant_t)750.0, _T("Z坐标"));
+	PropertyGridProperty* pNX = new PropertyGridProperty(_T("法矢X"), (_variant_t)0.0, _T("法矢X坐标"));
+	PropertyGridProperty* pNY = new PropertyGridProperty(_T("法矢Y"), (_variant_t)0.0, _T("法矢Y坐标"));
+	PropertyGridProperty* pNZ = new PropertyGridProperty(_T("法矢Z"), (_variant_t)-1.0, _T("法矢Z坐标"));
+
+	PropertyGridProperty* pOriginX = new PropertyGridProperty(_T("初始点X"), (_variant_t)x, _T("初始点X"));
+	PropertyGridProperty* pOriginY = new PropertyGridProperty(_T("初始点Y"), (_variant_t)y, _T("初始点Y"));
+	PropertyGridProperty* pRowNum = new PropertyGridProperty(_T("行数"), (_variant_t)5, _T("行数"));
+	PropertyGridProperty* pColumNum = new PropertyGridProperty(_T("列数"), (_variant_t)5, _T("列数"));
+	PropertyGridProperty* pRowLen = new PropertyGridProperty(_T("行宽"), (_variant_t)20.0, _T("行宽"));
+	PropertyGridProperty* pColumLen = new PropertyGridProperty(_T("列宽"), (_variant_t)20.0, _T("列宽"));
+
+	PropertyGridProperty* pLumSet = new PropertyGridProperty(_T("坐标"), 0, FALSE);
+
+	pSetLum->AddSubItem(pType);
+	pSetLum->AddSubItem(pLm);
+	pSetLum->AddSubItem(pW);
+
+	pSetLum->AddSubItem(pZ);
+	pSetLum->AddSubItem(pNX);
+	pSetLum->AddSubItem(pNY);
+	pSetLum->AddSubItem(pNZ);
+
+	pSetLum->AddSubItem(pOriginX);
+	pSetLum->AddSubItem(pOriginY);
+	pSetLum->AddSubItem(pRowNum);
+	pSetLum->AddSubItem(pColumNum);
+	pSetLum->AddSubItem(pRowLen);
+	pSetLum->AddSubItem(pColumLen);
+
+	pSetLum->AddSubItem(pLumSet);
+
+	pLuminaire->AddSubItem(pSetLum);
+
+	CalLumSet(pSetLum);//计算灯具位置
+
+}
+void CRoomWnd::CalLumSet(CMFCPropertyGridProperty* pSetLum)
+{
+	double originX = pSetLum->GetSubItem(LUM_SET_ORIGIN_X)->GetValue().dblVal;
+	double originY = pSetLum->GetSubItem(LUM_SET_ORIGIN_Y)->GetValue().dblVal;
+	int rowN = pSetLum->GetSubItem(LUM_SET_ROW_N)->GetValue().intVal;
+	int colN = pSetLum->GetSubItem(LUM_SET_COL_N)->GetValue().intVal;
+	double rowL = pSetLum->GetSubItem(LUM_SET_ROW_L)->GetValue().dblVal;
+	double colL = pSetLum->GetSubItem(LUM_SET_COL_L)->GetValue().dblVal;
+	CMFCPropertyGridProperty* pLumSet = pSetLum->GetSubItem(LUM_SET_POINTS);
+	for (int i = 0; i < rowN; i++)
+	{
+		for (int j = 0; j < colN; j++)
+		{
+			CMFCPropertyGridProperty* pPoint = new CMFCPropertyGridProperty(_T("点(mm)"), 0, TRUE);
+			CMFCPropertyGridProperty* pPointX = new CMFCPropertyGridProperty(_T("X"), i*rowL, TRUE);
+			CMFCPropertyGridProperty* pPointY = new CMFCPropertyGridProperty(_T("Y"), j*colL, TRUE);
+			pPoint->AddSubItem(pPointX);
+			pPoint->AddSubItem(pPointY);
+			pLumSet->AddSubItem(pPoint);
+		}
+	}
+}
+
+void CRoomWnd::CalMinXY(CMFCPropertyGridProperty* pRoom, Vec2d& minP)
+{
+	if (!pRoom)
+	return;
+	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+	if (!pMain)
+		return;
+
+	CMFCPropertyGridProperty* optimizeOutWallPos = pMain->GetOptimizeWallProperty().getCoodOutWallGroup();
+	CMFCPropertyGridProperty* optimizeInWallPos = pMain->GetOptimizeWallProperty().getCoodInWallGroup();
+	CMFCPropertyGridProperty* pOutWallIndexs = pRoom->GetSubItem(ROOM_OUT_WALL);
+	CMFCPropertyGridProperty* pInWallIndexs = pRoom->GetSubItem(ROOM_IN_WALL);
+	Vec2d s, e, minp, maxp;
+	for (int j = 0; j < pOutWallIndexs->GetSubItemsCount(); j++)
+	{
+		int index = pOutWallIndexs->GetSubItem(j)->GetValue().intVal;
+		s.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+		s.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+		e.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+		e.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+		s.UpdateMinMax(minp,maxp);
+		e.UpdateMinMax(minp,maxp);
+	}
+	for (int j = 0; j < pInWallIndexs->GetSubItemsCount(); j++)
+	{
+		int index = pInWallIndexs->GetSubItem(j)->GetValue().intVal;
+		s.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+		s.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+		e.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+		e.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+		s.UpdateMinMax(minp,maxp);
+		e.UpdateMinMax(minp,maxp);
+	}
+	minP = minp;
+}
 void CRoomWnd::OnRoomAddLuminaireSingle()
 {
 	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
@@ -619,6 +761,35 @@ void CRoomWnd::OnRoomAddLuminaireSingle()
 	{
 		CMFCPropertyGridProperty* pLuminaire = selItem->GetSubItem(ROOM_SINGLE_LUMINAIRE);
 		AddSingleLuminaire(pLuminaire, 0,0);
+		m_wndPropList.UpdateProperty((PropertyGridProperty*)pLuminaire);
+
+		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+		if (!pMain)
+			return;
+		pMain->GetActiveView()->Invalidate(); 
+	}
+	else
+	{
+		AfxMessageBox(_T("没有选择任何房间！"));
+	}
+}
+
+
+void CRoomWnd::OnRoomAddLuminaireSet()
+{
+	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
+	while (selItem && selItem->GetParent())
+	{
+		selItem = selItem->GetParent();
+	}
+	if (selItem)
+	{
+		Vec2d minP;
+		CalMinXY(selItem,minP);
+		CMFCPropertyGridProperty* pLuminaire = selItem->GetSubItem(ROOM_SET_LUMINAIRE);
+		AddSetLuminaire(pLuminaire, minP.x, minP.y);
+		m_wndPropList.UpdateProperty((PropertyGridProperty*)pLuminaire);
+
 		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 		if (!pMain)
 			return;
