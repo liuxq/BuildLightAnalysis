@@ -706,8 +706,8 @@ void CRoomWnd::CalLumSet(CMFCPropertyGridProperty* pSetLum)
 		for (int j = 0; j < colN; j++)
 		{
 			CMFCPropertyGridProperty* pPoint = new CMFCPropertyGridProperty(_T("µã(mm)"), 0, TRUE);
-			CMFCPropertyGridProperty* pPointX = new CMFCPropertyGridProperty(_T("X"), i*rowL, TRUE);
-			CMFCPropertyGridProperty* pPointY = new CMFCPropertyGridProperty(_T("Y"), j*colL, TRUE);
+			CMFCPropertyGridProperty* pPointX = new CMFCPropertyGridProperty(_T("X"), i*rowL, _T("X×ø±ê"));
+			CMFCPropertyGridProperty* pPointY = new CMFCPropertyGridProperty(_T("Y"), j*colL, _T("Y×ø±ê"));
 			pPoint->AddSubItem(pPointX);
 			pPoint->AddSubItem(pPointY);
 			pLumSet->AddSubItem(pPoint);
@@ -727,7 +727,7 @@ void CRoomWnd::CalMinXY(CMFCPropertyGridProperty* pRoom, Vec2d& minP)
 	CMFCPropertyGridProperty* optimizeInWallPos = pMain->GetOptimizeWallProperty().getCoodInWallGroup();
 	CMFCPropertyGridProperty* pOutWallIndexs = pRoom->GetSubItem(ROOM_OUT_WALL);
 	CMFCPropertyGridProperty* pInWallIndexs = pRoom->GetSubItem(ROOM_IN_WALL);
-	Vec2d s, e, minp, maxp;
+	Vec2d s, e, minp(1.0e8, 1.0e8), maxp(-1.0e8, -1.0e8);
 	for (int j = 0; j < pOutWallIndexs->GetSubItemsCount(); j++)
 	{
 		int index = pOutWallIndexs->GetSubItem(j)->GetValue().intVal;
