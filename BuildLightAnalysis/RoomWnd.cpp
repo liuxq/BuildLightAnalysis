@@ -47,6 +47,7 @@ BEGIN_MESSAGE_MAP(CRoomWnd, CDockablePane)
 	ON_COMMAND(ID_ROOM_CAL_GRID, &CRoomWnd::OnRoomCalGrid)
 	ON_COMMAND(ID_ROOM_ADD_LUMINAIRE_SINGLE, &CRoomWnd::OnRoomAddLuminaireSingle)
 	ON_COMMAND(ID_ROOM_ADD_LUMINAIRE_SET, &CRoomWnd::OnRoomAddLuminaireSet)
+	ON_COMMAND(ID_ROOM_ADD_CONTROL_SET, &CRoomWnd::OnRoomAddControlSet)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -195,6 +196,7 @@ PropertyGridProperty* CRoomWnd::AddRoom(CString roomName)
 	PropertyGridProperty* pGrid = new PropertyGridProperty(_T("计算网格"), ROOM_GRID, FALSE);
 	PropertyGridProperty* pSingleLuminaire = new PropertyGridProperty(_T("单个灯具"), ROOM_SINGLE_LUMINAIRE, FALSE);
 	PropertyGridProperty* pSetLuminaire = new PropertyGridProperty(_T("灯具组"), ROOM_SET_LUMINAIRE, FALSE);
+	PropertyGridProperty* pControlSet = new PropertyGridProperty(_T("控制分组"), ROOM_CONTROL_SET, FALSE);
 
 	PropertyGridProperty* pOffset = new PropertyGridProperty(_T("内偏移(mm)"), (_variant_t)120.0, _T("内偏移"));
 	PropertyGridProperty* pMeshLen = new PropertyGridProperty(_T("网格边长(mm)"), (_variant_t)120.0, _T("网格边长"));
@@ -209,6 +211,7 @@ PropertyGridProperty* CRoomWnd::AddRoom(CString roomName)
 	pRoom->AddSubItem(pGrid);
 	pRoom->AddSubItem(pSingleLuminaire);
 	pRoom->AddSubItem(pSetLuminaire);
+	pRoom->AddSubItem(pControlSet);
 
 	m_wndPropList.AddProperty(pRoom);
 	m_wndPropList.SetCurSel(pRoom);
@@ -407,6 +410,18 @@ LRESULT CRoomWnd::OnPropertyChanged (WPARAM,LPARAM lParam)
 		CalGrid(grid);
 		//更新视图     
 		pMain->GetActiveView()->Invalidate(); 
+		return 1;
+	}
+	if (pProp->GetParent() && pProp->GetParent()->GetData() == ROOM_SET_LUMINAIRE)
+	{
+		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+		if (!pMain)
+			return 0;
+		CMFCPropertyGridProperty* lumSet = pProp->GetParent();
+		CalLumSet(lumSet);
+		//更新视图     
+		pMain->GetActiveView()->Invalidate(); 
+		return 1;
 	}
 	return 0;
 }
@@ -629,6 +644,9 @@ void CRoomWnd::AddSingleLuminaire(CMFCPropertyGridProperty* pLuminaire, double x
 	pSingleLum->AddSubItem(pNZ);
 
 	pLuminaire->AddSubItem(pSingleLum);
+
+	m_wndPropList.UpdateProperty((PropertyGridProperty*)pLuminaire);
+	m_wndPropList.AdjustLayout();
 }
 
 void CRoomWnd::AddSetLuminaire(CMFCPropertyGridProperty* pLuminaire, double x, double y)
@@ -642,7 +660,7 @@ void CRoomWnd::AddSetLuminaire(CMFCPropertyGridProperty* pLuminaire, double x, d
 	CString strCount;
 	strCount.Format(_T("灯具组%d"),count);
 
-	PropertyGridProperty* pSetLum = new PropertyGridProperty(strCount, 0, FALSE);
+	PropertyGridProperty* pSetLum = new PropertyGridProperty(strCount, ROOM_SET_LUMINAIRE, FALSE);
 
 	PropertyGridProperty* pType = new PropertyGridProperty(_T("类型"), _T("FAC21280P-23W"), _T("灯具类型"));
 	PropertyGridProperty* pLm = new PropertyGridProperty(_T("光通量(lm)"),(_variant_t)2100, _T("灯具的光通量"));
@@ -664,8 +682,8 @@ void CRoomWnd::AddSetLuminaire(CMFCPropertyGridProperty* pLuminaire, double x, d
 	PropertyGridProperty* pOriginY = new PropertyGridProperty(_T("初始点Y"), (_variant_t)y, _T("初始点Y"));
 	PropertyGridProperty* pRowNum = new PropertyGridProperty(_T("行数"), (_variant_t)5, _T("行数"));
 	PropertyGridProperty* pColumNum = new PropertyGridProperty(_T("列数"), (_variant_t)5, _T("列数"));
-	PropertyGridProperty* pRowLen = new PropertyGridProperty(_T("行宽"), (_variant_t)20.0, _T("行宽"));
-	PropertyGridProperty* pColumLen = new PropertyGridProperty(_T("列宽"), (_variant_t)20.0, _T("列宽"));
+	PropertyGridProperty* pRowLen = new PropertyGridProperty(_T("行宽"), (_variant_t)200.0, _T("行宽"));
+	PropertyGridProperty* pColumLen = new PropertyGridProperty(_T("列宽"), (_variant_t)200.0, _T("列宽"));
 
 	PropertyGridProperty* pLumSet = new PropertyGridProperty(_T("坐标"), 0, FALSE);
 
@@ -690,7 +708,7 @@ void CRoomWnd::AddSetLuminaire(CMFCPropertyGridProperty* pLuminaire, double x, d
 	pLuminaire->AddSubItem(pSetLum);
 
 	CalLumSet(pSetLum);//计算灯具位置
-
+	m_wndPropList.UpdateProperty((PropertyGridProperty*)pLuminaire);
 }
 void CRoomWnd::CalLumSet(CMFCPropertyGridProperty* pSetLum)
 {
@@ -700,21 +718,70 @@ void CRoomWnd::CalLumSet(CMFCPropertyGridProperty* pSetLum)
 	int colN = pSetLum->GetSubItem(LUM_SET_COL_N)->GetValue().intVal;
 	double rowL = pSetLum->GetSubItem(LUM_SET_ROW_L)->GetValue().dblVal;
 	double colL = pSetLum->GetSubItem(LUM_SET_COL_L)->GetValue().dblVal;
-	CMFCPropertyGridProperty* pLumSet = pSetLum->GetSubItem(LUM_SET_POINTS);
+
+	if (pSetLum->GetSubItemsCount() == LUM_SET_POINTS+1)
+	{
+		CMFCPropertyGridProperty* pLumSet = pSetLum->GetSubItem(LUM_SET_POINTS);
+		if (pLumSet)
+			pSetLum->RemoveSubItem(pLumSet);
+	}
+
+	PropertyGridProperty* pLumSet = new PropertyGridProperty(_T("坐标"), 0, FALSE);
 	for (int i = 0; i < rowN; i++)
 	{
 		for (int j = 0; j < colN; j++)
 		{
 			CMFCPropertyGridProperty* pPoint = new CMFCPropertyGridProperty(_T("点(mm)"), 0, TRUE);
-			CMFCPropertyGridProperty* pPointX = new CMFCPropertyGridProperty(_T("X"), i*rowL, _T("X坐标"));
-			CMFCPropertyGridProperty* pPointY = new CMFCPropertyGridProperty(_T("Y"), j*colL, _T("Y坐标"));
+			CMFCPropertyGridProperty* pPointX = new CMFCPropertyGridProperty(_T("X"), i*colL + originX, _T("X坐标"));
+			CMFCPropertyGridProperty* pPointY = new CMFCPropertyGridProperty(_T("Y"), j*rowL + originY, _T("Y坐标"));
 			pPoint->AddSubItem(pPointX);
 			pPoint->AddSubItem(pPointY);
 			pLumSet->AddSubItem(pPoint);
 		}
 	}
-}
+	pSetLum->AddSubItem(pLumSet);
 
+	m_wndPropList.UpdateProperty((PropertyGridProperty*)(pSetLum));
+	m_wndPropList.AdjustLayout();
+}
+void CRoomWnd::CalMidXY(CMFCPropertyGridProperty* pRoom, Vec2d& midP)
+{
+	if (!pRoom)
+		return;
+	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+	if (!pMain)
+		return;
+
+	CMFCPropertyGridProperty* optimizeOutWallPos = pMain->GetOptimizeWallProperty().getCoodOutWallGroup();
+	CMFCPropertyGridProperty* optimizeInWallPos = pMain->GetOptimizeWallProperty().getCoodInWallGroup();
+	CMFCPropertyGridProperty* pOutWallIndexs = pRoom->GetSubItem(ROOM_OUT_WALL);
+	CMFCPropertyGridProperty* pInWallIndexs = pRoom->GetSubItem(ROOM_IN_WALL);
+	Vec2d s, e, midp(0, 0);
+	int count = 0;
+	for (int j = 0; j < pOutWallIndexs->GetSubItemsCount(); j++)
+	{
+		int index = pOutWallIndexs->GetSubItem(j)->GetValue().intVal;
+		s.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+		s.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+		e.x = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+		e.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+		midp += s;
+		midp += e;
+		count+=2;
+	}
+	for (int j = 0; j < pInWallIndexs->GetSubItemsCount(); j++)
+	{
+		int index = pInWallIndexs->GetSubItem(j)->GetValue().intVal;
+		s.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(0)->GetValue().dblVal;
+		s.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(0)->GetSubItem(1)->GetValue().dblVal;
+		e.x = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(0)->GetValue().dblVal;
+		e.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
+		midp += s;
+		midp += e;
+		count+=2;
+	}
+	midP = midp / count;
+}
 void CRoomWnd::CalMinXY(CMFCPropertyGridProperty* pRoom, Vec2d& minP)
 {
 	if (!pRoom)
@@ -728,6 +795,7 @@ void CRoomWnd::CalMinXY(CMFCPropertyGridProperty* pRoom, Vec2d& minP)
 	CMFCPropertyGridProperty* pOutWallIndexs = pRoom->GetSubItem(ROOM_OUT_WALL);
 	CMFCPropertyGridProperty* pInWallIndexs = pRoom->GetSubItem(ROOM_IN_WALL);
 	Vec2d s, e, minp(1.0e8, 1.0e8), maxp(-1.0e8, -1.0e8);
+	vector<Vec2d> points;
 	for (int j = 0; j < pOutWallIndexs->GetSubItemsCount(); j++)
 	{
 		int index = pOutWallIndexs->GetSubItem(j)->GetValue().intVal;
@@ -737,6 +805,8 @@ void CRoomWnd::CalMinXY(CMFCPropertyGridProperty* pRoom, Vec2d& minP)
 		e.y = optimizeOutWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
 		s.UpdateMinMax(minp,maxp);
 		e.UpdateMinMax(minp,maxp);
+		points.push_back(s);
+		points.push_back(e);
 	}
 	for (int j = 0; j < pInWallIndexs->GetSubItemsCount(); j++)
 	{
@@ -747,8 +817,23 @@ void CRoomWnd::CalMinXY(CMFCPropertyGridProperty* pRoom, Vec2d& minP)
 		e.y = optimizeInWallPos->GetSubItem(index)->GetSubItem(1)->GetSubItem(1)->GetValue().dblVal;
 		s.UpdateMinMax(minp,maxp);
 		e.UpdateMinMax(minp,maxp);
+		points.push_back(s);
+		points.push_back(e);
 	}
-	minP = minp;
+	double minLen = 1.0e9;
+	int minI = -1;
+	for (int i = 0; i < points.size(); i++)
+	{
+		if ((points[i]-minp).Length() < minLen)
+		{
+			minI = i;
+			minLen = (points[i]-minp).Length();
+		}
+	}
+	if (minI >= 0)
+	{
+		minP = points[minI];
+	}
 }
 void CRoomWnd::OnRoomAddLuminaireSingle()
 {
@@ -759,9 +844,11 @@ void CRoomWnd::OnRoomAddLuminaireSingle()
 	}
 	if (selItem)
 	{
+		Vec2d midP;
+		CalMidXY(selItem,midP);
 		CMFCPropertyGridProperty* pLuminaire = selItem->GetSubItem(ROOM_SINGLE_LUMINAIRE);
-		AddSingleLuminaire(pLuminaire, 0,0);
-		m_wndPropList.UpdateProperty((PropertyGridProperty*)pLuminaire);
+		AddSingleLuminaire(pLuminaire, midP.x, midP.y);
+		
 
 		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 		if (!pMain)
@@ -787,6 +874,33 @@ void CRoomWnd::OnRoomAddLuminaireSet()
 		Vec2d minP;
 		CalMinXY(selItem,minP);
 		CMFCPropertyGridProperty* pLuminaire = selItem->GetSubItem(ROOM_SET_LUMINAIRE);
+		AddSetLuminaire(pLuminaire, minP.x, minP.y);
+		m_wndPropList.UpdateProperty((PropertyGridProperty*)pLuminaire);
+
+		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+		if (!pMain)
+			return;
+		pMain->GetActiveView()->Invalidate(); 
+	}
+	else
+	{
+		AfxMessageBox(_T("没有选择任何房间！"));
+	}
+}
+
+
+void CRoomWnd::OnRoomAddControlSet()
+{
+	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
+	while (selItem && selItem->GetParent())
+	{
+		selItem = selItem->GetParent();
+	}
+	if (selItem)
+	{
+		Vec2d minP;
+		CalMinXY(selItem,minP);
+		CMFCPropertyGridProperty* pControlSet = selItem->GetSubItem(ROOM_CONTROL_SET);
 		AddSetLuminaire(pLuminaire, minP.x, minP.y);
 		m_wndPropList.UpdateProperty((PropertyGridProperty*)pLuminaire);
 

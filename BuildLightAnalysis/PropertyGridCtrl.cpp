@@ -89,6 +89,10 @@ void PropertyGridProperty::RemoveAllSubItem()
 		m_lstSubItems.RemoveAt(posSaved);
 		delete pListProp;
 	}
-	((PropertyGridCtrl*)m_pWndList)->ClearSel();
+	if (m_pWndList)
+	{
+		((PropertyGridCtrl*)m_pWndList)->ClearSel();
+	}
+	
 
 }

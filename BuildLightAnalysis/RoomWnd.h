@@ -13,7 +13,8 @@ enum
 	ROOM_WINDOW,
 	ROOM_GRID,
 	ROOM_SINGLE_LUMINAIRE,
-	ROOM_SET_LUMINAIRE
+	ROOM_SET_LUMINAIRE,
+	ROOM_CONTROL_SET
 };
 //º∆À„µ„
 enum
@@ -90,6 +91,7 @@ public:
 
 	void CalLumSet(CMFCPropertyGridProperty* pLum);
 	void CalMinXY(CMFCPropertyGridProperty* pRoom, Vec2d& minP);
+	void CalMidXY(CMFCPropertyGridProperty* pRoom, Vec2d& midP);
 
 	void OutputToRooms(vector<Room>& rooms);
 
@@ -132,5 +134,6 @@ public:
 
 	afx_msg void OnRoomAddLuminaireSingle();
 	afx_msg void OnRoomAddLuminaireSet();
+	afx_msg void OnRoomAddControlSet();
 };
 

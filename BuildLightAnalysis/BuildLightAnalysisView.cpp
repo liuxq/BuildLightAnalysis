@@ -316,7 +316,8 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 				graph->DrawLine(&winPen, (float)pWins.x, (float)pWins.y, (float)pWine.x, (float)pWine.y);
 			
 		}
-		//画房间和计算点
+		//画房间
+		//包含：房间名，计算点，灯具
 		Gdiplus::Pen selectGridPen(Gdiplus::Color(180,GetRValue(keyGridColor),GetGValue(keyGridColor),GetBValue(keyGridColor)),3);
 		Gdiplus::Pen keyGridPen(Gdiplus::Color(255,GetRValue(keyGridColor),GetGValue(keyGridColor),GetBValue(keyGridColor)),3);
 		Gdiplus::Pen roomPen(Gdiplus::Color(255,100,255,100), 20);
@@ -378,12 +379,17 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 			{
 				CMFCPropertyGridProperty* pPoints = pGrid->GetSubItem(GRID_POINTS);
 
-				for (int j = 0; j < pPoints->GetSubItemsCount(); j++)
-				{
-					p.x = pPoints->GetSubItem(j)->GetSubItem(0)->GetValue().dblVal;
-					p.y = pPoints->GetSubItem(j)->GetSubItem(1)->GetValue().dblVal;
+				CList<CMFCPropertyGridProperty*, CMFCPropertyGridProperty*>* pPointsList = ((PropertyGridProperty*)pPoints)->GetSubItemList();
+				POSITION interatorP = pPointsList->GetHeadPosition(); 
+				int j = 0;
+				while(interatorP != NULL)   
+				{   
+					CMFCPropertyGridProperty* curPoint = pPointsList->GetNext(interatorP);
+
+					p.x = curPoint->GetSubItem(0)->GetValue().dblVal;
+					p.y = curPoint->GetSubItem(1)->GetValue().dblVal;
 					p = m_transform.RealToScreen(p);
-					CString _name = pPoints->GetSubItem(j)->GetName();
+					CString _name = curPoint->GetName();
 					if (i == m_iSelectGridRoomIndex && j == m_iSelectGridIndex)//如果是拾取的计算点
 					{
 						graph->DrawLine(&selectGridPen, (float)p.x - 4, (float)p.y, (float)p.x + 4, (float)p.y);
@@ -397,9 +403,39 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 					}
 					else
 						graph->FillEllipse(&pointBrush, (float)p.x - 2, (float)p.y - 2, 4.0, 4.0);
+
+					j++;
 				}
 			}
-			
+			SolidBrush lumBrush(Gdiplus::Color(255,255,125,100));
+			//单个灯具
+			CMFCPropertyGridProperty* pSingleLum = pRoom->GetSubItem(ROOM_SINGLE_LUMINAIRE);
+			for (int j = 0; j < pSingleLum->GetSubItemsCount(); j++)
+			{
+				CMFCPropertyGridProperty* plum = pSingleLum->GetSubItem(j);
+				p.x = plum->GetSubItem(LUM_SINGLE_X)->GetValue().dblVal;
+				p.y = plum->GetSubItem(LUM_SINGLE_Y)->GetValue().dblVal;
+				p = m_transform.RealToScreen(p);					
+				graph->FillEllipse(&lumBrush, (float)p.x - 2, (float)p.y - 2, 4.0, 4.0);
+			}
+			//组灯具
+			CMFCPropertyGridProperty* pSetLum = pRoom->GetSubItem(ROOM_SET_LUMINAIRE);
+			for (int j = 0; j < pSetLum->GetSubItemsCount(); j++)
+			{
+				CMFCPropertyGridProperty* pSet = pSetLum->GetSubItem(j);
+				CMFCPropertyGridProperty* pPoints = pSet->GetSubItem(LUM_SET_POINTS);
+
+				CList<CMFCPropertyGridProperty*, CMFCPropertyGridProperty*>* pPointsList = ((PropertyGridProperty*)pPoints)->GetSubItemList();
+				POSITION interatorP = pPointsList->GetHeadPosition(); 
+				while(interatorP != NULL)   
+				{   
+					CMFCPropertyGridProperty* curPoint = pPointsList->GetNext(interatorP);
+					p.x = curPoint->GetSubItem(0)->GetValue().dblVal;
+					p.y = curPoint->GetSubItem(1)->GetValue().dblVal;
+					p = m_transform.RealToScreen(p);					
+					graph->FillEllipse(&lumBrush, (float)p.x - 2, (float)p.y - 2, 4.0, 4.0);
+				}
+			}
 		}
 	}
 	/*Graphics graphics(pDC->GetSafeHdc());

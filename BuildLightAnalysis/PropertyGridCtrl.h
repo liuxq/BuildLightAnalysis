@@ -13,7 +13,10 @@ public:
 	CString FormatProperty();
 
 	void RemoveAllSubItem();
-	
+	CList<CMFCPropertyGridProperty*, CMFCPropertyGridProperty*>* GetSubItemList()
+	{
+		return &m_lstSubItems;
+	}
 };
 
 
