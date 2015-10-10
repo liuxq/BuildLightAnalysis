@@ -101,6 +101,21 @@ struct LuminaireTem
 	int w;
 };
 
+struct ControlSetTem
+{
+	enum
+	{
+		mannual_on_auto_off,
+		light_sensor_on_off,
+		auto_on_off,
+		mannual_on_off_dimming,
+		mannual_on_auto_off_dimming,
+		time_table,
+	};
+	WCHAR type[80];
+	vector<double> args;
+};
+
 struct Room
 {
 	RoomType type;

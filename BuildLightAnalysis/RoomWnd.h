@@ -37,7 +37,6 @@ enum
 	LUM_SINGLE_NY,
 	LUM_SINGLE_NZ,
 };
-
 //灯具组
 enum
 {
@@ -56,7 +55,14 @@ enum
 	LUM_SET_COL_L,
 	LUM_SET_POINTS
 };
+//控制分组
+enum
+{
+	CONTROL_SET_LUM,
+	CONTROL_SET_TYPE,
 
+	CONTROL_SET_ARGS = 1001,//特殊！由于参数数量可变，用于设置data，不是索引
+};
 
 
 
@@ -88,6 +94,8 @@ public:
 	void CalGrid(CMFCPropertyGridProperty* pGrid);
 	void AddSingleLuminaire(CMFCPropertyGridProperty* pLuminaire, double x, double y);
 	void AddSetLuminaire(CMFCPropertyGridProperty* pLuminaire, double x, double y);
+	void AddControlSet(CMFCPropertyGridProperty* pControlSet);
+	void UpdateControlSetArgs(CMFCPropertyGridProperty* pControl);
 
 	void CalLumSet(CMFCPropertyGridProperty* pLum);
 	void CalMinXY(CMFCPropertyGridProperty* pRoom, Vec2d& minP);

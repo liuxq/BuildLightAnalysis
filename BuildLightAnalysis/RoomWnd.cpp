@@ -423,6 +423,17 @@ LRESULT CRoomWnd::OnPropertyChanged (WPARAM,LPARAM lParam)
 		pMain->GetActiveView()->Invalidate(); 
 		return 1;
 	}
+	if (pProp->GetData() == CONTROL_SET_TYPE)
+	{
+		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+		if (!pMain)
+			return 0;
+		CMFCPropertyGridProperty* controlSet = pProp->GetParent();
+		UpdateControlSetArgs(controlSet);
+		//更新视图     
+		pMain->GetActiveView()->Invalidate(); 
+		return 1;
+	}
 	return 0;
 }
 void CRoomWnd::OutputToRooms(vector<Room>& rooms)
@@ -887,7 +898,111 @@ void CRoomWnd::OnRoomAddLuminaireSet()
 		AfxMessageBox(_T("没有选择任何房间！"));
 	}
 }
+void CRoomWnd::UpdateControlSetArgs(CMFCPropertyGridProperty* pControl)
+{
+	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;  
+	CBuildLightAnalysisDoc* pDoc = (CBuildLightAnalysisDoc*)pMain->GetActiveDocument();
+	if (!pMain || !pDoc)
+		return;
 
+	for (int i = 0; i < pControl->GetSubItemsCount(); i++)
+	{
+		CMFCPropertyGridProperty* p = pControl->GetSubItem(i);
+		if (p->GetData() == CONTROL_SET_ARGS)
+		{
+			pControl->RemoveSubItem(p);
+			i--;
+		}
+	}
+	vector<ControlSetTem>& controlSetTems = pDoc->getControlSetTems();
+
+	CString controlSetType = pControl->GetSubItem(CONTROL_SET_TYPE)->GetValue().bstrVal;
+	if (controlSetType == CString(controlSetTems[0].type))
+	{
+		CMFCPropertyGridProperty* pDelayTime = new CMFCPropertyGridProperty(_T("延时参数"),controlSetTems[0].args[0],_T("延时参数"), CONTROL_SET_ARGS );
+		pControl->AddSubItem(pDelayTime);
+	}
+	else if (controlSetType == CString(controlSetTems[1].type))
+	{
+		CMFCPropertyGridProperty* pOpen = new CMFCPropertyGridProperty(_T("开灯照度参数"),controlSetTems[1].args[0],_T("开灯照度参数"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pClose = new CMFCPropertyGridProperty(_T("关灯照度参数"),controlSetTems[1].args[1],_T("关灯照度参数"), CONTROL_SET_ARGS );
+		pControl->AddSubItem(pOpen);
+		pControl->AddSubItem(pClose);
+	}
+	else if (controlSetType == CString(controlSetTems[2].type))
+	{
+		CMFCPropertyGridProperty* pDelayTime = new CMFCPropertyGridProperty(_T("延时参数"),controlSetTems[2].args[0],_T("延时参数"), CONTROL_SET_ARGS );
+		pControl->AddSubItem(pDelayTime);
+	}
+	else if (controlSetType == CString(controlSetTems[3].type))
+	{
+		CMFCPropertyGridProperty* pDown = new CMFCPropertyGridProperty(_T("照度下限"),controlSetTems[3].args[0],_T("照度下限"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pUp = new CMFCPropertyGridProperty(_T("照度上限"),controlSetTems[3].args[1],_T("照度上限"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pMinScale = new CMFCPropertyGridProperty(_T("最低输出比例"),controlSetTems[3].args[2],_T("最低输出比例"), CONTROL_SET_ARGS );
+		pControl->AddSubItem(pDown);
+		pControl->AddSubItem(pUp);
+		pControl->AddSubItem(pMinScale);
+	}
+	else if (controlSetType == CString(controlSetTems[4].type))
+	{
+		CMFCPropertyGridProperty* pDelayTime = new CMFCPropertyGridProperty(_T("延时参数"),controlSetTems[4].args[0],_T("延时参数"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pDown = new CMFCPropertyGridProperty(_T("照度下限"),controlSetTems[4].args[1],_T("照度下限"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pUp = new CMFCPropertyGridProperty(_T("照度上限"),controlSetTems[4].args[2],_T("照度上限"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pMinScale = new CMFCPropertyGridProperty(_T("最低输出比例"),controlSetTems[4].args[3],_T("最低输出比例"), CONTROL_SET_ARGS );
+		pControl->AddSubItem(pDelayTime);
+		pControl->AddSubItem(pDown);
+		pControl->AddSubItem(pUp);
+		pControl->AddSubItem(pMinScale);
+	}
+	else if (controlSetType == CString(controlSetTems[5].type))
+	{
+		CMFCPropertyGridProperty* pTime1_on = new CMFCPropertyGridProperty(_T("第一次开灯的时刻"),controlSetTems[5].args[0],_T("第一次开灯的时刻"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pTime1_off = new CMFCPropertyGridProperty(_T("第一次关灯的时刻"),controlSetTems[5].args[1],_T("第一次关灯的时刻"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pK1_output = new CMFCPropertyGridProperty(_T("第一次光输出比例"),controlSetTems[5].args[2],_T("第一次光输出比例"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pTime2_on = new CMFCPropertyGridProperty(_T("第二次开灯的时刻"),controlSetTems[5].args[3],_T("第二次开灯的时刻"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pTime2_off = new CMFCPropertyGridProperty(_T("第二次关灯的时刻"),controlSetTems[5].args[4],_T("第二次关灯的时刻"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pK2_output = new CMFCPropertyGridProperty(_T("第二次光输出比例"),controlSetTems[5].args[5],_T("第二次光输出比例"), CONTROL_SET_ARGS );
+
+		pControl->AddSubItem(pTime1_on);
+		pControl->AddSubItem(pTime1_off);
+		pControl->AddSubItem(pK1_output);
+		pControl->AddSubItem(pTime2_on);
+		pControl->AddSubItem(pTime2_off);
+		pControl->AddSubItem(pK2_output);
+	}
+
+	m_wndPropList.UpdateProperty((PropertyGridProperty*)pControl);
+	m_wndPropList.AdjustLayout();
+}
+void CRoomWnd::AddControlSet(CMFCPropertyGridProperty* pControlSet)
+{
+	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;  
+	CBuildLightAnalysisDoc* pDoc = (CBuildLightAnalysisDoc*)pMain->GetActiveDocument();
+	if (!pMain || !pDoc)
+		return;
+
+	int count = pControlSet->GetSubItemsCount();
+	CString strCount;
+	strCount.Format(_T("分组%d"),count);
+
+	PropertyGridProperty* pControl = new PropertyGridProperty(strCount, ROOM_CONTROL_SET, FALSE);
+
+	PropertyGridProperty* pLum = new PropertyGridProperty(_T("灯具"), CONTROL_SET_LUM, FALSE);
+	PropertyGridProperty* pType = new PropertyGridProperty(_T("类型"), _T("mannual_on_auto_off"), _T("控制分组类型"), CONTROL_SET_TYPE);
+	pType->AllowEdit(FALSE);
+	vector<ControlSetTem>& controlSetTems = pDoc->getControlSetTems();
+	for (int i = 0; i < controlSetTems.size(); i++)
+	{
+		pType->AddOption(CString(controlSetTems[i].type));
+	}
+	pControl->AddSubItem(pLum);
+	pControl->AddSubItem(pType);
+	pControlSet->AddSubItem(pControl);
+	UpdateControlSetArgs(pControl);
+	
+	m_wndPropList.UpdateProperty((PropertyGridProperty*)pControlSet);
+	m_wndPropList.AdjustLayout();
+}
 
 void CRoomWnd::OnRoomAddControlSet()
 {
@@ -898,11 +1013,9 @@ void CRoomWnd::OnRoomAddControlSet()
 	}
 	if (selItem)
 	{
-		Vec2d minP;
-		CalMinXY(selItem,minP);
 		CMFCPropertyGridProperty* pControlSet = selItem->GetSubItem(ROOM_CONTROL_SET);
-		AddSetLuminaire(pLuminaire, minP.x, minP.y);
-		m_wndPropList.UpdateProperty((PropertyGridProperty*)pLuminaire);
+		AddControlSet(pControlSet);
+		m_wndPropList.UpdateProperty((PropertyGridProperty*)pControlSet);
 
 		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 		if (!pMain)

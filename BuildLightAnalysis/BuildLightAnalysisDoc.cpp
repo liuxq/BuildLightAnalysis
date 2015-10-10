@@ -19,6 +19,7 @@
 #include "ProjectOutput.h"
 #include <fstream>
 #include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -244,6 +245,7 @@ void CBuildLightAnalysisDoc::OnFileNew()
 		loadCity();
 		loadRoomType();
 		loadLumTems();
+		loadControlSetTems();
 		pMain->GetOptionProperty().loadMaterialTemplateAndCity();
 		pMain->GetOptionProperty().SetTransform();
 
@@ -300,6 +302,7 @@ void CBuildLightAnalysisDoc::OnFileOpen()
 		loadCity();
 		loadRoomType();
 		loadLumTems();
+		loadControlSetTems();
 		load(inFile);
 		
 		m_bIsOpen = true;
@@ -375,8 +378,49 @@ void CBuildLightAnalysisDoc::loadLumTems()
 		_tcscpy_s(lt.type, typeCs);
 		lt.lm = lm;
 		lt.w = w;
-		m_LumTemplates.push_back(lt);
+		m_LumTems.push_back(lt);
 	}
+}
+void CBuildLightAnalysisDoc::loadControlSetTems()
+{
+	CString path;
+	path.Format(_T("%s\\Template_control.txt"), m_projectLocation);
+	ifstream inputFile(CStringToString(path));
+	if (!inputFile.is_open())
+	{
+		AfxMessageBox(_T("缺少控制分组模板，请将Template_control.txt文件放入工程文件夹下"));
+		return;
+	}
+	string strLine;
+
+	string first, type;
+	double arg;
+
+	while(getline(inputFile, strLine))
+	{
+		stringstream sStrem;
+		sStrem << strLine;
+		if (strLine.empty() || sStrem.peek() == '#')
+		{
+			continue;
+		}
+
+		sStrem >> first;
+		if (first == "void")
+		{
+			ControlSetTem cst;
+			sStrem >> type;
+			_tcscpy_s(cst.type, StringToCString(type));
+			while(sStrem >> arg)
+			{
+				cst.args.push_back(arg);
+			}
+			m_ControlSetTems.push_back(cst);
+		}
+		
+	}
+
+	return;
 }
 
 void CBuildLightAnalysisDoc::clear()

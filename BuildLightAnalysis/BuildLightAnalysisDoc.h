@@ -33,13 +33,18 @@ public:
 	}
 	vector<LuminaireTem>& getLuminaireTems()
 	{
-		return m_LumTemplates;
+		return m_LumTems;
+	}
+	vector<ControlSetTem>& getControlSetTems()
+	{
+		return m_ControlSetTems;
 	}
 private:
 	MaterialSet m_material;
 	vector<CString> m_citys;
 	vector<RoomType> m_roomTypes;
-	vector<LuminaireTem> m_LumTemplates;
+	vector<LuminaireTem> m_LumTems;
+	vector<ControlSetTem> m_ControlSetTems;
 // Operations
 public:
 
@@ -67,6 +72,7 @@ protected:
 	void loadCity();
 	void loadRoomType();
 	void loadLumTems();
+	void loadControlSetTems();
 	void save(ofstream& out);
 // Generated message map functions
 protected:
