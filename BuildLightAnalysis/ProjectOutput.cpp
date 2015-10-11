@@ -521,6 +521,14 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 	}
 }
 
+void LumOutput(string lumFile, string grid1File, string grid2File)
+{
+	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+	if (!pMain)
+		return;
+
+
+}
 void RoomOutput(string roomFile, string grid1File, string grid2File)
 {
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();

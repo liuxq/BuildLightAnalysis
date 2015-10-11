@@ -12,5 +12,6 @@ void geometryOutput(string filename, set<CString>& outMats, set<Material>& antiM
 void materialOutput(string filename, MaterialSet& materials, set<CString>& mats, set<Material>& antiMaterials);
 
 void RoomOutput(string roomFile, string grid1File, string grid2File);
+void LumOutput(string roomFile, string grid1File, string grid2File);
 
 void RoomOutToVector(vector<OutRoom>& surfaces, set<CString>& Mats,set<Material>& antiMaterials);

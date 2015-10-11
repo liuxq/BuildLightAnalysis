@@ -347,13 +347,13 @@ void CBuildLightAnalysisDoc::loadRoomType()
 		return;
 	}
 	string name;
-	int num;
-	while(inputFile >> name >> num )
+	double e;
+	while(inputFile >> name >> e )
 	{
 		RoomType rt;
 		CString nameCs = StringToCString(name);
 		_tcscpy_s(rt.name, nameCs);
-		rt.num = num;
+		rt.e = e;
 		m_roomTypes.push_back(rt);
 	}
 }

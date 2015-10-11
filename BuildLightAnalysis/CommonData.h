@@ -92,13 +92,13 @@ struct Grid
 struct RoomType
 {
 	WCHAR name[80];
-	int num;
+	double e;
 };
 struct LuminaireTem
 {
 	WCHAR type[80];
-	int lm;
-	int w;
+	double lm;
+	double w;
 };
 
 struct ControlSetTem
@@ -144,4 +144,11 @@ struct OutRoom
 	double height;
 };
 
-
+struct OutLumSingle
+{
+	WCHAR type[80];
+	double lm;
+	double w;
+	Vec3d p;
+	Vec3d np;
+};

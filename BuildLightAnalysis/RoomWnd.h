@@ -7,6 +7,7 @@
 enum
 {
 	ROOM_TYPE = 0,
+	ROOM_E,
 	ROOM_HEIGHT,
 	ROOM_OUT_WALL,
 	ROOM_IN_WALL,
@@ -14,7 +15,21 @@ enum
 	ROOM_GRID,
 	ROOM_SINGLE_LUMINAIRE,
 	ROOM_SET_LUMINAIRE,
-	ROOM_CONTROL_SET
+	ROOM_CONTROL_SET,
+	ROOM_PERSON,
+};
+enum
+{
+	ROOM_SINGLE_LUMINAIRE_DATA = 100,
+	ROOM_SET_LUMINAIRE_DATA = 101,
+	LUM_SINGLE_TYPE_DATA = 102,
+	LUM_SET_TYPE_DATA = 103,
+	ROOM_E_DATA = 104
+};
+//菜单
+enum
+{
+	MENU_CONTROL_SET0 = 2000,
 };
 //计算点
 enum
@@ -64,6 +79,13 @@ enum
 	CONTROL_SET_ARGS = 1001,//特殊！由于参数数量可变，用于设置data，不是索引
 };
 
+//人员
+enum
+{
+	PERSON_SCHEDULE_TYPE,
+	PERSON_BEHAVIOR_TYPE,
+	PERSON_CONTROL_SET
+};
 
 
 class CRoomWnd : public CDockablePane
@@ -95,13 +117,19 @@ public:
 	void AddSingleLuminaire(CMFCPropertyGridProperty* pLuminaire, double x, double y);
 	void AddSetLuminaire(CMFCPropertyGridProperty* pLuminaire, double x, double y);
 	void AddControlSet(CMFCPropertyGridProperty* pControlSet);
+	void AddPerson(CMFCPropertyGridProperty* pPerson);
+
+	void UpdateRoomE(CMFCPropertyGridProperty* pRoom);
+	void UpdateLumArgs(CMFCPropertyGridProperty* pLum);
 	void UpdateControlSetArgs(CMFCPropertyGridProperty* pControl);
 
+	void GetKeyGrid(CMFCPropertyGridProperty* pRoom, vector<int>& keys);
 	void CalLumSet(CMFCPropertyGridProperty* pLum);
 	void CalMinXY(CMFCPropertyGridProperty* pRoom, Vec2d& minP);
 	void CalMidXY(CMFCPropertyGridProperty* pRoom, Vec2d& midP);
 
 	void OutputToRooms(vector<Room>& rooms);
+	void OutputToLums(vector<vector<OutLumSingle>>& lumSingles);
 
 	void save(ofstream& out);
 	void load(ifstream& in);
@@ -143,5 +171,6 @@ public:
 	afx_msg void OnRoomAddLuminaireSingle();
 	afx_msg void OnRoomAddLuminaireSet();
 	afx_msg void OnRoomAddControlSet();
+	afx_msg void OnRoomAddPerson();
 };
 
