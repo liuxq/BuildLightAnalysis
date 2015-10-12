@@ -121,7 +121,7 @@ public:
 
 	void UpdateRoomE(CMFCPropertyGridProperty* pRoom);
 	void UpdateLumArgs(CMFCPropertyGridProperty* pLum);
-	void UpdateControlSetArgs(CMFCPropertyGridProperty* pControl);
+	void UpdateControlSetArgs(CMFCPropertyGridProperty* pControl, int keyGrid);
 
 	void GetKeyGrid(CMFCPropertyGridProperty* pRoom, vector<int>& keys);
 	void CalLumSet(CMFCPropertyGridProperty* pLum);
@@ -129,7 +129,8 @@ public:
 	void CalMidXY(CMFCPropertyGridProperty* pRoom, Vec2d& midP);
 
 	void OutputToRooms(vector<Room>& rooms);
-	void OutputToLums(vector<vector<OutLumSingle>>& lumSingles);
+	void OutputToLums(vector<vector<OutLumSingle>>& lumSingles, vector<vector<OutLumSet>>& lumSets,
+		vector<vector<OutControlSet>>& controlSets, vector<vector<OutPerson>>& persons);
 
 	void save(ofstream& out);
 	void load(ifstream& in);

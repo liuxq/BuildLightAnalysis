@@ -152,3 +152,32 @@ struct OutLumSingle
 	Vec3d p;
 	Vec3d np;
 };
+
+struct OutLumSet
+{
+	WCHAR type[80];
+	double lm;
+	double w;
+	double z;
+	Vec3d np;
+	Vec2d originP;
+	int rowN;
+	int colN;
+	double rowL;
+	double colL;
+};
+
+struct OutControlSet
+{
+	vector<int> lumSingles;
+	vector<int> lumSets;
+	WCHAR type[80];
+	int keyGrid;
+};
+
+struct OutPerson
+{
+	WCHAR schedule_type[80];
+	WCHAR behavior_type[80];
+	vector<int> controlIds;
+};
