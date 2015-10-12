@@ -647,7 +647,7 @@ void CRoomWnd::save(ofstream& out)
 			serializer<WCHAR[80]>::write(out, &controlSets[i][j].type);
 			serializer<int>::write(out, &controlSets[i][j].keyGrid);
 		}
-		sz = persons.size();
+		sz = persons[i].size();
 		out.write((char *)&sz, sizeof(sz));
 		for (int j = 0; j < sz; j++)
 		{
@@ -753,22 +753,41 @@ void CRoomWnd::load(ifstream& in)
 			point->AddSubItem(pGridPointZ);
 			pGridList->AddSubItem(point);
 		}
-
+		m_wndPropList.UpdateProperty((PropertyGridProperty*)pGrid);
 		for (int j = 0; j < lumSingles[i].size(); j++)
 		{
-			AddSingleLuminaire(pSingleLum);
+			AddSingleLuminaire(pSingleLum, lumSingles[i][j].p, lumSingles[i][j].type, lumSingles[i][j].lm, lumSingles[i][j].w, lumSingles[i][j].np);
 		}
 		for (int j = 0; j < lumSets[i].size(); j++)
 		{
-			AddSetLuminaire(pSetLum);
+			AddSetLuminaire(pSetLum, lumSets[i][j].originP,lumSets[i][j].type, lumSets[i][j].lm,lumSets[i][j].w,lumSets[i][j].z, lumSets[i][j].np,
+				lumSets[i][j].rowN, lumSets[i][j].colN,lumSets[i][j].rowL,lumSets[i][j].colL);
 		}
 		for (int j = 0; j < controlSets[i].size(); j++)
 		{
-			AddControlSet(pControlSet);
+			AddControlSet(pControlSet, controlSets[i][j].type, controlSets[i][j].keyGrid);
+			CMFCPropertyGridProperty* pControlSingleLum = pControlSet->GetSubItem(j)->GetSubItem(CONTROL_SET_LUM)->GetSubItem(0);
+			CMFCPropertyGridProperty* pControlSetLum = pControlSet->GetSubItem(j)->GetSubItem(CONTROL_SET_LUM)->GetSubItem(1);
+			for (int k = 0; k < controlSets[i][j].lumSingles.size(); k++)
+			{
+				CMFCPropertyGridProperty* pSingleLum_ = new CMFCPropertyGridProperty(_T("灯具"), (_variant_t)controlSets[i][j].lumSingles[k], _T("灯具"));
+				pControlSingleLum->AddSubItem(pSingleLum_);
+			}
+			for (int k = 0; k < controlSets[i][j].lumSets.size(); k++)
+			{
+				CMFCPropertyGridProperty* pSetLum_ = new CMFCPropertyGridProperty(_T("灯具组"), (_variant_t)controlSets[i][j].lumSets[k], _T("灯具组"));
+				pControlSetLum->AddSubItem(pSetLum_);
+			}
 		}
 		for (int j = 0; j < persons[i].size(); j++)
 		{
-			AddPerson(pPerson);
+			AddPerson(pPerson, persons[i][j].schedule_type, persons[i][j].behavior_type);
+			CMFCPropertyGridProperty* pPersonControlSet = pPerson->GetSubItem(j)->GetSubItem(PERSON_CONTROL_SET);
+			for (int k = 0; k < persons[i][j].controlIds.size(); k++)
+			{
+				CMFCPropertyGridProperty* cs = new CMFCPropertyGridProperty(_T("控制分组"), (_variant_t)persons[i][j].controlIds[k], _T("控制"));
+				pPersonControlSet->AddSubItem(cs);
+			}
 		}
 
 		m_wndPropList.UpdateProperty(pRoom);
@@ -814,7 +833,7 @@ void CRoomWnd::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 							return;
 						}
 					}
-					CMFCPropertyGridProperty* lum = new CMFCPropertyGridProperty(_T("灯具组"), (_variant_t)name,_T("灯具"));
+					CMFCPropertyGridProperty* lum = new CMFCPropertyGridProperty(_T("灯具组"), (_variant_t)name,_T("灯具组"));
 					plumSet->AddSubItem(lum);
 				}
 				else
@@ -900,7 +919,8 @@ void CRoomWnd::OnRoomCalGrid()
 		AfxMessageBox(_T("没有选择任何房间！"));
 	}
 }
-void CRoomWnd::AddSingleLuminaire(CMFCPropertyGridProperty* pLuminaire, double x, double y)
+
+void CRoomWnd::AddSingleLuminaire(CMFCPropertyGridProperty* pLuminaire,Vec3d p, WCHAR type[80],double lm,	double w ,Vec3d np)
 {
 	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;  
 	CBuildLightAnalysisDoc* pDoc = (CBuildLightAnalysisDoc*)pMain->GetActiveDocument();
@@ -912,9 +932,9 @@ void CRoomWnd::AddSingleLuminaire(CMFCPropertyGridProperty* pLuminaire, double x
 	strCount.Format(_T("%d"),count);
 	
 	PropertyGridProperty* pSingleLum = new PropertyGridProperty(strCount, ROOM_SINGLE_LUMINAIRE_DATA, FALSE);
-	PropertyGridProperty* pType = new PropertyGridProperty(_T("类型"), _T("FAC21280P-23W"), _T("灯具类型"), LUM_SINGLE_TYPE_DATA);
-	PropertyGridProperty* pLm = new PropertyGridProperty(_T("光通量(lm)"),(_variant_t)2100.0, _T("灯具的光通量"));
-	PropertyGridProperty* pW = new PropertyGridProperty(_T("功率(w)"), (_variant_t)23.0, _T("灯具的功率"));
+	PropertyGridProperty* pType = new PropertyGridProperty(_T("类型"), type, _T("灯具类型"), LUM_SINGLE_TYPE_DATA);
+	PropertyGridProperty* pLm = new PropertyGridProperty(_T("光通量(lm)"),(_variant_t)lm, _T("灯具的光通量"));
+	PropertyGridProperty* pW = new PropertyGridProperty(_T("功率(w)"), (_variant_t)w, _T("灯具的功率"));
 	pType->AllowEdit(FALSE);
 	pLm->AllowEdit(FALSE);
 	pW->AllowEdit(FALSE);
@@ -923,13 +943,13 @@ void CRoomWnd::AddSingleLuminaire(CMFCPropertyGridProperty* pLuminaire, double x
 	{
 		pType->AddOption(CString(lumTems[i].type));
 	}
-	PropertyGridProperty* pX = new PropertyGridProperty(_T("X(mm)"), (_variant_t)x, _T("X坐标"));
-	PropertyGridProperty* pY = new PropertyGridProperty(_T("Y(mm)"), (_variant_t)y, _T("Y坐标"));
-	PropertyGridProperty* pZ = new PropertyGridProperty(_T("Z(mm)"), (_variant_t)750.0, _T("Z坐标"));
+	PropertyGridProperty* pX = new PropertyGridProperty(_T("X(mm)"), (_variant_t)p.x, _T("X坐标"));
+	PropertyGridProperty* pY = new PropertyGridProperty(_T("Y(mm)"), (_variant_t)p.y, _T("Y坐标"));
+	PropertyGridProperty* pZ = new PropertyGridProperty(_T("Z(mm)"), (_variant_t)p.z, _T("Z坐标"));
 
-	PropertyGridProperty* pNX = new PropertyGridProperty(_T("法矢X"), (_variant_t)0.0, _T("法矢X坐标"));
-	PropertyGridProperty* pNY = new PropertyGridProperty(_T("法矢Y"), (_variant_t)0.0, _T("法矢Y坐标"));
-	PropertyGridProperty* pNZ = new PropertyGridProperty(_T("法矢Z"), (_variant_t)-1.0, _T("法矢Z坐标"));
+	PropertyGridProperty* pNX = new PropertyGridProperty(_T("法矢X"), (_variant_t)np.x, _T("法矢X坐标"));
+	PropertyGridProperty* pNY = new PropertyGridProperty(_T("法矢Y"), (_variant_t)np.y, _T("法矢Y坐标"));
+	PropertyGridProperty* pNZ = new PropertyGridProperty(_T("法矢Z"), (_variant_t)np.z, _T("法矢Z坐标"));
 
 	pSingleLum->AddSubItem(pType);
 	pSingleLum->AddSubItem(pLm);
@@ -947,7 +967,8 @@ void CRoomWnd::AddSingleLuminaire(CMFCPropertyGridProperty* pLuminaire, double x
 	m_wndPropList.AdjustLayout();
 }
 
-void CRoomWnd::AddSetLuminaire(CMFCPropertyGridProperty* pLuminaire, double x, double y)
+void CRoomWnd::AddSetLuminaire(CMFCPropertyGridProperty* pLuminaire, Vec2d originP, WCHAR type[80],
+	double lm, double w, double z, Vec3d np, int rowN,int colN, double rowL, double colL)
 {
 	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;  
 	CBuildLightAnalysisDoc* pDoc = (CBuildLightAnalysisDoc*)pMain->GetActiveDocument();
@@ -960,9 +981,9 @@ void CRoomWnd::AddSetLuminaire(CMFCPropertyGridProperty* pLuminaire, double x, d
 
 	PropertyGridProperty* pSetLum = new PropertyGridProperty(strCount, ROOM_SET_LUMINAIRE_DATA, FALSE);
 
-	PropertyGridProperty* pType = new PropertyGridProperty(_T("类型"), _T("FAC21280P-23W"), _T("灯具类型"), LUM_SET_TYPE_DATA);
-	PropertyGridProperty* pLm = new PropertyGridProperty(_T("光通量(lm)"),(_variant_t)2100.0, _T("灯具的光通量"));
-	PropertyGridProperty* pW = new PropertyGridProperty(_T("功率(w)"), (_variant_t)23.0, _T("灯具的功率"));
+	PropertyGridProperty* pType = new PropertyGridProperty(_T("类型"), type, _T("灯具类型"), LUM_SET_TYPE_DATA);
+	PropertyGridProperty* pLm = new PropertyGridProperty(_T("光通量(lm)"),(_variant_t)lm, _T("灯具的光通量"));
+	PropertyGridProperty* pW = new PropertyGridProperty(_T("功率(w)"), (_variant_t)w, _T("灯具的功率"));
 	pType->AllowEdit(FALSE);
 	pLm->AllowEdit(FALSE);
 	pW->AllowEdit(FALSE);
@@ -971,17 +992,17 @@ void CRoomWnd::AddSetLuminaire(CMFCPropertyGridProperty* pLuminaire, double x, d
 	{
 		pType->AddOption(CString(lumTems[i].type));
 	}
-	PropertyGridProperty* pZ = new PropertyGridProperty(_T("Z(mm)"), (_variant_t)750.0, _T("Z坐标"));
-	PropertyGridProperty* pNX = new PropertyGridProperty(_T("法矢X"), (_variant_t)0.0, _T("法矢X坐标"));
-	PropertyGridProperty* pNY = new PropertyGridProperty(_T("法矢Y"), (_variant_t)0.0, _T("法矢Y坐标"));
-	PropertyGridProperty* pNZ = new PropertyGridProperty(_T("法矢Z"), (_variant_t)-1.0, _T("法矢Z坐标"));
+	PropertyGridProperty* pZ = new PropertyGridProperty(_T("Z(mm)"), (_variant_t)z, _T("Z坐标"));
+	PropertyGridProperty* pNX = new PropertyGridProperty(_T("法矢X"), (_variant_t)np.x, _T("法矢X坐标"));
+	PropertyGridProperty* pNY = new PropertyGridProperty(_T("法矢Y"), (_variant_t)np.y, _T("法矢Y坐标"));
+	PropertyGridProperty* pNZ = new PropertyGridProperty(_T("法矢Z"), (_variant_t)np.z, _T("法矢Z坐标"));
 
-	PropertyGridProperty* pOriginX = new PropertyGridProperty(_T("初始点X"), (_variant_t)x, _T("初始点X"));
-	PropertyGridProperty* pOriginY = new PropertyGridProperty(_T("初始点Y"), (_variant_t)y, _T("初始点Y"));
-	PropertyGridProperty* pRowNum = new PropertyGridProperty(_T("行数"), (_variant_t)5, _T("行数"));
-	PropertyGridProperty* pColumNum = new PropertyGridProperty(_T("列数"), (_variant_t)5, _T("列数"));
-	PropertyGridProperty* pRowLen = new PropertyGridProperty(_T("行宽"), (_variant_t)200.0, _T("行宽"));
-	PropertyGridProperty* pColumLen = new PropertyGridProperty(_T("列宽"), (_variant_t)200.0, _T("列宽"));
+	PropertyGridProperty* pOriginX = new PropertyGridProperty(_T("初始点X"), (_variant_t)originP.x, _T("初始点X"));
+	PropertyGridProperty* pOriginY = new PropertyGridProperty(_T("初始点Y"), (_variant_t)originP.y, _T("初始点Y"));
+	PropertyGridProperty* pRowNum = new PropertyGridProperty(_T("行数"), (_variant_t)rowN, _T("行数"));
+	PropertyGridProperty* pColumNum = new PropertyGridProperty(_T("列数"), (_variant_t)colN, _T("列数"));
+	PropertyGridProperty* pRowLen = new PropertyGridProperty(_T("行宽"), (_variant_t)rowL, _T("行宽"));
+	PropertyGridProperty* pColumLen = new PropertyGridProperty(_T("列宽"), (_variant_t)colL, _T("列宽"));
 
 	PropertyGridProperty* pLumSet = new PropertyGridProperty(_T("坐标"), 0, FALSE);
 
@@ -1145,7 +1166,8 @@ void CRoomWnd::OnRoomAddLuminaireSingle()
 		Vec2d midP;
 		CalMidXY(selItem,midP);
 		CMFCPropertyGridProperty* pLuminaire = selItem->GetSubItem(ROOM_SINGLE_LUMINAIRE);
-		AddSingleLuminaire(pLuminaire, midP.x, midP.y);
+		Vec3d p(midP.x,midP.y, 750.0);
+		AddSingleLuminaire(pLuminaire, p);
 		
 
 		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
@@ -1171,7 +1193,7 @@ void CRoomWnd::OnRoomAddLuminaireSet()
 		Vec2d minP;
 		CalMinXY(selItem,minP);
 		CMFCPropertyGridProperty* pLuminaire = selItem->GetSubItem(ROOM_SET_LUMINAIRE);
-		AddSetLuminaire(pLuminaire, minP.x, minP.y);
+		AddSetLuminaire(pLuminaire, minP);
 		m_wndPropList.UpdateProperty((PropertyGridProperty*)pLuminaire);
 
 		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
@@ -1357,7 +1379,7 @@ void CRoomWnd::UpdateControlSetArgs(CMFCPropertyGridProperty* pControl, int keyG
 	m_wndPropList.UpdateProperty((PropertyGridProperty*)pControl);
 	m_wndPropList.AdjustLayout();
 }
-void CRoomWnd::AddControlSet(CMFCPropertyGridProperty* pControlSet)
+void CRoomWnd::AddControlSet(CMFCPropertyGridProperty* pControlSet, WCHAR type[80], int keyGrid)
 {
 	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;  
 	CBuildLightAnalysisDoc* pDoc = (CBuildLightAnalysisDoc*)pMain->GetActiveDocument();
@@ -1375,7 +1397,7 @@ void CRoomWnd::AddControlSet(CMFCPropertyGridProperty* pControlSet)
 	PropertyGridProperty* pLumSet = new PropertyGridProperty(_T("灯具组"), 0, FALSE);
 	pLum->AddSubItem(pLumSingle);
 	pLum->AddSubItem(pLumSet);
-	PropertyGridProperty* pType = new PropertyGridProperty(_T("类型"), _T("mannual_on_auto_off"), _T("控制分组类型"), CONTROL_SET_TYPE);
+	PropertyGridProperty* pType = new PropertyGridProperty(_T("类型"), type, _T("控制分组类型"), CONTROL_SET_TYPE);
 	pType->AllowEdit(FALSE);
 	vector<ControlSetTem>& controlSetTems = pDoc->getControlSetTems();
 	for (int i = 0; i < controlSetTems.size(); i++)
@@ -1385,12 +1407,12 @@ void CRoomWnd::AddControlSet(CMFCPropertyGridProperty* pControlSet)
 	pControl->AddSubItem(pLum);
 	pControl->AddSubItem(pType);
 	pControlSet->AddSubItem(pControl);
-	UpdateControlSetArgs(pControl,-1);
+	UpdateControlSetArgs(pControl,keyGrid);
 
 	m_wndPropList.UpdateProperty((PropertyGridProperty*)pControlSet);
 	m_wndPropList.AdjustLayout();
 }
-void CRoomWnd::AddPerson(CMFCPropertyGridProperty* pPerson)
+void CRoomWnd::AddPerson(CMFCPropertyGridProperty* pPerson, WCHAR schedule_type[80],  WCHAR behavior_type[80])
 {
 	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;  
 	CBuildLightAnalysisDoc* pDoc = (CBuildLightAnalysisDoc*)pMain->GetActiveDocument();
@@ -1403,8 +1425,8 @@ void CRoomWnd::AddPerson(CMFCPropertyGridProperty* pPerson)
 
 	PropertyGridProperty* pPersoni = new PropertyGridProperty(strCount,0, FALSE);
 
-	PropertyGridProperty* pSchedule = new PropertyGridProperty(_T("作息类型"),_T("行政"), _T("作息类型"));
-	PropertyGridProperty* pBehavior = new PropertyGridProperty(_T("行为类型"), _T("经济型"), _T("行为类型"));
+	PropertyGridProperty* pSchedule = new PropertyGridProperty(_T("作息类型"), schedule_type, _T("作息类型"));
+	PropertyGridProperty* pBehavior = new PropertyGridProperty(_T("行为类型"), behavior_type, _T("行为类型"));
 	pSchedule->AllowEdit(FALSE);
 	pBehavior->AllowEdit(FALSE);
 	pSchedule->AddOption(_T("行政"));
