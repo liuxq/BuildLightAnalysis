@@ -521,13 +521,71 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 	}
 }
 
-void LumOutput(string lumFile, string grid1File, string grid2File)
+void LumOutput(string lumFile, string controlFile, string personFile)
 {
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 	if (!pMain)
 		return;
+	ofstream lumOut(lumFile);
+	ofstream controlOut(controlFile);
+	ofstream personOut(personFile);
+	if (!lumOut.is_open() || !controlOut.is_open() || !personOut.is_open())
+	{
+		AfxMessageBox(_T("文件创建失败"));
+		return;
+	}
 
+	vector<vector<OutLumSingle>> lumSingles;
+	vector<vector<OutLumSet>> lumSets;
+	vector<vector<OutControlSet>> controlSets;
+	vector<vector<OutPerson>> persons;
+	pMain->GetRoomProperty().OutputToLums(lumSingles, lumSets, controlSets, persons);
+	
 
+	for (unsigned int i = 0; i < controlSets.size(); i++)
+	{
+		//第i个房间
+		for (unsigned int j = 0; j < controlSets[i].size(); j++)
+		{
+			CMFCPropertyGridProperty* control = pMain->GetRoomProperty().getPropList()->GetProperty(i)->GetSubItem(ROOM_CONTROL_SET)->GetSubItem(j);
+			int keyGrid = -1;
+			vector<double> args;
+			for (unsigned int k = 0; k < control->GetSubItemsCount(); k++)
+			{
+				if (control->GetSubItem(k)->GetData() == CONTROL_SET_ARGS)
+				{
+					if (CString(control->GetSubItem(k)->GetName()) == _T("关键点"))
+						keyGrid = control->GetSubItem(k)->GetValue().intVal;
+					else
+						args.push_back(control->GetSubItem(k)->GetValue().dblVal);
+				}
+				
+			}
+			//控制号j
+			for (unsigned int k = 0; k < controlSets[i][j].lumSingles.size(); k++)
+			{
+				int lumIndex = controlSets[i][j].lumSingles[k];
+				OutLumSingle& ols = lumSingles[i][lumIndex];
+				lumOut << "void " << "room"<< i << "_Single"<<lumIndex << " " << ols.type << " " << i << " " << j << " " 
+					<< ols.p.x <<" "<< ols.p.y << " " << ols.p.z << " " 
+					<< ols.np.x <<" "<< ols.np.y << " " << ols.np.z << " " 
+					<< j << endl;
+				
+				controlOut << "room" << i << "_Single"<< lumIndex << " " << controlSets[i][j].type;
+				if (keyGrid >= 0)
+					controlOut << " " << keyGrid;
+
+				for (unsigned int m = 0; m < args.size(); m++)
+				{
+					controlOut << " " << args[m];
+				}
+				controlOut << endl;
+				
+				
+			}
+			
+		}
+	}
 }
 void RoomOutput(string roomFile, string grid1File, string grid2File)
 {
