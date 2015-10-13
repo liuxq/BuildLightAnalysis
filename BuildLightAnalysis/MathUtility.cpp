@@ -581,3 +581,8 @@ double CalGirth(vector<Vec2d>& polygon)
 	}
 	return l;
 }
+
+Vec2d Rotate(Vec2d& p, double angle)
+{
+	return Vec2d(p.x*cos(angle)+p.y*sin(angle), p.y*cos(angle)-p.x*sin(angle));
+}

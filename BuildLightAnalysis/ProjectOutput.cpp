@@ -44,9 +44,12 @@ void geometryOutput(string filename, set<CString>& outMats, set<Material>& antiM
 			out << surf.mat << " polygon ";//材料 类型
 			out << surf.name << endl;//名字
 			out << surf.args[0] << " " << surf.args[1] << " " << surf.args[2] << " ";
+
 			for (int k = 0; k < surf.points.size(); k++)
 			{
-				out << surf.points[k].x << " " << surf.points[k].y << " " << surf.points[k].z << endl;
+				Vec2d p(surf.points[k].x, surf.points[k].y);
+				p = Rotate(p, PI/2);
+				out << p.x << " " << p.y << " " << surf.points[k].z << endl;
 			}
 			out << endl;
 		}
@@ -562,16 +565,17 @@ void LumOutput(string lumFile, string controlFile, string personFile)
 				
 			}
 			//控制号j
+			//单个灯具
 			for (unsigned int k = 0; k < controlSets[i][j].lumSingles.size(); k++)
 			{
 				int lumIndex = controlSets[i][j].lumSingles[k];
 				OutLumSingle& ols = lumSingles[i][lumIndex];
-				lumOut << "void " << "room"<< i << "_Single"<<lumIndex << " " << ols.type << " " << i << " " << j << " " 
+				lumOut << "void " << "lum_room"<< i << "_Single"<<lumIndex << " " << CStringToString(CString(ols.type)) << " " << i << " " << j << " " 
 					<< ols.p.x <<" "<< ols.p.y << " " << ols.p.z << " " 
 					<< ols.np.x <<" "<< ols.np.y << " " << ols.np.z << " " 
-					<< j << endl;
-				
-				controlOut << "room" << i << "_Single"<< lumIndex << " " << controlSets[i][j].type;
+					<< CStringToString(CString(controlSets[i][j].type)) << endl;
+
+				controlOut << "lum_room" << i << "_Single"<< lumIndex << " " << CStringToString(CString(controlSets[i][j].type));
 				if (keyGrid >= 0)
 					controlOut << " " << keyGrid;
 
@@ -580,10 +584,68 @@ void LumOutput(string lumFile, string controlFile, string personFile)
 					controlOut << " " << args[m];
 				}
 				controlOut << endl;
-				
+			}
+			//灯具组
+			for (unsigned int k = 0; k < controlSets[i][j].lumSets.size(); k++)
+			{
+				int lumIndex = controlSets[i][j].lumSets[k];
+				OutLumSet& ols = lumSets[i][lumIndex];
+				vector<Vec2d> outLums;
+				ols.outputLums(outLums);
+				for (unsigned int m = 0; m < outLums.size(); m++)
+				{
+					//导出lum
+					lumOut << "void " << "lum_room"<< i << "_Set"<<lumIndex <<"_"<< m << " " 
+						<< CStringToString(CString(ols.type)) << " " << i << " " << j << " " 
+						<< outLums[m].x <<" "<< outLums[m].y << " " << ols.z << " " 
+						<< ols.np.x <<" "<< ols.np.y << " " << ols.np.z << " " 
+						<< CStringToString(CString(controlSets[i][j].type)) << endl;
+					
+					//导出controlSet
+					controlOut << "lum_room" << i << "_Set"<< lumIndex <<"_"<< m << " "
+						<< CStringToString(CString(controlSets[i][j].type));
+					if (keyGrid >= 0)
+						controlOut << " " << keyGrid;
+
+					for (unsigned int n = 0; n < args.size(); n++)
+					{
+						controlOut << " " << args[n];
+					}
+					controlOut << endl;
+				}
+			}
+		}
+		//导出人员信息
+		for (unsigned int j = 0; j < persons[i].size(); j++)
+		{
+			//第j个人
+			personOut << "void " << j << " " <<i << " " <<CStringToString(CString(persons[i][j].schedule_type)) << " "
+				<< CStringToString(CString(persons[i][j].behavior_type));
+
+			for (unsigned int k = 0; k < persons[i][j].controlIds.size(); k++)
+			{
+				int controlId = persons[i][j].controlIds[k];
+				//单个灯具
+				for (unsigned int m = 0; m < controlSets[i][controlId].lumSingles.size(); m++)
+				{
+					int lumIndex = controlSets[i][controlId].lumSingles[m];
+					personOut << " lum_room"<< i << "_Single"<<lumIndex;
+				}
+				//灯具组
+				for (unsigned int m = 0; m < controlSets[i][controlId].lumSets.size(); m++)
+				{
+					int lumIndex = controlSets[i][controlId].lumSets[m];
+					OutLumSet& ols = lumSets[i][lumIndex];
+					vector<Vec2d> outLums;
+					ols.outputLums(outLums);
+					for (unsigned int n = 0; n < outLums.size(); n++)
+					{
+						personOut << " lum_room"<< i << "_Set"<< lumIndex <<"_"<< n;
+					}
+				}
 				
 			}
-			
+			personOut << endl;
 		}
 	}
 }
@@ -648,7 +710,7 @@ void RoomOutput(string roomFile, string grid1File, string grid2File)
 					out <<"key";
 				}
 				out << endl;
-				
+
 				grid1Out << points[a].p.x << " " << points[a].p.y<<" "<< points[a].p.z << " "<<0<<" "<<0<<" "<<1<<endl;
 
 				if (points[a].isKey)

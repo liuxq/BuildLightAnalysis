@@ -165,6 +165,17 @@ struct OutLumSet
 	int colN;
 	double rowL;
 	double colL;
+
+	void outputLums(vector<Vec2d>& outLums)
+	{
+		for (int i = 0; i < rowN; i++)
+		{
+			for (int j = 0; j < colN; j++)
+			{
+				outLums.push_back(Vec2d(i*colL + originP.x, j*rowL + originP.y));				
+			}
+		}
+	}
 };
 
 struct OutControlSet

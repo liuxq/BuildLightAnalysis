@@ -152,6 +152,12 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 	graph->DrawLine(&ArrowXPen, (float)Oaxis.x, (float)Oaxis.y, (float)Xaxis.x, (float)Xaxis.y);
 	graph->DrawLine(&ArrowYPen, (float)Oaxis.x, (float)Oaxis.y, (float)Yaxis.x, (float)Yaxis.y);
 
+	//绘制指北针
+	double angle = 20;
+	double anglep = angle / 180 * PI;
+	Vec2d angleDir(cos(anglep),sin(anglep));
+
+
 	//取配置中的内外墙颜色
 	COLORREF outWallColor = pMain->GetOptionProperty().GetDataInt(OPTION_OUTWALL_COLOR);
 	COLORREF inWallColor = pMain->GetOptionProperty().GetDataInt(OPTION_INWALL_COLOR);

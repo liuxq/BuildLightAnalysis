@@ -4,6 +4,9 @@
 #include <list>
 #include "CommonData.h"
 
+
+#define PI 3.1415926
+
 using namespace std;
 
 string CStringToString(CString& str);
@@ -29,3 +32,6 @@ double CalArea(vector<Vec2d>& polygon);
 
 //求多边形周长
 double CalGirth(vector<Vec2d>& polygon);
+
+//旋转坐标
+Vec2d Rotate(Vec2d& p, double angle);

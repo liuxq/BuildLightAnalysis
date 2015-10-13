@@ -502,6 +502,26 @@ void CBuildLightAnalysisDoc::save(ofstream& outputFile)
 
 void CBuildLightAnalysisDoc::OnFileOutput()
 {
+	string path = CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName);
+	fstream _file1, _file2, _file3, _file4,_file5,_file6,_file7,_file8;
+	_file1.open(path + "_geometry.rad",ios::in);
+	_file2.open(path + "_material.rad",ios::in);
+	_file3.open(path + "_grid1.pts",ios::in);
+	_file4.open(path + "_grid2.pts",ios::in);
+	_file5.open(path + "_room_info.txt",ios::in);
+	_file6.open(path + "_lighting_system.gx",ios::in);
+	_file7.open(path + "_control_system.ctl",ios::in);
+	_file8.open(path + "_occupany.occ",ios::in);
+
+	if(_file1 && _file2 && _file3 && _file4 && _file5 && _file6 && _file7 && _file8)
+	{
+		int nRes = AfxMessageBox(_T("已经导出过，是否覆盖"), MB_YESNO|MB_ICONQUESTION);
+		if (nRes == IDNO)
+		{
+			return;
+		}
+	}
+	
 	OnFileSave();
 
 	set<CString> mats;
@@ -511,6 +531,10 @@ void CBuildLightAnalysisDoc::OnFileOutput()
 	string grid1file = CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_grid1.pts";
 	string grid2file = CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_grid2.pts";
 	RoomOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) +"_room_info.txt", grid1file, grid2file);
+	string lumfile = CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) +"_lighting_system.gx";
+	string controlfile = CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) +"_control_system.ctl";
+	string personfile = CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) +"_occupany.occ";
+	LumOutput(lumfile,controlfile, personfile);
 
 	AfxMessageBox(_T("导出成功"));
 }

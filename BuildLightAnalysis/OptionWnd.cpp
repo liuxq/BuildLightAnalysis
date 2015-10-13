@@ -123,6 +123,7 @@ void COptionWnd::InitPropList()
 	CMFCPropertyGridColorProperty* pInWallColor = new CMFCPropertyGridColorProperty(_T("内墙颜色"),RGB(0, 111, 200));
 	CMFCPropertyGridColorProperty* pInKeyGridColor = new CMFCPropertyGridColorProperty(_T("关键点颜色"),RGB(255, 0, 0));
 	CMFCPropertyGridProperty* pCity = new PropertyGridProperty(_T("城市"), _T("Beijing.Beijing"), _T("默认城市"));
+	CMFCPropertyGridProperty* pNorth = new PropertyGridProperty(_T("指北针角度(角度)"), (_variant_t)0.0, _T("指北针角度， -180~180"));
 
 	
 	m_wndPropList.AddProperty(pLevelHigh);m_DataType[OPTION_LEVEL_HEIGHT] = OPTION_TYPE_DOUBLE;
@@ -139,6 +140,7 @@ void COptionWnd::InitPropList()
 	m_wndPropList.AddProperty(pInWallColor);m_DataType[OPTION_INWALL_COLOR] = OPTION_TYPE_COLOR;
 	m_wndPropList.AddProperty(pInKeyGridColor);m_DataType[OPTION_KEYGRID_COLOR] = OPTION_TYPE_COLOR;
 	m_wndPropList.AddProperty(pCity);m_DataType[OPTION_CITY] = OPTION_TYPE_STRING;
+	m_wndPropList.AddProperty(pNorth);m_DataType[OPTION_NORTH] = OPTION_TYPE_DOUBLE;
 }
 
 void COptionWnd::loadMaterialTemplateAndCity()
