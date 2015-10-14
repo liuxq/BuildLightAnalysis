@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include <list>
+#include <string>
 
 
 
@@ -33,6 +34,8 @@ void geometryOutput(string filename, set<CString>& outMats, set<Material>& antiM
 
 	vector<OutRoom> outRooms;
 	RoomOutToVector(outRooms, outMats, antiMaterials);
+	double angle = pMain->GetOptionProperty().GetDataDouble(OPTION_NORTH);
+	double anglep = angle / 180 * PI;
 
 	for (int i = 0; i < rooms.size(); i++)
 	{
@@ -48,7 +51,7 @@ void geometryOutput(string filename, set<CString>& outMats, set<Material>& antiM
 			for (int k = 0; k < surf.points.size(); k++)
 			{
 				Vec2d p(surf.points[k].x, surf.points[k].y);
-				p = Rotate(p, PI/2);
+				p = Rotate(p, anglep);
 				out << p.x << " " << p.y << " " << surf.points[k].z << endl;
 			}
 			out << endl;
@@ -544,7 +547,9 @@ void LumOutput(string lumFile, string controlFile, string personFile)
 	vector<vector<OutPerson>> persons;
 	pMain->GetRoomProperty().OutputToLums(lumSingles, lumSets, controlSets, persons);
 	
-
+	//旋转角度
+	double angle = pMain->GetOptionProperty().GetDataDouble(OPTION_NORTH);
+	double anglep = angle / 180 * PI;
 	for (unsigned int i = 0; i < controlSets.size(); i++)
 	{
 		//第i个房间
@@ -570,8 +575,10 @@ void LumOutput(string lumFile, string controlFile, string personFile)
 			{
 				int lumIndex = controlSets[i][j].lumSingles[k];
 				OutLumSingle& ols = lumSingles[i][lumIndex];
+				Vec2d p(ols.p.x, ols.p.y);
+				p = Rotate(p, anglep);
 				lumOut << "void " << "lum_room"<< i << "_Single"<<lumIndex << " " << CStringToString(CString(ols.type)) << " " << i << " " << j << " " 
-					<< ols.p.x <<" "<< ols.p.y << " " << ols.p.z << " " 
+					<< p.x <<" "<< p.y << " " << ols.p.z << " " 
 					<< ols.np.x <<" "<< ols.np.y << " " << ols.np.z << " " 
 					<< CStringToString(CString(controlSets[i][j].type)) << endl;
 
@@ -594,10 +601,12 @@ void LumOutput(string lumFile, string controlFile, string personFile)
 				ols.outputLums(outLums);
 				for (unsigned int m = 0; m < outLums.size(); m++)
 				{
-					//导出lum
+					//导出lumset
+					Vec2d p(outLums[m].x, outLums[m].y);
+					p = Rotate(p, anglep);
 					lumOut << "void " << "lum_room"<< i << "_Set"<<lumIndex <<"_"<< m << " " 
 						<< CStringToString(CString(ols.type)) << " " << i << " " << j << " " 
-						<< outLums[m].x <<" "<< outLums[m].y << " " << ols.z << " " 
+						<< p.x <<" "<< p.y << " " << ols.z << " " 
 						<< ols.np.x <<" "<< ols.np.y << " " << ols.np.z << " " 
 						<< CStringToString(CString(controlSets[i][j].type)) << endl;
 					
@@ -649,7 +658,7 @@ void LumOutput(string lumFile, string controlFile, string personFile)
 		}
 	}
 }
-void RoomOutput(string roomFile, string grid1File, string grid2File)
+void RoomOutput(string roomFile, string gridDir)
 {
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 	if (!pMain)
@@ -657,11 +666,15 @@ void RoomOutput(string roomFile, string grid1File, string grid2File)
 
 	vector<Room> rooms;
 	pMain->GetRoomProperty().OutputToRooms(rooms);
+	vector<vector<OutLumSingle>> lumSingles;
+	vector<vector<OutLumSet>> lumSets;
+	vector<vector<OutControlSet>> controlSets;
+	vector<vector<OutPerson>> persons;
+	pMain->GetRoomProperty().OutputToLums(lumSingles, lumSets, controlSets, persons);
 
 	ofstream out(roomFile);
-	ofstream grid1Out(grid1File);
-	ofstream grid2Out(grid2File);
-	if (!out.is_open() || !grid1Out.is_open() || !grid2Out.is_open())
+	
+	if (!out.is_open())
 	{
 		AfxMessageBox(_T("文件创建失败"));
 		return;
@@ -679,7 +692,9 @@ void RoomOutput(string roomFile, string grid1File, string grid2File)
 	double h = pMain->GetOptionProperty().GetDataDouble(OPTION_LEVEL_HEIGHT);
 	CString roofMat = pMain->GetOptionProperty().GetDataCString(OPTION_ROOF_MAT);
 	CString floorMat = pMain->GetOptionProperty().GetDataCString(OPTION_FLOOR_MAT);
-	int GridPointCount = 0;
+	
+	double angle = pMain->GetOptionProperty().GetDataDouble(OPTION_NORTH);
+	double anglep = angle / 180 * PI;
 	for (int i = 0; i < rooms.size(); i++)
 	{
 		//导出第i个房间
@@ -689,38 +704,76 @@ void RoomOutput(string roomFile, string grid1File, string grid2File)
 		out << "room_Girth " << outRooms[i].girth << endl;
 		out << "room_Area " << outRooms[i].area / 1000000 << "平方米" << endl;
 		out << "room_Height " << outRooms[i].height << endl << endl;
+		
 		out << "start geometry" << endl;
-
 		for (int a = 0; a < outRooms[i].surfaces.size(); a++)
 		{
 			out << outRooms[i].surfaces[a].name <<endl;
 		}
-
 		out << "end geometry" << endl << endl;
+
+		out << "start luminaire" << endl;
+		for (unsigned int a = 0; a < lumSingles[i].size(); a++)
+		{
+			out << "lum_room"<< i << "_Single"<< a << endl;
+		}
+		for (unsigned int a = 0; a < lumSets[i].size(); a++)
+		{
+			OutLumSet& ols = lumSets[i][a];
+			vector<Vec2d> outLums;
+			ols.outputLums(outLums);
+			for (unsigned int n = 0; n < outLums.size(); n++)
+			{
+				out << "lum_room"<< i << "_Set"<< a <<"_"<< n << endl;
+			}
+		}
+		out << "end luminaire" << endl << endl;
 
 		if (!rooms[i].grid.points.empty())
 		{
+			string gridFile = gridDir + "_room";
+			gridFile += '0'+i;
+			ofstream grid1Out(gridFile +"_grid1.pts");
+			ofstream grid2Out(gridFile +"_grid2.pts");
+			if (!grid1Out.is_open() || !grid2Out.is_open())
+			{
+				AfxMessageBox(_T("文件创建失败"));
+				return;
+			}
+
 			vector<GridPoint>& points = rooms[i].grid.points;
 			out << "start pts" << endl;
 			for (int a = 0; a < points.size(); a++)
 			{
-				out << GridPointCount << " ";
+				out << a << " ";
 				if (points[a].isKey)
 				{
 					out <<"key";
 				}
 				out << endl;
 
-				grid1Out << points[a].p.x << " " << points[a].p.y<<" "<< points[a].p.z << " "<<0<<" "<<0<<" "<<1<<endl;
+				Vec2d p(points[a].p.x, points[a].p.y);
+				p = Rotate(p, anglep);
+
+				grid1Out << p.x << " " << p.y<<" "<< points[a].p.z << " "<<0<<" "<<0<<" "<<1<<endl;
 
 				if (points[a].isKey)
 				{
-					grid2Out << points[a].p.x << " " << points[a].p.y<<" "<< points[a].p.z << " "<<0<<" "<<0<<" "<<1<<endl;
+					grid2Out << p.x << " " << p.y<<" "<< points[a].p.z << " "<<0<<" "<<0<<" "<<1<<endl;
 				}
-				GridPointCount++;
 			}
 			out << "end pts" << endl << endl;
+
+			grid1Out.close();
+			grid2Out.close();
 		}
+
+		out << "start user" << endl;
+		for (int a = 0; a < persons[i].size(); a++)
+		{
+			out << a <<endl;
+		}
+		out << "end user" << endl << endl;
 		
 	}
 }

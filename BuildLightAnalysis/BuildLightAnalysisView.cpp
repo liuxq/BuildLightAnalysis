@@ -153,10 +153,31 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 	graph->DrawLine(&ArrowYPen, (float)Oaxis.x, (float)Oaxis.y, (float)Yaxis.x, (float)Yaxis.y);
 
 	//绘制指北针
-	double angle = 20;
+	AdjustableArrowCap NorthCap(15,4,true);
+	Gdiplus::Pen ArrowNorthPen(Gdiplus::Color(255,255,0,0), 3);
+	ArrowNorthPen.SetCustomEndCap(&NorthCap);
+	double angle = pMain->GetOptionProperty().GetDataDouble(OPTION_NORTH) + 90.0;
 	double anglep = angle / 180 * PI;
-	Vec2d angleDir(cos(anglep),sin(anglep));
+	Vec2d angleDir(cos(anglep),-sin(anglep));
+	double offsetX = 80;
+	double offsetY = 80;
+	double arrowLen = 50;
+	Vec2d northArrowP(rect.right - offsetX, rect.top + offsetY);
+	Vec2d northArrowS = northArrowP - arrowLen*0.5*angleDir;
+	Vec2d northArrowE = northArrowP + arrowLen*0.5*angleDir;
+	Vec2d northArrowT = northArrowP + arrowLen*0.8*angleDir;
+	graph->DrawLine(&ArrowNorthPen, (float)northArrowS.x, (float)northArrowS.y, (float)northArrowE.x, (float)northArrowE.y);
 
+	PointF posNorth(northArrowT.x, northArrowT.y);
+	FontFamily fontFamilyNorth(L"幼圆");
+	Gdiplus::Font font(&fontFamilyNorth,12);
+
+	SolidBrush brushNorth(Color(255, 255, 0, 0));
+	CString na = _T("北");
+	WCHAR *wch = (WCHAR*)na.GetBuffer(na.GetLength());
+	posNorth.X -= 10;
+	posNorth.Y -= 8;
+	graph->DrawString(wch ,na.GetLength(), &font,posNorth, &brushNorth);
 
 	//取配置中的内外墙颜色
 	COLORREF outWallColor = pMain->GetOptionProperty().GetDataInt(OPTION_OUTWALL_COLOR);
