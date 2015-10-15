@@ -35,3 +35,5 @@ double CalGirth(vector<Vec2d>& polygon);
 
 //Ðý×ª×ø±ê
 Vec2d Rotate(Vec2d& p, double angle);
+
+int NamePost(CString name);

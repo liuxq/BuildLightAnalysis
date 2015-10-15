@@ -286,6 +286,7 @@ void CRoomWnd::CalGrid(CMFCPropertyGridProperty* pGrid)
 	vector<Wall> outWalls;
 	if (!CalClosedPolygon(roomWalls, outWalls, outPolygon))
 	{
+		AfxMessageBox(_T("房间墙数不够或没有封闭，不能计算网格"));
 		return;
 	}
 	vector<Vec2d> gridPoints;
@@ -810,17 +811,22 @@ void CRoomWnd::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 			int count = curItem->GetSubItem(ROOM_CONTROL_SET)->GetSubItemsCount();
 			CMenu menu1;
 			menu1.CreatePopupMenu();
+			menu1.AppendMenu(MF_STRING,MENU_CONTROL_SET0+0, _T("删除"));
 			CString numStr;
 			for (int i = 0; i < count; i++)
 			{
 				numStr.Format(_T("加入到控制分组%d"), i);
-				menu1.AppendMenu(MF_STRING,MENU_CONTROL_SET0+i, numStr);
+				menu1.AppendMenu(MF_STRING,MENU_CONTROL_SET0+i+1, numStr);
 			}
 			int selectI = menu1.TrackPopupMenu(TPM_RETURNCMD, point.x, point.y, this);
 			menu1.DestroyMenu();
-			if (selectI)
+			if (selectI == MENU_CONTROL_SET0)//删除灯具
 			{
-				CMFCPropertyGridProperty* lumSet = curItem->GetSubItem(ROOM_CONTROL_SET)->GetSubItem(selectI-MENU_CONTROL_SET0)->GetSubItem(CONTROL_SET_LUM);
+				DeleteLumByIndex(curItem, NamePost(selItem->GetName()), selItem->GetData() == ROOM_SINGLE_LUMINAIRE_DATA);
+			}
+			else if (selectI)
+			{
+				CMFCPropertyGridProperty* lumSet = curItem->GetSubItem(ROOM_CONTROL_SET)->GetSubItem(selectI-MENU_CONTROL_SET0-1)->GetSubItem(CONTROL_SET_LUM);
 				int name = _ttoi(selItem->GetName());
 				if (selItem->GetData() == ROOM_SET_LUMINAIRE_DATA)
 				{
@@ -863,17 +869,22 @@ void CRoomWnd::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 			int count = curItem->GetSubItem(ROOM_PERSON)->GetSubItemsCount();
 			CMenu menu1;
 			menu1.CreatePopupMenu();
+			menu1.AppendMenu(MF_STRING,MENU_CONTROL_SET0+0, _T("删除"));
 			CString numStr;
 			for (int i = 0; i < count; i++)
 			{
 				numStr.Format(_T("加入到人员%d"), i);
-				menu1.AppendMenu(MF_STRING,MENU_CONTROL_SET0+i, numStr);
+				menu1.AppendMenu(MF_STRING,MENU_CONTROL_SET0+i+1, numStr);
 			}
 			int selectI = menu1.TrackPopupMenu(TPM_RETURNCMD, point.x, point.y, this);
 			menu1.DestroyMenu();
-			if (selectI)
+			if (selectI == MENU_CONTROL_SET0)//删除分组
 			{
-				CMFCPropertyGridProperty* controSet = curItem->GetSubItem(ROOM_PERSON)->GetSubItem(selectI-MENU_CONTROL_SET0)->GetSubItem(PERSON_CONTROL_SET);
+				DeleteControSetByIndex(curItem, NamePost(selItem->GetName()));
+			}
+			else if (selectI)
+			{
+				CMFCPropertyGridProperty* controSet = curItem->GetSubItem(ROOM_PERSON)->GetSubItem(selectI-MENU_CONTROL_SET0-1)->GetSubItem(PERSON_CONTROL_SET);
 				int name = _ttoi(selItem->GetName());
 				for (int k = 0; k < controSet->GetSubItemsCount(); k++)
 				{
@@ -898,6 +909,112 @@ void CRoomWnd::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 
 }
 
+void CRoomWnd::DeleteLumByIndex(CMFCPropertyGridProperty* pRoom, int delIndex, bool isSingle)
+{
+	CMFCPropertyGridProperty* lums = isSingle? 
+		pRoom->GetSubItem(ROOM_SINGLE_LUMINAIRE):
+		pRoom->GetSubItem(ROOM_SET_LUMINAIRE);
+	CMFCPropertyGridProperty* controlSets = pRoom->GetSubItem(ROOM_CONTROL_SET);
+	
+	if (delIndex < 0 || delIndex >= lums->GetSubItemsCount())
+		return;
+
+	CMainFrame* pMain = (CMainFrame*)AfxGetApp()->m_pMainWnd;  
+
+	CMFCPropertyGridProperty* delItem = lums->GetSubItem(delIndex);
+	if (delItem)
+	{
+		lums->RemoveSubItem(delItem);
+
+		//重新设置一下灯具编号
+		int count = lums->GetSubItemsCount();
+		CString strName;
+		for (int i = 0; i < count; i++)
+		{
+			strName.Format(_T("%d"),i);
+			lums->GetSubItem(i)->SetName(strName);
+
+			if (i == delIndex)
+				m_wndPropList.SetCurSel(lums->GetSubItem(i));
+		}
+
+		//更新控制分组中的灯具编号
+		for (unsigned int i = 0; i < controlSets->GetSubItemsCount(); i++)
+		{
+			CMFCPropertyGridProperty* controlSet = controlSets->GetSubItem(i);
+			CMFCPropertyGridProperty* controlLums = isSingle? 
+			controlSet->GetSubItem(CONTROL_SET_LUM)->GetSubItem(0):
+			controlSet->GetSubItem(CONTROL_SET_LUM)->GetSubItem(1);
+
+			for (int j = 0; j < controlLums->GetSubItemsCount(); j++)
+			{
+				CMFCPropertyGridProperty* p = controlLums->GetSubItem(j);
+				int oriIndex = p->GetValue().lVal;
+				if (oriIndex == delIndex)
+				{
+					controlLums->RemoveSubItem(p);
+					j--;
+				}
+				else if (oriIndex > delIndex)
+				{
+					p->SetValue((_variant_t)(oriIndex-1));
+				}
+			}
+		}
+		m_wndPropList.AdjustLayout();
+	}
+}
+void CRoomWnd::DeleteControSetByIndex(CMFCPropertyGridProperty* pRoom, int delIndex)
+{
+	CMFCPropertyGridProperty* controlSets = pRoom->GetSubItem(ROOM_CONTROL_SET);
+	CMFCPropertyGridProperty* persons = pRoom->GetSubItem(ROOM_PERSON);
+
+	if (controlSets < 0 || delIndex >= controlSets->GetSubItemsCount())
+		return;
+
+	CMainFrame* pMain = (CMainFrame*)AfxGetApp()->m_pMainWnd;  
+
+	CMFCPropertyGridProperty* delItem = controlSets->GetSubItem(delIndex);
+	if (delItem)
+	{
+		controlSets->RemoveSubItem(delItem);
+
+		//重新设置一下灯具编号
+		int count = controlSets->GetSubItemsCount();
+		CString strName;
+		for (int i = 0; i < count; i++)
+		{
+			strName.Format(_T("%d"),i);
+			controlSets->GetSubItem(i)->SetName(strName);
+
+			if (i == delIndex)
+				m_wndPropList.SetCurSel(controlSets->GetSubItem(i));
+		}
+
+		//更新人员中的灯具编号
+		for (unsigned int i = 0; i < persons->GetSubItemsCount(); i++)
+		{
+			CMFCPropertyGridProperty* person = persons->GetSubItem(i);
+			CMFCPropertyGridProperty* controls = person->GetSubItem(PERSON_CONTROL_SET);
+
+			for (int j = 0; j < controls->GetSubItemsCount(); j++)
+			{
+				CMFCPropertyGridProperty* p = controls->GetSubItem(j);
+				int oriIndex = p->GetValue().lVal;
+				if (oriIndex == delIndex)
+				{
+					controls->RemoveSubItem(p);
+					j--;
+				}
+				else if (oriIndex > delIndex)
+				{
+					p->SetValue((_variant_t)(oriIndex-1));
+				}
+			}
+		}
+		m_wndPropList.AdjustLayout();
+	}
+}
 void CRoomWnd::OnRoomCalGrid()
 {
 	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();

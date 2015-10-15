@@ -149,11 +149,7 @@ void CWindowWnd::OnDeleteWindow()
 	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
 	if (selItem && !selItem->GetParent())
 	{
-		CString name = selItem->GetName();
-		CString namePost = name.Right(name.GetLength() - 1);
-		int index = _ttoi(namePost);
-
-		DeleteWindowByIndex(index);
+		DeleteWindowByIndex(NamePost(selItem->GetName()));
 	}
 }
 

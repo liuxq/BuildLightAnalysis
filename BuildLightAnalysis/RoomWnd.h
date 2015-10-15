@@ -134,6 +134,9 @@ public:
 	void OutputToRooms(vector<Room>& rooms);
 	void OutputToLums(vector<vector<OutLumSingle>>& lumSingles, vector<vector<OutLumSet>>& lumSets,
 		vector<vector<OutControlSet>>& controlSets, vector<vector<OutPerson>>& persons);
+	
+	void DeleteLumByIndex(CMFCPropertyGridProperty* pRoom, int index, bool isSingle);
+	void DeleteControSetByIndex(CMFCPropertyGridProperty* pRoom, int index);
 
 	void save(ofstream& out);
 	void load(ifstream& in);
