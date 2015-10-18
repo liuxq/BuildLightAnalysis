@@ -22,6 +22,10 @@ public:
 		pos *= scale;
 		pos += center;
 		pos.y = height - pos.y;
+		if (pos.x > 5000.0)	pos.x = 5000.0;
+		if (pos.x < -5000.0)pos.x = -5000.0;
+		if (pos.y > 5000.0)	pos.y = 5000.0;
+		if (pos.y < -5000.0)pos.y = -5000.0;
 		return pos;
 	}
 
