@@ -861,7 +861,7 @@ void CRoomWnd::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 				m_wndPropList.AdjustLayout();
 			}
 		}
-		else if (selItem->GetData() == ROOM_CONTROL_SET)//控制分组加入到人员中
+		else if (selItem->GetData() == ROOM_CONTROL_SET_DATA)//控制分组加入到人员中
 		{
 			CMFCPropertyGridProperty* curItem = selItem;
 			while(curItem->GetParent())
@@ -1507,7 +1507,7 @@ void CRoomWnd::AddControlSet(CMFCPropertyGridProperty* pControlSet, WCHAR type[8
 	CString strCount;
 	strCount.Format(_T("%d"),count);
 
-	PropertyGridProperty* pControl = new PropertyGridProperty(strCount, ROOM_CONTROL_SET, FALSE);
+	PropertyGridProperty* pControl = new PropertyGridProperty(strCount, ROOM_CONTROL_SET_DATA, FALSE);
 
 	PropertyGridProperty* pLum = new PropertyGridProperty(_T("灯具"), CONTROL_SET_LUM, FALSE);
 	PropertyGridProperty* pLumSingle = new PropertyGridProperty(_T("单个灯具"), 0, FALSE);
