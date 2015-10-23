@@ -589,6 +589,6 @@ Vec2d Rotate(Vec2d& p, double angle)
 
 int NamePost(CString name)
 {
-	CString namePost = name.Right(name.GetLength() - 1);
+	CString namePost = name.Right(1);
 	return _ttoi(namePost);
 }

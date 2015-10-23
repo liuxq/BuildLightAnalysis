@@ -235,7 +235,7 @@ void COptionWnd::SetPropListFont()
 void COptionWnd::save(ofstream& out)
 {
 	double dbl;
-	int intv;
+	long longv;
 	string str;
 	CString cstr;
 
@@ -252,8 +252,8 @@ void COptionWnd::save(ofstream& out)
 			serializer<string>::writeString(out,&CStringToString(cstr));
 			break;
 		case OPTION_TYPE_COLOR:
-			intv = m_wndPropList.GetProperty(OPTION_START + i)->GetValue().intVal;
-			serializer<int>::write(out,&intv);
+			longv = m_wndPropList.GetProperty(OPTION_START + i)->GetValue().lVal;
+			serializer<long>::write(out,&longv);
 			break;
 
 		}
@@ -264,7 +264,7 @@ void COptionWnd::save(ofstream& out)
 void COptionWnd::load(ifstream& in)
 {
 	double dbl;
-	int intv;
+	long longv;
 	string str;
 	CString cstr;
 
@@ -281,10 +281,8 @@ void COptionWnd::load(ifstream& in)
 			m_wndPropList.GetProperty(OPTION_START + i)->SetValue(StringToCString(str));
 			break;
 		case OPTION_TYPE_COLOR:
-			serializer<int>::read(in,&intv);
-			_variant_t var;
-			var = intv;var.vt = VT_I4;
-			((CMFCPropertyGridColorProperty*)m_wndPropList.GetProperty(OPTION_START + i))->SetColor(var);
+			serializer<long>::read(in,&longv);
+			((CMFCPropertyGridColorProperty*)m_wndPropList.GetProperty(OPTION_START + i))->SetColor(longv);
 			break;
 
 		}

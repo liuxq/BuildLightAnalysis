@@ -322,7 +322,7 @@ void CRoomWnd::OnDeleteRoom()
 	if (selItem && !selItem->GetParent())
 	{
 		CString name = selItem->GetName();
-		CString namePost = name.Right(name.GetLength() - 2);
+		CString namePost = name.Right(1);
 		int index = _ttoi(namePost);
 
 		((PropertyGridProperty*)selItem)->RemoveAllSubItem();
@@ -352,7 +352,7 @@ void CRoomWnd::DeleteWindowFromRoom(int winIndex)
 		for (int j = 0; j < pWin->GetSubItemsCount(); j++)
 		{
 			CMFCPropertyGridProperty* p = pWin->GetSubItem(j);
-			int oriIndex = p->GetValue().lVal;
+			long oriIndex = p->GetValue().lVal;
 			if (oriIndex == winIndex)
 			{
 				pWin->RemoveSubItem(p);
@@ -367,7 +367,7 @@ void CRoomWnd::DeleteWindowFromRoom(int winIndex)
 	m_wndPropList.AdjustLayout();
 	
 }
-bool CRoomWnd::AddToSelectedRoom(int type, int index)
+bool CRoomWnd::AddToSelectedRoom(int type, long index)
 {
 	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
 	while (selItem && selItem->GetParent())
@@ -380,7 +380,7 @@ bool CRoomWnd::AddToSelectedRoom(int type, int index)
 		for (int i = 0; i < subItem->GetSubItemsCount(); i++)
 		{
 			CMFCPropertyGridProperty* p = subItem->GetSubItem(i);
-			if (p->GetValue().intVal == index)
+			if (p->GetValue().lVal == index)
 			{
 				AfxMessageBox(_T("该房间已经存在该墙或窗户"));
 				return false;
@@ -419,7 +419,7 @@ LRESULT CRoomWnd::OnPropertyChanged (WPARAM,LPARAM lParam)
 		pMain->GetActiveView()->Invalidate(); 
 		return 1;
 	}
-	if (pProp->GetParent() && pProp->GetParent()->GetData() == ROOM_SET_LUMINAIRE)
+	if (pProp->GetParent() && pProp->GetParent()->GetData() == ROOM_SET_LUMINAIRE_DATA && pProp->GetData() != LUM_SET_TYPE_DATA)
 	{
 		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 		if (!pMain)
@@ -483,17 +483,17 @@ void CRoomWnd::OutputToRooms(vector<Room>& rooms)
 		room.height = pHeight->GetValue().dblVal;
 		for (int j = 0; j < pOutWall->GetSubItemsCount(); j++)
 		{
-			int index = pOutWall->GetSubItem(j)->GetValue().intVal;
+			long index = pOutWall->GetSubItem(j)->GetValue().lVal;
 			room.outWalls.push_back(index);
 		}
 		for (int j = 0; j < pInWall->GetSubItemsCount(); j++)
 		{
-			int index = pInWall->GetSubItem(j)->GetValue().intVal;
+			long index = pInWall->GetSubItem(j)->GetValue().lVal;
 			room.inWalls.push_back(index);
 		}
 		for (int j = 0; j < pWindow->GetSubItemsCount(); j++)
 		{
-			int index = pWindow->GetSubItem(j)->GetValue().intVal;
+			long index = pWindow->GetSubItem(j)->GetValue().lVal;
 			room.windows.push_back(index);
 		}
 
@@ -630,9 +630,9 @@ void CRoomWnd::save(ofstream& out)
 	{
 		serializer<RoomType>::write(out, &rooms[i].type);
 		serializer<double>::write(out, &rooms[i].height);
-		serializer<int>::write(out, &rooms[i].outWalls);
-		serializer<int>::write(out, &rooms[i].inWalls);
-		serializer<int>::write(out, &rooms[i].windows);
+		serializer<long>::write(out, &rooms[i].outWalls);
+		serializer<long>::write(out, &rooms[i].inWalls);
+		serializer<long>::write(out, &rooms[i].windows);
 		serializer<double>::write(out, &rooms[i].grid.offset);
 		serializer<double>::write(out, &rooms[i].grid.meshLen);
 		serializer<GridPoint>::write(out, &rooms[i].grid.points);
@@ -643,8 +643,8 @@ void CRoomWnd::save(ofstream& out)
 		out.write((char *)&sz, sizeof(sz));
 		for (int j = 0; j < sz; j++)
 		{
-			serializer<int>::write(out, &controlSets[i][j].lumSingles);
-			serializer<int>::write(out, &controlSets[i][j].lumSets);
+			serializer<long>::write(out, &controlSets[i][j].lumSingles);
+			serializer<long>::write(out, &controlSets[i][j].lumSets);
 			serializer<WCHAR[80]>::write(out, &controlSets[i][j].type);
 			serializer<int>::write(out, &controlSets[i][j].keyGrid);
 		}
@@ -654,7 +654,7 @@ void CRoomWnd::save(ofstream& out)
 		{
 			serializer<WCHAR[80]>::write(out, &persons[i][j].schedule_type);
 			serializer<WCHAR[80]>::write(out, &persons[i][j].behavior_type);
-			serializer<int>::write(out, &persons[i][j].controlIds);
+			serializer<long>::write(out, &persons[i][j].controlIds);
 		}
 		
 	}
@@ -675,9 +675,9 @@ void CRoomWnd::load(ifstream& in)
 	{
 		serializer<RoomType>::read(in, &rooms[i].type);
 		serializer<double>::read(in, &rooms[i].height);
-		serializer<int>::read(in, &rooms[i].outWalls);
-		serializer<int>::read(in, &rooms[i].inWalls);
-		serializer<int>::read(in, &rooms[i].windows);
+		serializer<long>::read(in, &rooms[i].outWalls);
+		serializer<long>::read(in, &rooms[i].inWalls);
+		serializer<long>::read(in, &rooms[i].windows);
 		serializer<double>::read(in, &rooms[i].grid.offset);
 		serializer<double>::read(in, &rooms[i].grid.meshLen);
 		serializer<GridPoint>::read(in, &rooms[i].grid.points);
@@ -689,8 +689,8 @@ void CRoomWnd::load(ifstream& in)
 		controlSets[i].resize(sz);
 		for (int j = 0; j < sz; j++)
 		{
-			serializer<int>::read(in, &controlSets[i][j].lumSingles);
-			serializer<int>::read(in, &controlSets[i][j].lumSets);
+			serializer<long>::read(in, &controlSets[i][j].lumSingles);
+			serializer<long>::read(in, &controlSets[i][j].lumSets);
 			serializer<WCHAR[80]>::read(in, &controlSets[i][j].type);
 			serializer<int>::read(in, &controlSets[i][j].keyGrid);
 		}
@@ -700,7 +700,7 @@ void CRoomWnd::load(ifstream& in)
 		{
 			serializer<WCHAR[80]>::read(in, &persons[i][j].schedule_type);
 			serializer<WCHAR[80]>::read(in, &persons[i][j].behavior_type);
-			serializer<int>::read(in, &persons[i][j].controlIds);
+			serializer<long>::read(in, &persons[i][j].controlIds);
 		}
 	}
 	for (int i = 0; i < size; i++)
@@ -764,29 +764,29 @@ void CRoomWnd::load(ifstream& in)
 			AddSetLuminaire(pSetLum, lumSets[i][j].originP,lumSets[i][j].type, lumSets[i][j].lm,lumSets[i][j].w,lumSets[i][j].z, lumSets[i][j].np,
 				lumSets[i][j].rowN, lumSets[i][j].colN,lumSets[i][j].rowL,lumSets[i][j].colL);
 		}
-		for (int j = 0; j < controlSets[i].size(); j++)
+		for (unsigned int j = 0; j < controlSets[i].size(); j++)
 		{
 			AddControlSet(pControlSet, controlSets[i][j].type, controlSets[i][j].keyGrid);
 			CMFCPropertyGridProperty* pControlSingleLum = pControlSet->GetSubItem(j)->GetSubItem(CONTROL_SET_LUM)->GetSubItem(0);
 			CMFCPropertyGridProperty* pControlSetLum = pControlSet->GetSubItem(j)->GetSubItem(CONTROL_SET_LUM)->GetSubItem(1);
-			for (int k = 0; k < controlSets[i][j].lumSingles.size(); k++)
+			for (unsigned int k = 0; k < controlSets[i][j].lumSingles.size(); k++)
 			{
-				CMFCPropertyGridProperty* pSingleLum_ = new CMFCPropertyGridProperty(_T("灯具"), (_variant_t)controlSets[i][j].lumSingles[k], _T("灯具"));
+				CMFCPropertyGridProperty* pSingleLum_ = new CMFCPropertyGridProperty(_T("灯具"), (_variant_t)controlSets[i][j].lumSingles[k], _T("灯具"), CONTROL_SINGLE_LUMSET_DATA);
 				pControlSingleLum->AddSubItem(pSingleLum_);
 			}
-			for (int k = 0; k < controlSets[i][j].lumSets.size(); k++)
+			for (unsigned int k = 0; k < controlSets[i][j].lumSets.size(); k++)
 			{
-				CMFCPropertyGridProperty* pSetLum_ = new CMFCPropertyGridProperty(_T("灯具组"), (_variant_t)controlSets[i][j].lumSets[k], _T("灯具组"));
+				CMFCPropertyGridProperty* pSetLum_ = new CMFCPropertyGridProperty(_T("灯具组"), (_variant_t)controlSets[i][j].lumSets[k], _T("灯具组"), CONTROL_SET_LUMSET_DATA);
 				pControlSetLum->AddSubItem(pSetLum_);
 			}
 		}
-		for (int j = 0; j < persons[i].size(); j++)
+		for (unsigned int j = 0; j < persons[i].size(); j++)
 		{
 			AddPerson(pPerson, persons[i][j].schedule_type, persons[i][j].behavior_type);
 			CMFCPropertyGridProperty* pPersonControlSet = pPerson->GetSubItem(j)->GetSubItem(PERSON_CONTROL_SET);
-			for (int k = 0; k < persons[i][j].controlIds.size(); k++)
+			for (unsigned int k = 0; k < persons[i][j].controlIds.size(); k++)
 			{
-				CMFCPropertyGridProperty* cs = new CMFCPropertyGridProperty(_T("控制分组"), (_variant_t)persons[i][j].controlIds[k], _T("控制"));
+				CMFCPropertyGridProperty* cs = new CMFCPropertyGridProperty(_T("控制分组"), (_variant_t)persons[i][j].controlIds[k], _T("控制"), PERSON_CONTROL_SET_DATA);
 				pPersonControlSet->AddSubItem(cs);
 			}
 		}
@@ -803,7 +803,7 @@ void CRoomWnd::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 	{
 #ifndef SHARED_HANDLERS
 
-		if (selItem->GetData() == ROOM_SET_LUMINAIRE_DATA || selItem->GetData() == ROOM_SINGLE_LUMINAIRE_DATA)
+		if (selItem->GetData() == ROOM_SET_LUMINAIRE_DATA || selItem->GetData() == ROOM_SINGLE_LUMINAIRE_DATA)//灯具加入到控制分组中
 		{
 			CMFCPropertyGridProperty* curItem = selItem;
 			while(curItem->GetParent())
@@ -823,11 +823,14 @@ void CRoomWnd::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 			if (selectI == MENU_CONTROL_SET0)//删除灯具
 			{
 				DeleteLumByIndex(curItem, NamePost(selItem->GetName()), selItem->GetData() == ROOM_SINGLE_LUMINAIRE_DATA);
+				CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;
+				if (pMain)
+					pMain->GetActiveView()->Invalidate(); 
 			}
 			else if (selectI)
 			{
 				CMFCPropertyGridProperty* lumSet = curItem->GetSubItem(ROOM_CONTROL_SET)->GetSubItem(selectI-MENU_CONTROL_SET0-1)->GetSubItem(CONTROL_SET_LUM);
-				int name = _ttoi(selItem->GetName());
+				long name = _ttoi(selItem->GetName());
 				if (selItem->GetData() == ROOM_SET_LUMINAIRE_DATA)
 				{
 					CMFCPropertyGridProperty* plumSet = lumSet->GetSubItem(1);
@@ -839,7 +842,7 @@ void CRoomWnd::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 							return;
 						}
 					}
-					CMFCPropertyGridProperty* lum = new CMFCPropertyGridProperty(_T("灯具组"), (_variant_t)name,_T("灯具组"));
+					CMFCPropertyGridProperty* lum = new CMFCPropertyGridProperty(_T("灯具组"), (_variant_t)name,_T("灯具组"), CONTROL_SET_LUMSET_DATA);
 					plumSet->AddSubItem(lum);
 				}
 				else
@@ -853,7 +856,7 @@ void CRoomWnd::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 							return;
 						}
 					}
-					CMFCPropertyGridProperty* lum = new CMFCPropertyGridProperty(_T("灯具"), (_variant_t)name ,_T("灯具"));
+					CMFCPropertyGridProperty* lum = new CMFCPropertyGridProperty(_T("灯具"), (_variant_t)name ,_T("灯具"), CONTROL_SINGLE_LUMSET_DATA);
 					plumSingle->AddSubItem(lum);
 				}
 				
@@ -885,7 +888,7 @@ void CRoomWnd::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 			else if (selectI)
 			{
 				CMFCPropertyGridProperty* controSet = curItem->GetSubItem(ROOM_PERSON)->GetSubItem(selectI-MENU_CONTROL_SET0-1)->GetSubItem(PERSON_CONTROL_SET);
-				int name = _ttoi(selItem->GetName());
+				long name = _ttoi(selItem->GetName());
 				for (int k = 0; k < controSet->GetSubItemsCount(); k++)
 				{
 					if (controSet->GetSubItem(k)->GetValue().intVal == name)
@@ -894,9 +897,37 @@ void CRoomWnd::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 						return;
 					}
 				}
-				CMFCPropertyGridProperty* cs = new CMFCPropertyGridProperty(_T("控制分组"),(_variant_t)name,_T("控制"));
+				CMFCPropertyGridProperty* cs = new CMFCPropertyGridProperty(_T("控制分组"),(_variant_t)name,_T("控制"), PERSON_CONTROL_SET_DATA);
 				controSet->AddSubItem(cs);
 				m_wndPropList.UpdateProperty((PropertyGridProperty*)(controSet));
+				m_wndPropList.AdjustLayout();
+			}
+		}
+		else if (selItem->GetData() == CONTROL_SET_LUMSET_DATA || selItem->GetData() == CONTROL_SINGLE_LUMSET_DATA)
+		{
+			CMenu menu1;
+			menu1.CreatePopupMenu();
+			menu1.AppendMenu(MF_STRING, MENU_DEDETE, _T("删除"));
+			int selectI = menu1.TrackPopupMenu(TPM_RETURNCMD, point.x, point.y, this);
+			menu1.DestroyMenu();
+			if (selectI == MENU_DEDETE)//删除控制分组中的灯具
+			{
+				CMFCPropertyGridProperty* par = selItem->GetParent();
+				par->RemoveSubItem(selItem);
+				m_wndPropList.AdjustLayout();
+			}
+		}
+		else if (selItem->GetData() == PERSON_CONTROL_SET_DATA)
+		{
+			CMenu menu1;
+			menu1.CreatePopupMenu();
+			menu1.AppendMenu(MF_STRING, MENU_DEDETE, _T("删除"));
+			int selectI = menu1.TrackPopupMenu(TPM_RETURNCMD, point.x, point.y, this);
+			menu1.DestroyMenu();
+			if (selectI == MENU_DEDETE)//删除人员中的控制分组
+			{
+				CMFCPropertyGridProperty* par = selItem->GetParent();
+				par->RemoveSubItem(selItem);
 				m_wndPropList.AdjustLayout();
 			}
 		}
@@ -949,7 +980,7 @@ void CRoomWnd::DeleteLumByIndex(CMFCPropertyGridProperty* pRoom, int delIndex, b
 			for (int j = 0; j < controlLums->GetSubItemsCount(); j++)
 			{
 				CMFCPropertyGridProperty* p = controlLums->GetSubItem(j);
-				int oriIndex = p->GetValue().lVal;
+				long oriIndex = p->GetValue().lVal;
 				if (oriIndex == delIndex)
 				{
 					controlLums->RemoveSubItem(p);
@@ -1000,7 +1031,7 @@ void CRoomWnd::DeleteControSetByIndex(CMFCPropertyGridProperty* pRoom, int delIn
 			for (int j = 0; j < controls->GetSubItemsCount(); j++)
 			{
 				CMFCPropertyGridProperty* p = controls->GetSubItem(j);
-				int oriIndex = p->GetValue().lVal;
+				long oriIndex = p->GetValue().lVal;
 				if (oriIndex == delIndex)
 				{
 					controls->RemoveSubItem(p);
@@ -1168,8 +1199,8 @@ void CRoomWnd::CalLumSet(CMFCPropertyGridProperty* pSetLum)
 		for (int j = 0; j < colN; j++)
 		{
 			CMFCPropertyGridProperty* pPoint = new CMFCPropertyGridProperty(_T("点(mm)"), 0, TRUE);
-			CMFCPropertyGridProperty* pPointX = new CMFCPropertyGridProperty(_T("X"), i*colL + originX, _T("X坐标"));
-			CMFCPropertyGridProperty* pPointY = new CMFCPropertyGridProperty(_T("Y"), j*rowL + originY, _T("Y坐标"));
+			CMFCPropertyGridProperty* pPointX = new CMFCPropertyGridProperty(_T("X"), j*colL + originX, _T("X坐标"));
+			CMFCPropertyGridProperty* pPointY = new CMFCPropertyGridProperty(_T("Y"), i*rowL + originY, _T("Y坐标"));
 			pPoint->AddSubItem(pPointX);
 			pPoint->AddSubItem(pPointY);
 			pLumSet->AddSubItem(pPoint);

@@ -120,9 +120,9 @@ struct Room
 {
 	RoomType type;
 	double height;
-	vector<int> outWalls;
-	vector<int> inWalls;
-	vector<int> windows;
+	vector<long> outWalls;
+	vector<long> inWalls;
+	vector<long> windows;
 	//º∆À„µ„
 	Grid grid;
 };
@@ -180,8 +180,8 @@ struct OutLumSet
 
 struct OutControlSet
 {
-	vector<int> lumSingles;
-	vector<int> lumSets;
+	vector<long> lumSingles;
+	vector<long> lumSets;
 	WCHAR type[80];
 	int keyGrid;
 };
@@ -190,5 +190,5 @@ struct OutPerson
 {
 	WCHAR schedule_type[80];
 	WCHAR behavior_type[80];
-	vector<int> controlIds;
+	vector<long> controlIds;
 };

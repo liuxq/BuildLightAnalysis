@@ -25,12 +25,16 @@ enum
 	LUM_SINGLE_TYPE_DATA,
 	LUM_SET_TYPE_DATA,
 	ROOM_CONTROL_SET_DATA,
-	ROOM_E_DATA	
+	ROOM_E_DATA,
+	CONTROL_SET_LUMSET_DATA,
+	CONTROL_SINGLE_LUMSET_DATA,
+	PERSON_CONTROL_SET_DATA,
 };
 //≤Àµ•
 enum
 {
 	MENU_CONTROL_SET0 = 2000,
+	MENU_DEDETE,
 };
 //º∆À„µ„
 enum
@@ -110,7 +114,7 @@ public:
 	}
 
 	PropertyGridProperty* AddRoom(CString);
-	bool AddToSelectedRoom(int type, int index);
+	bool AddToSelectedRoom(int type, long index);
 	void DeleteWindowFromRoom(int winIndex);
 	void DeleteAllRoom();
 	CMFCPropertyGridProperty* InsertGrid(double offset, double meshLen);
