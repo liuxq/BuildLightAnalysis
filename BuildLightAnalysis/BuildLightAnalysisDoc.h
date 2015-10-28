@@ -6,6 +6,8 @@
 
 #include "Material.h"
 #include "CommonData.h"
+#include <map>
+
 
 class CBuildLightAnalysisDoc : public CDocument
 {
@@ -39,12 +41,17 @@ public:
 	{
 		return m_ControlSetTems;
 	}
+	map<string, string>& getTranslate()
+	{
+		return m_translate;
+	}
 private:
 	MaterialSet m_material;
 	vector<CString> m_citys;
 	vector<RoomType> m_roomTypes;
 	vector<LuminaireTem> m_LumTems;
 	vector<ControlSetTem> m_ControlSetTems;
+	map<string, string> m_translate;
 // Operations
 public:
 

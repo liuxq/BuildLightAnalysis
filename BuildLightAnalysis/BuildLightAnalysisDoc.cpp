@@ -317,13 +317,13 @@ void CBuildLightAnalysisDoc::OnFileOpen()
 void CBuildLightAnalysisDoc::loadMaterial()
 {
 	CString path;
-	path.Format(_T("%s\\Template_material.rad"), m_projectLocation);
+	path.Format(_T("template\\Template_material.rad"), m_projectLocation);
 	m_material.loadTemplate(path);
 }
 void CBuildLightAnalysisDoc::loadCity()
 {
 	CString path;
-	path.Format(_T("%s\\city_list.txt"), m_projectLocation);
+	path.Format(_T("city_list.txt"), m_projectLocation);
 	ifstream inputFile(CStringToString(path));
 	if (!inputFile.is_open())
 	{
@@ -339,7 +339,7 @@ void CBuildLightAnalysisDoc::loadCity()
 void CBuildLightAnalysisDoc::loadRoomType()
 {
 	CString path;
-	path.Format(_T("%s\\room_type.txt"), m_projectLocation);
+	path.Format(_T("template\\room_type.txt"), m_projectLocation);
 	ifstream inputFile(CStringToString(path));
 	if (!inputFile.is_open())
 	{
@@ -347,9 +347,11 @@ void CBuildLightAnalysisDoc::loadRoomType()
 		return;
 	}
 	string name;
+	string engName;
 	double e;
-	while(inputFile >> name >> e )
+	while(inputFile >> name >> engName >> e )
 	{
+		m_translate[name] = engName;
 		RoomType rt;
 		CString nameCs = StringToCString(name);
 		_tcscpy_s(rt.name, nameCs);
@@ -361,7 +363,7 @@ void CBuildLightAnalysisDoc::loadRoomType()
 void CBuildLightAnalysisDoc::loadLumTems()
 {
 	CString path;
-	path.Format(_T("%s\\luminaire_list.txt"), m_projectLocation);
+	path.Format(_T("luminaire_list.txt"), m_projectLocation);
 	ifstream inputFile(CStringToString(path));
 	if (!inputFile.is_open())
 	{
@@ -384,7 +386,7 @@ void CBuildLightAnalysisDoc::loadLumTems()
 void CBuildLightAnalysisDoc::loadControlSetTems()
 {
 	CString path;
-	path.Format(_T("%s\\Template_control.txt"), m_projectLocation);
+	path.Format(_T("template\\Template_control.txt"), m_projectLocation);
 	ifstream inputFile(CStringToString(path));
 	if (!inputFile.is_open())
 	{

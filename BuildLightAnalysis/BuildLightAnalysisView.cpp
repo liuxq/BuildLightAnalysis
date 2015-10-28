@@ -179,6 +179,28 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 	posNorth.Y -= 8;
 	graph->DrawString(wch ,na.GetLength(), &font,posNorth, &brushNorth);
 
+	//绘制比例尺
+	double scaleOption = pMain->GetOptionProperty().GetDataDouble(OPTION_PIX_MM_SCALE);
+	double pixLen = 80;
+	Gdiplus::Pen ScalePen(Gdiplus::Color(255,0,0,0), 3);
+	Vec2d scaleRight(rect.right - 20, rect.bottom - 20);
+	Vec2d scaleLeft(scaleRight.x - pixLen, scaleRight.y);
+	graph->DrawLine(&ScalePen, (float)scaleLeft.x, (float)scaleLeft.y, (float)scaleRight.x, (float)scaleRight.y);
+	graph->DrawLine(&ScalePen, (float)scaleLeft.x, (float)scaleLeft.y - 3, (float)scaleLeft.x, (float)scaleLeft.y+2);
+	graph->DrawLine(&ScalePen, (float)scaleRight.x, (float)scaleRight.y - 3, (float)scaleRight.x, (float)scaleRight.y+2);
+
+	PointF posScale(scaleLeft.x, scaleLeft.y);
+	FontFamily fontFamilyScale(L"幼圆");
+	Gdiplus::Font fontScale(&fontFamilyScale,12);
+
+	SolidBrush brushScale(Color(255, 0, 0, 0));
+	CString ScaleStr;
+	ScaleStr.Format(_T("%0.2fmm"), pixLen/scaleOption);
+	WCHAR *wchScale = (WCHAR*)ScaleStr.GetBuffer(ScaleStr.GetLength());
+	posScale.X += 0;
+	posScale.Y -= 20;
+	graph->DrawString(wchScale ,ScaleStr.GetLength(), &fontScale, posScale, &brushScale);
+
 	//取配置中的内外墙颜色
 	COLORREF outWallColor = pMain->GetOptionProperty().GetDataInt(OPTION_OUTWALL_COLOR);
 	COLORREF inWallColor = pMain->GetOptionProperty().GetDataInt(OPTION_INWALL_COLOR);

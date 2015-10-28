@@ -761,7 +761,7 @@ void CRoomWnd::load(ifstream& in)
 		}
 		for (int j = 0; j < lumSets[i].size(); j++)
 		{
-			AddSetLuminaire(pSetLum, lumSets[i][j].originP,lumSets[i][j].type, lumSets[i][j].lm,lumSets[i][j].w,lumSets[i][j].z, lumSets[i][j].np,
+			AddSetLuminaire(pSetLum, lumSets[i][j].originP, lumSets[i][j].z, lumSets[i][j].type, lumSets[i][j].lm,lumSets[i][j].w, lumSets[i][j].np,
 				lumSets[i][j].rowN, lumSets[i][j].colN,lumSets[i][j].rowL,lumSets[i][j].colL);
 		}
 		for (unsigned int j = 0; j < controlSets[i].size(); j++)
@@ -1115,8 +1115,8 @@ void CRoomWnd::AddSingleLuminaire(CMFCPropertyGridProperty* pLuminaire,Vec3d p, 
 	m_wndPropList.AdjustLayout();
 }
 
-void CRoomWnd::AddSetLuminaire(CMFCPropertyGridProperty* pLuminaire, Vec2d originP, WCHAR type[80],
-	double lm, double w, double z, Vec3d np, int rowN,int colN, double rowL, double colL)
+void CRoomWnd::AddSetLuminaire(CMFCPropertyGridProperty* pLuminaire, Vec2d originP, double z, WCHAR type[80],
+	double lm, double w, Vec3d np, int rowN,int colN, double rowL, double colL)
 {
 	CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;  
 	CBuildLightAnalysisDoc* pDoc = (CBuildLightAnalysisDoc*)pMain->GetActiveDocument();
@@ -1314,7 +1314,8 @@ void CRoomWnd::OnRoomAddLuminaireSingle()
 		Vec2d midP;
 		CalMidXY(selItem,midP);
 		CMFCPropertyGridProperty* pLuminaire = selItem->GetSubItem(ROOM_SINGLE_LUMINAIRE);
-		Vec3d p(midP.x,midP.y, 750.0);
+		double h = selItem->GetSubItem(ROOM_HEIGHT)->GetValue().dblVal;
+		Vec3d p(midP.x,midP.y, h);
 		AddSingleLuminaire(pLuminaire, p);
 		
 
@@ -1341,7 +1342,8 @@ void CRoomWnd::OnRoomAddLuminaireSet()
 		Vec2d minP;
 		CalMinXY(selItem,minP);
 		CMFCPropertyGridProperty* pLuminaire = selItem->GetSubItem(ROOM_SET_LUMINAIRE);
-		AddSetLuminaire(pLuminaire, minP);
+		double h = selItem->GetSubItem(ROOM_HEIGHT)->GetValue().dblVal;
+		AddSetLuminaire(pLuminaire, minP, h);
 		m_wndPropList.UpdateProperty((PropertyGridProperty*)pLuminaire);
 
 		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
@@ -1577,12 +1579,12 @@ void CRoomWnd::AddPerson(CMFCPropertyGridProperty* pPerson, WCHAR schedule_type[
 	PropertyGridProperty* pBehavior = new PropertyGridProperty(_T("行为类型"), behavior_type, _T("行为类型"));
 	pSchedule->AllowEdit(FALSE);
 	pBehavior->AllowEdit(FALSE);
-	pSchedule->AddOption(_T("行政"));
-	pSchedule->AddOption(_T("研发(设计)"));
-	pSchedule->AddOption(_T("销售"));
-	pBehavior->AddOption(_T("经济型"));
-	pBehavior->AddOption(_T("实用型"));
-	pBehavior->AddOption(_T("舒适型"));
+	pSchedule->AddOption(_T("Management"));
+	pSchedule->AddOption(_T("Development"));
+	pSchedule->AddOption(_T("Sales"));
+	pBehavior->AddOption(_T("Economic_type"));
+	pBehavior->AddOption(_T("Common_type"));
+	pBehavior->AddOption(_T("Comfortable_type"));
 
 	PropertyGridProperty* pControlSet = new PropertyGridProperty(_T("控制分组"), 0, FALSE);
 	

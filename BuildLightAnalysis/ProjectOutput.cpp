@@ -2,6 +2,8 @@
 #include "ProjectOutput.h"
 #include "MainFrm.h"
 #include "MathUtility.h"
+#include "BuildLightAnalysisDoc.h"
+#include "BuildLightAnalysisView.h"
 
 #include <fstream>
 #include <list>
@@ -28,7 +30,6 @@ void geometryOutput(string filename, set<CString>& outMats, set<Material>& antiM
 	CMFCPropertyGridProperty* optimizeInWallPos = pMain->GetOptimizeWallProperty().getCoodInWallGroup();
 	PropertyGridCtrl* pWindowlist = pMain->GetWindowProperty().getPropList();
 
-	double h = pMain->GetOptionProperty().GetDataDouble(OPTION_LEVEL_HEIGHT);
 	CString roofMat = pMain->GetOptionProperty().GetDataCString(OPTION_ROOF_MAT);
 	CString floorMat = pMain->GetOptionProperty().GetDataCString(OPTION_FLOOR_MAT);
 
@@ -573,15 +574,19 @@ void LumOutput(string lumFile, string controlFile, string personFile)
 			//单个灯具
 			for (unsigned int k = 0; k < controlSets[i][j].lumSingles.size(); k++)
 			{
+				//导出灯具文件
 				int lumIndex = controlSets[i][j].lumSingles[k];
 				OutLumSingle& ols = lumSingles[i][lumIndex];
 				Vec2d p(ols.p.x, ols.p.y);
 				p = Rotate(p, anglep);
-				lumOut << "void " << "lum_room"<< i << "_Single"<<lumIndex << " " << CStringToString(CString(ols.type)) << " " << i << " " << j << " " 
+				string lumPath = "lum_data/";
+				lumPath += CStringToString(CString(ols.type)) + ".IES";
+				lumOut << "void " << "lum_room"<< i << "_Single"<<lumIndex << " " << lumPath << " " << i << " " << j << " " 
 					<< p.x <<" "<< p.y << " " << ols.p.z << " " 
 					<< ols.np.x <<" "<< ols.np.y << " " << ols.np.z << " " 
 					<< CStringToString(CString(controlSets[i][j].type)) << endl;
 
+				//导出控制文件
 				controlOut << "lum_room" << i << "_Single"<< lumIndex << " " << CStringToString(CString(controlSets[i][j].type));
 				if (keyGrid >= 0)
 					controlOut << " " << keyGrid;
@@ -601,16 +606,18 @@ void LumOutput(string lumFile, string controlFile, string personFile)
 				ols.outputLums(outLums);
 				for (unsigned int m = 0; m < outLums.size(); m++)
 				{
-					//导出lumset
+					//导出灯具文件
 					Vec2d p(outLums[m].x, outLums[m].y);
 					p = Rotate(p, anglep);
+					string lumPath = "lum_data/";
+					lumPath += CStringToString(CString(ols.type)) + ".IES";
 					lumOut << "void " << "lum_room"<< i << "_Set"<<lumIndex <<"_"<< m << " " 
-						<< CStringToString(CString(ols.type)) << " " << i << " " << j << " " 
+						<< lumPath << " " << i << " " << j << " " 
 						<< p.x <<" "<< p.y << " " << ols.z << " " 
 						<< ols.np.x <<" "<< ols.np.y << " " << ols.np.z << " " 
 						<< CStringToString(CString(controlSets[i][j].type)) << endl;
 					
-					//导出controlSet
+					//导出控制文件
 					controlOut << "lum_room" << i << "_Set"<< lumIndex <<"_"<< m << " "
 						<< CStringToString(CString(controlSets[i][j].type));
 					if (keyGrid >= 0)
@@ -625,6 +632,9 @@ void LumOutput(string lumFile, string controlFile, string personFile)
 			}
 		}
 		//导出人员信息
+		vector<Room> rooms;
+		pMain->GetRoomProperty().OutputToRooms(rooms);
+		double room_E = rooms[i].type.e;
 		for (unsigned int j = 0; j < persons[i].size(); j++)
 		{
 			//第j个人
@@ -633,35 +643,39 @@ void LumOutput(string lumFile, string controlFile, string personFile)
 
 			for (unsigned int k = 0; k < persons[i][j].controlIds.size(); k++)
 			{
-				int controlId = persons[i][j].controlIds[k];
-				//单个灯具
-				for (unsigned int m = 0; m < controlSets[i][controlId].lumSingles.size(); m++)
-				{
-					int lumIndex = controlSets[i][controlId].lumSingles[m];
-					personOut << " lum_room"<< i << "_Single"<<lumIndex;
-				}
-				//灯具组
-				for (unsigned int m = 0; m < controlSets[i][controlId].lumSets.size(); m++)
-				{
-					int lumIndex = controlSets[i][controlId].lumSets[m];
-					OutLumSet& ols = lumSets[i][lumIndex];
-					vector<Vec2d> outLums;
-					ols.outputLums(outLums);
-					for (unsigned int n = 0; n < outLums.size(); n++)
-					{
-						personOut << " lum_room"<< i << "_Set"<< lumIndex <<"_"<< n;
-					}
-				}
-				
+				personOut << " " << persons[i][j].controlIds[k];
 			}
 			personOut << endl;
+			CString be_type = CString(persons[i][j].behavior_type);
+			if (be_type == _T("Economic_type"))
+			{
+				//0.5*E_standard 0.3*E_standard 6
+				personOut << "on_type " << room_E* 0.5 << " " << room_E * 0.3 << " " << 6 << endl;
+				//1 1 1.5*E_standard 0.6*E_standard 6
+				personOut << "off_type " << 1 << " " <<1 << " " << room_E* 1.5 << " " << room_E * 0.6 << " " << 6 << endl;
+			}
+			else if (be_type == _T("Common_type"))
+			{
+				//E_standard 0.5*E_standard 3 0.5
+				personOut << "on_type " << room_E << " " << room_E * 0.5 << " " << 3 << " " << 0.5 << endl;
+				//0.5 1 2*E_standard E_standard 3
+				personOut << "off_type " << 0.5 << " " <<1 << " " << room_E * 2 << " " << room_E << " " << 3 << endl;
+			}
+			else if (be_type == _T("Comfortable_type"))
+			{
+				//1
+				personOut << "on_type " << 1 << endl;
+				//1
+				personOut << "off_type " << 1 << endl;
+			}
 		}
 	}
 }
 void RoomOutput(string roomFile, string gridDir)
 {
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
-	if (!pMain)
+	CBuildLightAnalysisDoc* pDoc = (CBuildLightAnalysisDoc*)pMain->GetActiveDocument();
+	if (!pMain || !pDoc)
 		return;
 
 	vector<Room> rooms;
@@ -679,6 +693,11 @@ void RoomOutput(string roomFile, string gridDir)
 		AfxMessageBox(_T("文件创建失败"));
 		return;
 	}
+	//到处城市信息
+	CString strCity = pMain->GetOptionProperty().GetDataCString(OPTION_CITY);
+	out << "City_name "  << CStringToString(strCity) << endl;
+	string cityPath = "wea_data/";
+	out << "City_path "  << cityPath + CStringToString(strCity) + "_5min.wea" << endl << endl;
 
 	vector<OutRoom> outRooms;
 	set<CString> outMats;
@@ -689,7 +708,6 @@ void RoomOutput(string roomFile, string gridDir)
 	CMFCPropertyGridProperty* optimizeInWallPos = pMain->GetOptimizeWallProperty().getCoodInWallGroup();
 	PropertyGridCtrl* pWindowlist = pMain->GetWindowProperty().getPropList();
 
-	double h = pMain->GetOptionProperty().GetDataDouble(OPTION_LEVEL_HEIGHT);
 	CString roofMat = pMain->GetOptionProperty().GetDataCString(OPTION_ROOF_MAT);
 	CString floorMat = pMain->GetOptionProperty().GetDataCString(OPTION_FLOOR_MAT);
 	
@@ -700,10 +718,10 @@ void RoomOutput(string roomFile, string gridDir)
 		//导出第i个房间
 
 		out << "void Room_"  << i << endl;
-		out << "room_Type " << CStringToString(CString(rooms[i].type.name)) << endl;
-		out << "room_Girth " << outRooms[i].girth << endl;
-		out << "room_Area " << outRooms[i].area / 1000000 << "平方米" << endl;
-		out << "room_Height " << outRooms[i].height << endl << endl;
+		out << "room_Type " << pDoc->getTranslate()[CStringToString(CString(rooms[i].type.name))] << endl;
+		out << "room_Girth " << outRooms[i].girth << "mm" << endl;
+		out << "room_Area " << outRooms[i].area / 1000000 << "m*m" << endl;
+		out << "room_Height " << outRooms[i].height << "mm" << endl << endl;
 		
 		out << "start geometry" << endl;
 		for (int a = 0; a < outRooms[i].surfaces.size(); a++)

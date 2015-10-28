@@ -171,8 +171,11 @@ END_MESSAGE_MAP()
 // App command to run the dialog
 void CBuildLightAnalysisApp::OnAppAbout()
 {
-	CAboutDlg aboutDlg;
-	aboutDlg.DoModal();
+	/*CAboutDlg aboutDlg;
+	aboutDlg.DoModal();*/
+	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+	if (pMain)
+		ShellExecute(pMain->m_hWnd, L"open",L"help.doc" ,NULL, NULL, SW_SHOWDEFAULT);
 }
 
 // CBuildLightAnalysisApp customization load/save methods

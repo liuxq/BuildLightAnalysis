@@ -121,11 +121,11 @@ public:
 	void CalGrid(CMFCPropertyGridProperty* pGrid);
 	void AddSingleLuminaire(CMFCPropertyGridProperty* pLuminaire,Vec3d p, WCHAR type[80] = _T("FAC21280P-23W"),
 		double lm = 2100.0,	double w = 23.0 ,Vec3d np = Vec3d(0,0,-1));
-	void AddSetLuminaire(CMFCPropertyGridProperty* pLuminaire, Vec2d originP, WCHAR type[80] = _T("FAC21280P-23W"),
-		double lm = 2100.0, double w = 23.0, double z = 750.0, Vec3d np = Vec3d(0,0,-1),
+	void AddSetLuminaire(CMFCPropertyGridProperty* pLuminaire, Vec2d originP, double z, WCHAR type[80] = _T("FAC21280P-23W"),
+		double lm = 2100.0, double w = 23.0, Vec3d np = Vec3d(0,0,-1),
 		int rowN = 5,int colN = 5,double rowL = 200.0,double colL = 200.0);
 	void AddControlSet(CMFCPropertyGridProperty* pControlSet, WCHAR type[80] = _T("mannual_on_auto_off"), int keyGrid = -1);
-	void AddPerson(CMFCPropertyGridProperty* pPerson, WCHAR schedule_type[80] = _T("行政"),  WCHAR behavior_type[80] = _T("经济型"));
+	void AddPerson(CMFCPropertyGridProperty* pPerson, WCHAR schedule_type[80] = _T("Management"),  WCHAR behavior_type[80] = _T("Economic_type"));
 
 	void UpdateRoomE(CMFCPropertyGridProperty* pRoom);
 	void UpdateLumArgs(CMFCPropertyGridProperty* pLum);
