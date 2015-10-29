@@ -34,6 +34,10 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_OUTWALL, &CMainFrame::OnUpdateEditOutwall)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_INWALL, &CMainFrame::OnUpdateEditInwall)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_OPTIMIZE, &CMainFrame::OnUpdateEditOptimize)
+	ON_COMMAND(ID_ROOM_ADD_LUMINAIRE_SINGLE, &CMainFrame::OnRoomAddLuminaireSingle)
+	ON_COMMAND(ID_ROOM_ADD_LUMINAIRE_SET, &CMainFrame::OnRoomAddLuminaireSet)
+	ON_COMMAND(ID_ROOM_ADD_CONTROL_SET, &CMainFrame::OnRoomAddControlSet)
+	ON_COMMAND(ID_ROOM_ADD_PERSON, &CMainFrame::OnRoomAddPerson)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -320,17 +324,10 @@ void CMainFrame::loadMode(ifstream& in)
 	serializer<int>::read(in, &m_eMode);
 }
 
-void CMainFrame::OnRoomCalGrid()
-{
-	m_wndRoomProperties.OnRoomCalGrid();
-}
-
-
 void CMainFrame::OnUpdateEditOutwall(CCmdUI *pCmdUI)
 {
 	pCmdUI->SetCheck(m_eMode == MODE_OUTWALL);    
 }
-
 
 void CMainFrame::OnUpdateEditInwall(CCmdUI *pCmdUI)
 {
@@ -341,4 +338,33 @@ void CMainFrame::OnUpdateEditInwall(CCmdUI *pCmdUI)
 void CMainFrame::OnUpdateEditOptimize(CCmdUI *pCmdUI)
 {
 	pCmdUI->SetCheck(m_eMode == MODE_OPTIMIZE);
+}
+
+void CMainFrame::OnRoomCalGrid()
+{
+	m_wndRoomProperties.OnRoomCalGrid();
+}
+
+
+void CMainFrame::OnRoomAddLuminaireSingle()
+{
+	m_wndRoomProperties.OnRoomAddLuminaireSingle();
+}
+
+
+void CMainFrame::OnRoomAddLuminaireSet()
+{
+	m_wndRoomProperties.OnRoomAddLuminaireSet();
+}
+
+
+void CMainFrame::OnRoomAddControlSet()
+{
+	m_wndRoomProperties.OnRoomAddControlSet();
+}
+
+
+void CMainFrame::OnRoomAddPerson()
+{
+	m_wndRoomProperties.OnRoomAddPerson();
 }

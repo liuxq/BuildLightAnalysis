@@ -122,6 +122,10 @@ public:
 	afx_msg void OnUpdateEditOutwall(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateEditInwall(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateEditOptimize(CCmdUI *pCmdUI);
+	afx_msg void OnRoomAddLuminaireSingle();
+	afx_msg void OnRoomAddLuminaireSet();
+	afx_msg void OnRoomAddControlSet();
+	afx_msg void OnRoomAddPerson();
 };
 
 
