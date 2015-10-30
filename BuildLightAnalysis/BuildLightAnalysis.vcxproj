@@ -94,9 +94,11 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="res\bitmap1.bmp" />
     <None Include="res\BuildLightAnalysis.ico" />
     <None Include="res\BuildLightAnalysis.rc2" />
     <None Include="res\BuildLightAnalysisDoc.ico" />
+    <None Include="res\filenewBg.bmp" />
     <None Include="res\properties.bmp" />
     <None Include="res\properties_hc.bmp" />
     <None Include="res\properties_wnd.ico" />

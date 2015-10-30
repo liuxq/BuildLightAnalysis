@@ -456,7 +456,8 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 					j++;
 				}
 			}
-			SolidBrush lumBrush(Gdiplus::Color(255,255,125,100));
+
+			Gdiplus::Pen lumPen(Gdiplus::Color(255,0,0,0),1);
 			//单个灯具
 			CMFCPropertyGridProperty* pSingleLum = pRoom->GetSubItem(ROOM_SINGLE_LUMINAIRE);
 			for (int j = 0; j < pSingleLum->GetSubItemsCount(); j++)
@@ -465,7 +466,10 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 				p.x = plum->GetSubItem(LUM_SINGLE_X)->GetValue().dblVal;
 				p.y = plum->GetSubItem(LUM_SINGLE_Y)->GetValue().dblVal;
 				p = m_transform.RealToScreen(p);					
-				graph->FillEllipse(&lumBrush, (float)p.x - 2, (float)p.y - 2, 4.0, 4.0);
+				PointF pointsOut[] = {PointF(p.x-5,p.y-3),PointF(p.x-5,p.y+3),PointF(p.x+5,p.y+3),PointF(p.x+5,p.y-3),PointF(p.x-5,p.y-3)};
+				PointF pointsIn[] = {PointF(p.x-5,p.y-1),PointF(p.x-5,p.y+1),PointF(p.x+5,p.y+1),PointF(p.x+5,p.y-1),PointF(p.x-5,p.y-1)};
+				graph->DrawLines(&lumPen,pointsOut,5);
+				graph->DrawLines(&lumPen,pointsIn,5);
 			}
 			//组灯具
 			CMFCPropertyGridProperty* pSetLum = pRoom->GetSubItem(ROOM_SET_LUMINAIRE);
@@ -482,7 +486,10 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 					p.x = curPoint->GetSubItem(0)->GetValue().dblVal;
 					p.y = curPoint->GetSubItem(1)->GetValue().dblVal;
 					p = m_transform.RealToScreen(p);					
-					graph->FillEllipse(&lumBrush, (float)p.x - 2, (float)p.y - 2, 4.0, 4.0);
+					PointF pointsOut[] = {PointF(p.x-5,p.y-3),PointF(p.x-5,p.y+3),PointF(p.x+5,p.y+3),PointF(p.x+5,p.y-3),PointF(p.x-5,p.y-3)};
+					PointF pointsIn[] = {PointF(p.x-5,p.y-1),PointF(p.x-5,p.y+1),PointF(p.x+5,p.y+1),PointF(p.x+5,p.y-1),PointF(p.x-5,p.y-1)};
+					graph->DrawLines(&lumPen,pointsOut,5);
+					graph->DrawLines(&lumPen,pointsIn,5);
 				}
 			}
 		}

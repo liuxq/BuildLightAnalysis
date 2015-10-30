@@ -16,6 +16,7 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
 
 	DECLARE_MESSAGE_MAP()
 public:
@@ -24,4 +25,9 @@ public:
 
 	afx_msg void OnBnClickedButtonNewBrowse();
 	afx_msg void OnBnClickedOk();
+
+private:
+	CBrush m_backbrush;
+public:
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 };

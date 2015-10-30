@@ -29,6 +29,26 @@ DlgProjectNew::~DlgProjectNew()
 {
 }
 
+BOOL DlgProjectNew::OnInitDialog()
+{
+	if (m_projectLocation.IsEmpty())
+	{
+		TCHAR path[MAX_PATH];
+		GetCurrentDirectory(MAX_PATH,path);
+		CString PathName(path);
+		m_projectLocation = PathName;
+	}
+	UpdateData(FALSE);
+
+	/*向导自动生成的其他代码*/
+	CBitmap bmp;
+	bmp.LoadBitmap(IDB_BITMAP_NEWFILE_BG);
+	m_backbrush.CreatePatternBrush(&bmp);
+	bmp.DeleteObject();
+	return TRUE;
+
+	return TRUE;
+}
 void DlgProjectNew::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
@@ -40,6 +60,7 @@ void DlgProjectNew::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(DlgProjectNew, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_NEW_BROWSE, &DlgProjectNew::OnBnClickedButtonNewBrowse)
 	ON_BN_CLICKED(IDOK, &DlgProjectNew::OnBnClickedOk)
+	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 
@@ -104,4 +125,13 @@ void DlgProjectNew::OnBnClickedOk()
 	}
 	
 	CDialogEx::OnOK();
+}
+
+
+HBRUSH DlgProjectNew::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+	if(pWnd == this)
+		return m_backbrush;
+	return hbr;
 }
