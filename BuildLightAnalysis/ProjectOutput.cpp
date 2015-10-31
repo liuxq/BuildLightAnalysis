@@ -53,6 +53,8 @@ void geometryOutput(string filename, set<CString>& outMats, set<Material>& antiM
 			{
 				Vec2d p(surf.points[k].x, surf.points[k].y);
 				p = Rotate(p, anglep);
+
+				out << "\t";
 				out << p.x << " " << p.y << " " << surf.points[k].z << endl;
 			}
 			out << endl;
@@ -181,7 +183,7 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 			surf.name += ".Floor";
 			surf.type = "polygon";
 			surf.mat = CStringToString(floorMat);
-			surf.args[0] = 0; surf.args[1] = 0; surf.args[2] = 9; 
+			surf.args[0] = 0; surf.args[1] = 0; surf.args[2] = outPolygon.size() * 3; 
 			surf.points.clear();
 			for (int j = 0; j < outPolygon.size(); j++)
 			{
@@ -196,7 +198,7 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 			surf.name += ".Roof";
 			surf.type = "polygon";
 			surf.mat = CStringToString(roofMat);
-			surf.args[0] = 0; surf.args[1] = 0; surf.args[2] = 9; 
+			surf.args[0] = 0; surf.args[1] = 0; surf.args[2] = outPolygon.size() * 3; 
 			surf.points.clear();
 			for (int j = outPolygon.size()-1; j >= 0 ; j--)
 			{
@@ -222,7 +224,7 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 				surf.name += '0'+j;
 				surf.type = "polygon";
 				surf.mat = CStringToString(mat);
-				surf.args[0] = 0; surf.args[1] = 0; surf.args[2] = 9; 
+				surf.args[0] = 0; surf.args[1] = 0; surf.args[2] = 12; 
 				surf.points.clear();
 				if (outWalls[j].isOrder)
 				{
@@ -250,7 +252,7 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 				surf.name += '0' + j;
 				surf.type = "polygon";
 				surf.mat = CStringToString(CString(roomWindows[j].WinMaterial));
-				surf.args[0] = 0; surf.args[1] = 0; surf.args[2] = 9; 
+				surf.args[0] = 0; surf.args[1] = 0; surf.args[2] = 12; 
 
 				mats.insert(CString(roomWindows[j].WinMaterial));
 
@@ -356,7 +358,7 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 			surf.name += ".Floor";
 			surf.type = "polygon";
 			surf.mat = CStringToString(floorMat);
-			surf.args[0] = 0; surf.args[1] = 0; surf.args[2] = 9; 
+			surf.args[0] = 0; surf.args[1] = 0; surf.args[2] = outPolygon.size() * 3; 
 			surf.points.clear();
 			for (int j = outPolygon.size()-1; j >= 0 ; j--)
 			{
@@ -369,7 +371,7 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 			surf.name += ".Roof";
 			surf.type = "polygon";
 			surf.mat = CStringToString(roofMat);
-			surf.args[0] = 0; surf.args[1] = 0; surf.args[2] = 9; 
+			surf.args[0] = 0; surf.args[1] = 0; surf.args[2] = outPolygon.size() * 3; 
 			surf.points.clear();
 			for (int j = 0; j < outPolygon.size(); j++)
 			{
@@ -393,7 +395,7 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 				surf.name += '0'+j;
 				surf.type = "polygon";
 				surf.mat = CStringToString(mat);
-				surf.args[0] = 0; surf.args[1] = 0; surf.args[2] = 9; 
+				surf.args[0] = 0; surf.args[1] = 0; surf.args[2] = 12; 
 				surf.points.clear();
 				if (!outWalls[j].isOrder)
 				{
@@ -422,7 +424,7 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 				surf.name += '0' + j;
 				surf.type = "polygon";
 				surf.mat = CStringToString(CString(roomWindows[j].WinMaterial));
-				surf.args[0] = 0; surf.args[1] = 0; surf.args[2] = 9; 
+				surf.args[0] = 0; surf.args[1] = 0; surf.args[2] = 12; 
 
 				mats.insert(CString(roomWindows[j].WinMaterial));
 
