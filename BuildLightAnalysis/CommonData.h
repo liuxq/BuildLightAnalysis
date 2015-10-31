@@ -7,7 +7,7 @@
 
 using namespace std;
 
-#define GAME_VERTION 106 
+#define GAME_VERTION 107 
 
 struct sLine
 {
