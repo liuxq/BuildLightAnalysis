@@ -532,7 +532,7 @@ void CBuildLightAnalysisDoc::OnFileOutput()
 	RoomOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) +"_room_info.txt", gridfile);
 	string lumfile = CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) +"_lighting_system.gx";
 	string controlfile = CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) +"_control_system.ctl";
-	string personfile = CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) +"_occupany.occ";
+	string personfile = CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) +"_occupancy.occ";
 	LumOutput(lumfile,controlfile, personfile);
 
 	AfxMessageBox(_T("导出成功"));

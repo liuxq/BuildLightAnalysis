@@ -318,6 +318,10 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 				mt.args.push_back("0");
 				antiMaterials.insert(mt);
 
+				//计算窗户法线
+				vector<Vec3d>& wpoints = surfaces.back().points;
+				Vec3d crossW = (wpoints[1]-wpoints[0])/(wpoints[2]-wpoints[1]);
+				crossW.Normalize();
 				//写反物质,正方向
 				surf.name = "room";
 				surf.name += '0' + i; 
@@ -328,7 +332,12 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 				surf.args[0] = 0;
 				surf.args[1] = 0;
 				surf.args[2] = 12;
-				surf.points = surfaces.back().points;//与窗户坐标相同
+				surf.points = wpoints;//与窗户坐标相同
+				for (unsigned int k = 0; k < surf.points.size(); k++)
+				{
+					surf.points[k]+= crossW*2;
+				}
+				
 				surfaces.push_back(surf);
 
 				//写反物质,反方向
@@ -341,11 +350,15 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 				surf.args[0] = 0;
 				surf.args[1] = 0;
 				surf.args[2] = 12;
-				surf.points = surfaces.back().points;//与窗户坐标相同
+				surf.points = wpoints;//与窗户坐标相同
 				int ssz = surf.points.size();
-				for (int s = 0; s < ssz/2; s++)
+				for (unsigned int s = 0; s < ssz/2; s++)
 				{
 					swap(surf.points[s], surf.points[ssz-s-1]);
+				}
+				for (unsigned int s = 0; s < ssz; s++)
+				{
+					surf.points[s] -= crossW*2;
 				}
 				surfaces.push_back(surf);
 			}
@@ -490,6 +503,11 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 				mt.args.push_back("0");
 				antiMaterials.insert(mt);
 
+				//计算窗户法线
+				vector<Vec3d>& wpoints = surfaces.back().points;
+				Vec3d crossW = (wpoints[1]-wpoints[0])/(wpoints[2]-wpoints[1]);
+				crossW.Normalize();
+
 				//写反物质,正方向
 				surf.name = "room";
 				surf.name += '0' + i; 
@@ -500,7 +518,11 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 				surf.args[0] = 0;
 				surf.args[1] = 0;
 				surf.args[2] = 12;
-				surf.points = surfaces.back().points;//与窗户坐标相同
+				surf.points = wpoints;//与窗户坐标相同
+				for (unsigned int k = 0; k < surf.points.size(); k++)
+				{
+					surf.points[k] += crossW*2;
+				}
 				surfaces.push_back(surf);
 
 				//写反物质,反方向
@@ -513,11 +535,15 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 				surf.args[0] = 0;
 				surf.args[1] = 0;
 				surf.args[2] = 12;
-				surf.points = surfaces.back().points;//与窗户坐标相同
-				int ssz = surf.points.size();
-				for (int s = 0; s < ssz/2; s++)
+				surf.points = wpoints;//与窗户坐标相同
+				unsigned int ssz = surf.points.size();
+				for (unsigned int s = 0; s < ssz/2; s++)
 				{
 					swap(surf.points[s], surf.points[ssz-s-1]);
+				}
+				for (unsigned int s = 0; s < ssz; s++)
+				{
+					surf.points[s] -= crossW*2;
 				}
 				surfaces.push_back(surf);
 			}
