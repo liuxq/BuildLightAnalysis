@@ -11,6 +11,8 @@
 #include "BuildLightAnalysisDoc.h"
 #include "BuildLightAnalysisView.h"
 
+#include "SplashWindow.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -52,6 +54,17 @@ CBuildLightAnalysisApp theApp;
 
 BOOL CBuildLightAnalysisApp::InitInstance()
 {
+
+	CSplashWindow *pSplashWindow = new CSplashWindow;//为指针申请内存空间
+	pSplashWindow->CreateSplash();
+	pSplashWindow->CenterWindow();
+	pSplashWindow->ShowWindow(SW_SHOW);
+	pSplashWindow->UpdateWindow();
+	Sleep(3000); //Delay 3 Second//自定显示启动画面的时间
+	pSplashWindow->DestroyWindow();//销毁启动窗口
+	delete pSplashWindow;//删除指针，清空内存
+
+
 	CWinAppEx::InitInstance();
 
 

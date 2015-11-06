@@ -94,17 +94,13 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="res\bitmap1.bmp" />
     <None Include="res\BuildLightAnalysis.ico" />
     <None Include="res\BuildLightAnalysis.rc2" />
     <None Include="res\BuildLightAnalysisDoc.ico" />
     <None Include="res\filenewBg.bmp" />
-    <None Include="res\properties.bmp" />
     <None Include="res\properties_hc.bmp" />
-    <None Include="res\properties_wnd.ico" />
-    <None Include="res\properties_wnd_hc.ico" />
-    <None Include="res\Toolbar.bmp" />
     <None Include="res\Toolbar256.bmp" />
+    <None Include="res\welcome.bmp" />
     <None Include="UserImages.bmp" />
   </ItemGroup>
   <ItemGroup>
@@ -125,6 +121,7 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RoomWnd.h" />
     <ClInclude Include="Serializer.h" />
+    <ClInclude Include="SplashWindow.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Transform.h" />
@@ -147,6 +144,7 @@
     <ClCompile Include="ProjectOutput.cpp" />
     <ClCompile Include="PropertyGridCtrl.cpp" />
     <ClCompile Include="RoomWnd.cpp" />
+    <ClCompile Include="SplashWindow.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
