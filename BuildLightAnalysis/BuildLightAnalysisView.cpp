@@ -169,7 +169,7 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 	graph->DrawLine(&ArrowNorthPen, (float)northArrowS.x, (float)northArrowS.y, (float)northArrowE.x, (float)northArrowE.y);
 
 	PointF posNorth(northArrowT.x, northArrowT.y);
-	FontFamily fontFamilyNorth(L"Ó×Ô²");
+	FontFamily fontFamilyNorth(L"ËÎÌå");
 	Gdiplus::Font font(&fontFamilyNorth,12);
 
 	SolidBrush brushNorth(Color(255, 255, 0, 0));
@@ -190,7 +190,7 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 	graph->DrawLine(&ScalePen, (float)scaleRight.x, (float)scaleRight.y - 3, (float)scaleRight.x, (float)scaleRight.y+2);
 
 	PointF posScale(scaleLeft.x, scaleLeft.y);
-	FontFamily fontFamilyScale(L"Ó×Ô²");
+	FontFamily fontFamilyScale(L"ËÎÌå");
 	Gdiplus::Font fontScale(&fontFamilyScale,12);
 
 	SolidBrush brushScale(Color(255, 0, 0, 0));
@@ -411,7 +411,7 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 				pos /= sumCount;
 				//pos = m_transform.RealToScreen(pos);
 				PointF posf(pos.x, pos.y);
-				FontFamily fontFamily(L"Ó×Ô²");
+				FontFamily fontFamily(L"ËÎÌå");
 				Gdiplus::Font font(&fontFamily,12);
 				
 				SolidBrush brush(Color(255, 255, 0, 0));
