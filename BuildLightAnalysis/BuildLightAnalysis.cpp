@@ -60,7 +60,7 @@ BOOL CBuildLightAnalysisApp::InitInstance()
 	pSplashWindow->CenterWindow();
 	pSplashWindow->ShowWindow(SW_SHOW);
 	pSplashWindow->UpdateWindow();
-	Sleep(3000); //Delay 3 Second//自定显示启动画面的时间
+	Sleep(3/*000*/); //Delay 3 Second//自定显示启动画面的时间
 	pSplashWindow->DestroyWindow();//销毁启动窗口
 	delete pSplashWindow;//删除指针，清空内存
 

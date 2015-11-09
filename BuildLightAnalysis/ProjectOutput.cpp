@@ -8,6 +8,7 @@
 #include <fstream>
 #include <list>
 #include <string>
+#include <algorithm>
 
 
 
@@ -94,6 +95,55 @@ void materialOutput(string filename, MaterialSet& materials, set<CString>& mats,
 	}
 }
 
+void wallToPoints(bool isAntiClock, double h, Wall& wall, vector<stWindow>& windows, vector<Vec3d>& outPoints)
+{
+	outPoints.clear();
+	sort(windows.begin(),windows.end());
+	bool isOrder = wall.isOrder;
+	isOrder = isAntiClock? isOrder: !isOrder;
+	if (isOrder)
+	{
+		outPoints.push_back(Vec3d(wall.line.s.x,wall.line.s.y, h));
+		outPoints.push_back(Vec3d(wall.line.e.x,wall.line.e.y, h));
+		outPoints.push_back(Vec3d(wall.line.e.x,wall.line.e.y, 0));
+		for (int i = windows.size()-1; i >= 0 ; i--)
+		{
+			Vec2d dir = wall.line.e - wall.line.s;
+			Vec2d pWinc = wall.line.s + dir * windows[i].pos;
+			dir = dir / dir.Length();
+			Vec2d pWins = pWinc - dir * windows[i].WinWidth * 0.5;
+			Vec2d pWine = pWinc + dir * windows[i].WinWidth * 0.5;
+			outPoints.push_back(Vec3d(pWine.x,pWine.y, 0));
+			outPoints.push_back(Vec3d(pWine.x,pWine.y, windows[i].WinUpHeight));
+			outPoints.push_back(Vec3d(pWins.x,pWins.y, windows[i].WinUpHeight));
+			outPoints.push_back(Vec3d(pWins.x,pWins.y, windows[i].WinDownHeight));
+			outPoints.push_back(Vec3d(pWine.x,pWine.y, windows[i].WinDownHeight));
+			outPoints.push_back(Vec3d(pWine.x,pWine.y, 0));
+		}
+		outPoints.push_back(Vec3d(wall.line.s.x,wall.line.s.y, 0));
+	}
+	else
+	{
+		outPoints.push_back(Vec3d(wall.line.e.x,wall.line.e.y, h));
+		outPoints.push_back(Vec3d(wall.line.s.x,wall.line.s.y, h));
+		outPoints.push_back(Vec3d(wall.line.s.x,wall.line.s.y, 0));
+		for (unsigned int i = 0; i < windows.size(); i++)
+		{
+			Vec2d dir = wall.line.e - wall.line.s;
+			Vec2d pWinc = wall.line.s + dir * windows[i].pos;
+			dir = dir / dir.Length();
+			Vec2d pWins = pWinc - dir * windows[i].WinWidth * 0.5;
+			Vec2d pWine = pWinc + dir * windows[i].WinWidth * 0.5;
+			outPoints.push_back(Vec3d(pWins.x,pWins.y, 0));
+			outPoints.push_back(Vec3d(pWins.x,pWins.y, windows[i].WinUpHeight));
+			outPoints.push_back(Vec3d(pWine.x,pWine.y, windows[i].WinUpHeight));
+			outPoints.push_back(Vec3d(pWine.x,pWine.y, windows[i].WinDownHeight));
+			outPoints.push_back(Vec3d(pWins.x,pWins.y, windows[i].WinDownHeight));
+			outPoints.push_back(Vec3d(pWins.x,pWins.y, 0));
+		}
+		outPoints.push_back(Vec3d(wall.line.e.x,wall.line.e.y, 0));
+	}
+}
 void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material>& antiMaterials)
 {
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
@@ -208,7 +258,7 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 			surfaces.push_back(surf);
 
 			//侧墙
-			for (int j = 0; j < outWalls.size(); j++)
+			for (unsigned int j = 0; j < outWalls.size(); j++)
 			{
 				CString mat;
 				if (outWalls[j].wallInfo.type == sLine::OUT_WALL)
@@ -218,6 +268,18 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 
 				mats.insert(mat);
 
+				CString type = outWalls[j].wallInfo.type == sLine::OUT_WALL ? _T("外墙"): _T("内墙");
+				vector<stWindow> roomWindowsInThisWall;
+				for (unsigned int k = 0; k < roomWindows.size(); k++)
+				{
+					if (outWalls[j].wallInfo.index == roomWindows[k].wallIndex && 
+						type == roomWindows[k].wallType)
+					{
+						roomWindowsInThisWall.push_back(roomWindows[k]);
+					}
+				}
+
+
 				surf.name = "room";
 				surf.name += '0'+ i; 
 				surf.name += ".Wall";
@@ -226,20 +288,22 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 				surf.mat = CStringToString(mat);
 				surf.args[0] = 0; surf.args[1] = 0; surf.args[2] = 12; 
 				surf.points.clear();
-				if (outWalls[j].isOrder)
+				wallToPoints(true,h,outWalls[j],roomWindowsInThisWall,surf.points);
+				surf.args[2] = surf.points.size()*3;
+				/*if (outWalls[j].isOrder)
 				{
-					surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, h));
-					surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, h));
-					surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, 0.0));
-					surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, 0.0));
+				surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, h));
+				surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, h));
+				surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, 0.0));
+				surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, 0.0));
 				}
 				else
 				{
-					surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, h));
-					surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, h));
-					surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, 0.0));
-					surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, 0.0));
-				}
+				surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, h));
+				surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, h));
+				surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, 0.0));
+				surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, 0.0));
+				}*/
 				surfaces.push_back(surf);
 			}
 			//窗户
@@ -305,62 +369,62 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 				}
 				surfaces.push_back(surf);
 
-				//记录反物质材质
-				CString winOnWallMat = wallProperty->GetSubItem(roomWindows[j].wallIndex)->GetSubItem(2)->GetValue().bstrVal;
-				CString winOnWallMatAnti = _T("anti_mat_");
-				winOnWallMatAnti += wallProperty->GetSubItem(roomWindows[j].wallIndex)->GetSubItem(2)->GetValue().bstrVal;
-				Material mt;
-				mt.type = "antimatter";
-				mt.name = CStringToString(winOnWallMatAnti);
-				mt.args.push_back("1");
-				mt.args.push_back(CStringToString(winOnWallMat));
-				mt.args.push_back("0");
-				mt.args.push_back("0");
-				antiMaterials.insert(mt);
+				////记录反物质材质
+				//CString winOnWallMat = wallProperty->GetSubItem(roomWindows[j].wallIndex)->GetSubItem(2)->GetValue().bstrVal;
+				//CString winOnWallMatAnti = _T("anti_mat_");
+				//winOnWallMatAnti += wallProperty->GetSubItem(roomWindows[j].wallIndex)->GetSubItem(2)->GetValue().bstrVal;
+				//Material mt;
+				//mt.type = "antimatter";
+				//mt.name = CStringToString(winOnWallMatAnti);
+				//mt.args.push_back("1");
+				//mt.args.push_back(CStringToString(winOnWallMat));
+				//mt.args.push_back("0");
+				//mt.args.push_back("0");
+				//antiMaterials.insert(mt);
 
-				//计算窗户法线
-				vector<Vec3d>& wpoints = surfaces.back().points;
-				Vec3d crossW = (wpoints[1]-wpoints[0])/(wpoints[2]-wpoints[1]);
-				crossW.Normalize();
-				//写反物质,正方向
-				surf.name = "room";
-				surf.name += '0' + i; 
-				surf.name += ".hole";
-				surf.name += '0' + j; 
-				surf.type = "polygon";
-				surf.mat = CStringToString(winOnWallMatAnti);
-				surf.args[0] = 0;
-				surf.args[1] = 0;
-				surf.args[2] = 12;
-				surf.points = wpoints;//与窗户坐标相同
-				for (unsigned int k = 0; k < surf.points.size(); k++)
-				{
-					surf.points[k]+= crossW*2;
-				}
-				
-				surfaces.push_back(surf);
+				////计算窗户法线
+				//vector<Vec3d>& wpoints = surfaces.back().points;
+				//Vec3d crossW = (wpoints[1]-wpoints[0])/(wpoints[2]-wpoints[1]);
+				//crossW.Normalize();
+				////写反物质,正方向
+				//surf.name = "room";
+				//surf.name += '0' + i; 
+				//surf.name += ".hole";
+				//surf.name += '0' + j; 
+				//surf.type = "polygon";
+				//surf.mat = CStringToString(winOnWallMatAnti);
+				//surf.args[0] = 0;
+				//surf.args[1] = 0;
+				//surf.args[2] = 12;
+				//surf.points = wpoints;//与窗户坐标相同
+				//for (unsigned int k = 0; k < surf.points.size(); k++)
+				//{
+				//	surf.points[k]+= crossW*2;
+				//}
+				//
+				//surfaces.push_back(surf);
 
-				//写反物质,反方向
-				surf.name = "room";
-				surf.name += '0' + i; 
-				surf.name += ".hole_inv";
-				surf.name += '0' + j; 
-				surf.type = "polygon";
-				surf.mat = CStringToString(winOnWallMatAnti);
-				surf.args[0] = 0;
-				surf.args[1] = 0;
-				surf.args[2] = 12;
-				surf.points = wpoints;//与窗户坐标相同
-				int ssz = surf.points.size();
-				for (unsigned int s = 0; s < ssz/2; s++)
-				{
-					swap(surf.points[s], surf.points[ssz-s-1]);
-				}
-				for (unsigned int s = 0; s < ssz; s++)
-				{
-					surf.points[s] -= crossW*2;
-				}
-				surfaces.push_back(surf);
+				////写反物质,反方向
+				//surf.name = "room";
+				//surf.name += '0' + i; 
+				//surf.name += ".hole_inv";
+				//surf.name += '0' + j; 
+				//surf.type = "polygon";
+				//surf.mat = CStringToString(winOnWallMatAnti);
+				//surf.args[0] = 0;
+				//surf.args[1] = 0;
+				//surf.args[2] = 12;
+				//surf.points = wpoints;//与窗户坐标相同
+				//int ssz = surf.points.size();
+				//for (unsigned int s = 0; s < ssz/2; s++)
+				//{
+				//	swap(surf.points[s], surf.points[ssz-s-1]);
+				//}
+				//for (unsigned int s = 0; s < ssz; s++)
+				//{
+				//	surf.points[s] -= crossW*2;
+				//}
+				//surfaces.push_back(surf);
 			}
 		}
 		else
@@ -399,8 +463,18 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 					mat = optimizeOutWallPos->GetSubItem(outWalls[j].wallInfo.index)->GetSubItem(2)->GetValue().bstrVal;
 				else
 					mat = optimizeInWallPos->GetSubItem(outWalls[j].wallInfo.index)->GetSubItem(2)->GetValue().bstrVal;
-
 				mats.insert(mat);
+
+				CString type = outWalls[j].wallInfo.type == sLine::OUT_WALL ? _T("外墙"): _T("内墙");
+				vector<stWindow> roomWindowsInThisWall;
+				for (unsigned int k = 0; k < roomWindows.size(); k++)
+				{
+					if (outWalls[j].wallInfo.index == roomWindows[k].wallIndex && 
+						type == roomWindows[k].wallType)
+					{
+						roomWindowsInThisWall.push_back(roomWindows[k]);
+					}
+				}
 
 				surf.name = "room";
 				surf.name += '0'+ i; 
@@ -408,22 +482,24 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 				surf.name += '0'+j;
 				surf.type = "polygon";
 				surf.mat = CStringToString(mat);
-				surf.args[0] = 0; surf.args[1] = 0; surf.args[2] = 12; 
+				surf.args[0] = 0; surf.args[1] = 0;
 				surf.points.clear();
-				if (!outWalls[j].isOrder)
+				/*if (!outWalls[j].isOrder)
 				{
-					surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, h));
-					surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, h));
-					surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, 0.0));
-					surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, 0.0));
+				surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, h));
+				surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, h));
+				surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, 0.0));
+				surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, 0.0));
 				}
 				else
 				{
-					surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, h));
-					surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, h));
-					surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, 0.0));
-					surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, 0.0));
-				}
+				surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, h));
+				surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, h));
+				surf.points.push_back(Vec3d(outWalls[j].line.s.x,outWalls[j].line.s.y, 0.0));
+				surf.points.push_back(Vec3d(outWalls[j].line.e.x,outWalls[j].line.e.y, 0.0));
+				}*/
+				wallToPoints(false,h,outWalls[j],roomWindowsInThisWall,surf.points);
+				surf.args[2] = surf.points.size()*3;
 				surfaces.push_back(surf);
 			}
 
@@ -490,62 +566,62 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 				}
 				surfaces.push_back(surf);
 
-				//记录反物质材质
-				CString winOnWallMat = wallProperty->GetSubItem(roomWindows[j].wallIndex)->GetSubItem(2)->GetValue().bstrVal;
-				CString winOnWallMatAnti = _T("anti_mat_");
-				winOnWallMatAnti += wallProperty->GetSubItem(roomWindows[j].wallIndex)->GetSubItem(2)->GetValue().bstrVal;
-				Material mt;
-				mt.type = "antimatter";
-				mt.name = CStringToString(winOnWallMatAnti);
-				mt.args.push_back("1");
-				mt.args.push_back(CStringToString(winOnWallMat));
-				mt.args.push_back("0");
-				mt.args.push_back("0");
-				antiMaterials.insert(mt);
+				////记录反物质材质
+				//CString winOnWallMat = wallProperty->GetSubItem(roomWindows[j].wallIndex)->GetSubItem(2)->GetValue().bstrVal;
+				//CString winOnWallMatAnti = _T("anti_mat_");
+				//winOnWallMatAnti += wallProperty->GetSubItem(roomWindows[j].wallIndex)->GetSubItem(2)->GetValue().bstrVal;
+				//Material mt;
+				//mt.type = "antimatter";
+				//mt.name = CStringToString(winOnWallMatAnti);
+				//mt.args.push_back("1");
+				//mt.args.push_back(CStringToString(winOnWallMat));
+				//mt.args.push_back("0");
+				//mt.args.push_back("0");
+				//antiMaterials.insert(mt);
 
-				//计算窗户法线
-				vector<Vec3d>& wpoints = surfaces.back().points;
-				Vec3d crossW = (wpoints[1]-wpoints[0])/(wpoints[2]-wpoints[1]);
-				crossW.Normalize();
+				////计算窗户法线
+				//vector<Vec3d>& wpoints = surfaces.back().points;
+				//Vec3d crossW = (wpoints[1]-wpoints[0])/(wpoints[2]-wpoints[1]);
+				//crossW.Normalize();
 
-				//写反物质,正方向
-				surf.name = "room";
-				surf.name += '0' + i; 
-				surf.name += ".hole";
-				surf.name += '0' + j; 
-				surf.type = "polygon";
-				surf.mat = CStringToString(winOnWallMatAnti);
-				surf.args[0] = 0;
-				surf.args[1] = 0;
-				surf.args[2] = 12;
-				surf.points = wpoints;//与窗户坐标相同
-				for (unsigned int k = 0; k < surf.points.size(); k++)
-				{
-					surf.points[k] += crossW*2;
-				}
-				surfaces.push_back(surf);
+				////写反物质,正方向
+				//surf.name = "room";
+				//surf.name += '0' + i; 
+				//surf.name += ".hole";
+				//surf.name += '0' + j; 
+				//surf.type = "polygon";
+				//surf.mat = CStringToString(winOnWallMatAnti);
+				//surf.args[0] = 0;
+				//surf.args[1] = 0;
+				//surf.args[2] = 12;
+				//surf.points = wpoints;//与窗户坐标相同
+				//for (unsigned int k = 0; k < surf.points.size(); k++)
+				//{
+				//	surf.points[k] += crossW*2;
+				//}
+				//surfaces.push_back(surf);
 
-				//写反物质,反方向
-				surf.name = "room";
-				surf.name += '0' + i; 
-				surf.name += ".hole_inv";
-				surf.name += '0' + j; 
-				surf.type = "polygon";
-				surf.mat = CStringToString(winOnWallMatAnti);
-				surf.args[0] = 0;
-				surf.args[1] = 0;
-				surf.args[2] = 12;
-				surf.points = wpoints;//与窗户坐标相同
-				unsigned int ssz = surf.points.size();
-				for (unsigned int s = 0; s < ssz/2; s++)
-				{
-					swap(surf.points[s], surf.points[ssz-s-1]);
-				}
-				for (unsigned int s = 0; s < ssz; s++)
-				{
-					surf.points[s] -= crossW*2;
-				}
-				surfaces.push_back(surf);
+				////写反物质,反方向
+				//surf.name = "room";
+				//surf.name += '0' + i; 
+				//surf.name += ".hole_inv";
+				//surf.name += '0' + j; 
+				//surf.type = "polygon";
+				//surf.mat = CStringToString(winOnWallMatAnti);
+				//surf.args[0] = 0;
+				//surf.args[1] = 0;
+				//surf.args[2] = 12;
+				//surf.points = wpoints;//与窗户坐标相同
+				//unsigned int ssz = surf.points.size();
+				//for (unsigned int s = 0; s < ssz/2; s++)
+				//{
+				//	swap(surf.points[s], surf.points[ssz-s-1]);
+				//}
+				//for (unsigned int s = 0; s < ssz; s++)
+				//{
+				//	surf.points[s] -= crossW*2;
+				//}
+				//surfaces.push_back(surf);
 			}
 		}
 
@@ -575,7 +651,7 @@ void LumOutput(string lumFile, string controlFile, string personFile)
 	vector<vector<OutControlSet>> controlSets;
 	vector<vector<OutPerson>> persons;
 	pMain->GetRoomProperty().OutputToLums(lumSingles, lumSets, controlSets, persons);
-	
+
 	//旋转角度
 	double angle = pMain->GetOptionProperty().GetDataDouble(OPTION_NORTH);
 	double anglep = angle / 180 * PI;
@@ -596,7 +672,7 @@ void LumOutput(string lumFile, string controlFile, string personFile)
 					else
 						args.push_back(control->GetSubItem(k)->GetValue().dblVal);
 				}
-				
+
 			}
 			//控制号j
 			//单个灯具
@@ -644,7 +720,7 @@ void LumOutput(string lumFile, string controlFile, string personFile)
 						<< p.x <<" "<< p.y << " " << ols.z << " " 
 						<< ols.np.x <<" "<< ols.np.y << " " << ols.np.z << " " 
 						<< CStringToString(CString(controlSets[i][j].type)) << endl;
-					
+
 					//导出控制文件
 					controlOut << "lum_room" << i << "_Set"<< lumIndex <<"_"<< m << " "
 						<< CStringToString(CString(controlSets[i][j].type));
@@ -715,7 +791,7 @@ void RoomOutput(string roomFile, string gridDir)
 	pMain->GetRoomProperty().OutputToLums(lumSingles, lumSets, controlSets, persons);
 
 	ofstream out(roomFile);
-	
+
 	if (!out.is_open())
 	{
 		AfxMessageBox(_T("文件创建失败"));
@@ -738,7 +814,7 @@ void RoomOutput(string roomFile, string gridDir)
 
 	CString roofMat = pMain->GetOptionProperty().GetDataCString(OPTION_ROOF_MAT);
 	CString floorMat = pMain->GetOptionProperty().GetDataCString(OPTION_FLOOR_MAT);
-	
+
 	double angle = pMain->GetOptionProperty().GetDataDouble(OPTION_NORTH);
 	double anglep = angle / 180 * PI;
 	for (int i = 0; i < rooms.size(); i++)
@@ -750,7 +826,7 @@ void RoomOutput(string roomFile, string gridDir)
 		out << "room_Girth " << outRooms[i].girth << "mm" << endl;
 		out << "room_Area " << outRooms[i].area / 1000000 << "m*m" << endl;
 		out << "room_Height " << outRooms[i].height << "mm" << endl << endl;
-		
+
 		out << "start geometry" << endl;
 		for (int a = 0; a < outRooms[i].surfaces.size(); a++)
 		{
@@ -820,6 +896,6 @@ void RoomOutput(string roomFile, string gridDir)
 			out << a <<endl;
 		}
 		out << "end user" << endl << endl;
-		
+
 	}
 }

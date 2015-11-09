@@ -75,6 +75,11 @@ struct stWindow
 	double WinDownHeight;
 	double WinWidth;
 	WCHAR WinMaterial[80];
+
+	bool operator < (stWindow& b)
+	{
+		return pos < b.pos;
+	}
 };
 #pragma pack()
 
