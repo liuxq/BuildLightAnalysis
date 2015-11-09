@@ -286,7 +286,7 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 				surf.name += '0'+j;
 				surf.type = "polygon";
 				surf.mat = CStringToString(mat);
-				surf.args[0] = 0; surf.args[1] = 0; surf.args[2] = 12; 
+				surf.args[0] = 0; surf.args[1] = 0;
 				surf.points.clear();
 				wallToPoints(true,h,outWalls[j],roomWindowsInThisWall,surf.points);
 				surf.args[2] = surf.points.size()*3;
