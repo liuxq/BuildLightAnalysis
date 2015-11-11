@@ -1,0 +1,24 @@
+普通办公室 general_office 300
+高档办公室 senior_office 500
+会议室 conference_room 300
+视频会议室 video_conference_room 750
+设计室 design_office 500
+接待室/前台 reception 200
+服务大厅/营业厅 service_hall 300
+文件整理/复印/发行室 copy/print_room 300
+资料/档案存放室 reference_room 200
+普通门厅 entrance_hall 100
+高档门厅 senior_entrance_hall 200
+走廊/流动区域/楼梯间（普通）circulation_corridor 50
+走廊/流动区域/楼梯间（高档）senior_circulation_corridor 100
+自动扶梯 escalator 150
+厕所/盥洗室/浴室（普通）washroom 75
+厕所/盥洗室/浴室（高档）senior_washroom 150
+电梯前厅（普通）elevator_lobby 100
+电梯前厅（高档）senior_elevator_lobby 150
+休息室 lounge 100
+更衣室 locker_room 150
+储藏室 storage 100
+餐厅 dining-hall 200
+公共车库 garage 50 
+机房 machine_room 200

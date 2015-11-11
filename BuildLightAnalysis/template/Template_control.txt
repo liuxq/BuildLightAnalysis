@@ -1,0 +1,24 @@
+#####################################################
+# Lighting Control Template File          
+#####################################################
+# This file has been written by Luo Tao           	      
+# China Academy of Building Research                            
+#####################################################
+
+#This file describes the common control systems for lighting
+#手动控制无需设置参数，在人员文件中描述
+#lighting_sensor_on_off和mannual_on_off_dimming、mannual_on_auto_off_dimming中需要选择关键点
+void manual_on_off
+
+void manual_on_auto_off 15
+
+void light_sensor_on_off  300 600
+
+void auto_on_off 15
+
+void manual_on_off_dimming 300 600 0.05
+
+void manual_on_auto_off_dimming 15  300 600 0.05
+
+void time_table 8 12 1 13 17 1
+

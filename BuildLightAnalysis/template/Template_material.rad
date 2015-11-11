@@ -1,0 +1,291 @@
+#++++++++++++++++++++++++++
+# Radiance Material Library
+#++++++++++++++++++++++++++
+
+# This file contains a list of Radiance material descriptions and is dynamically linked to the DIVA-for-Rhino 
+# material dialogue box. Users can automatically assign Radiance materials in this file to layers in their
+# Rhino model. If you add a material to this file, it will appear in the material selection pull down menus.
+# Please note that it is up to you to make sure that the Radiance material is correctly defined as Radiance
+# is going to crash otherwise. You are encouraged to make a backup copy of this file before modifying it. 
+
+
+# material name: GenericCeiling_80PercentReflectance
+# material type: opaque
+# comment: This is a purely diffuse reflector with a standard ceiling reflectance of 80%.  
+# author: Christoph Reinhart
+
+
+void plastic GenericCeiling_80PercentReflectance
+0
+0
+5 0.8 0.8 0.8 0 0
+
+
+# material name: GenericCeiling_85PercentReflectance
+# material type: opaque
+# comment: This is a purely diffuse reflector with a standard ceiling reflectance of 85%.  
+# author: Luo Tao
+
+
+void plastic GenericCeiling_85PercentReflectance
+0
+0
+5 0.85 0.85 0.85 0 0
+
+
+# material name: Purewhite_100PercentReflectance
+# material type: opaque 
+# comment: This is a purely diffuse reflector with a  reflectivity of 100%.  
+# author: Luo Tao
+void plastic Purewhite_100PercentReflectance
+0
+0
+5 1 1 1 0 0 
+
+# material name: Pureblack_0_Reflectance
+# material type: opaque 
+# comment: This is a purely diffuse reflector with a  reflectivity of 0%.  
+# author: Luo Tao
+void plastic Pureblack_0_Reflectance
+0
+0
+5 0 0 0 0 0 
+
+# material name: HighReflectanceCeiling_90PercentReflectance
+# material type: opaque
+# comment: This is a purely diffuse reflector with a standard ceiling reflectivity of 90%.  
+# author: Christoph Reinhart
+
+void plastic HighReflectanceCeiling_90PercentReflectance
+0
+0
+5 0.9 0.9 0.9 0 0
+
+
+# material name: GenericFloor_20PercentReflectance
+# material type: opaque 
+# comment: This is a purely diffuse reflector with a standard floor reflectivity of 20%.  
+# author: Christoph Reinhart
+void plastic GenericFloor_20PercentReflectance
+0
+0
+5 0.2 0.2 0.2 0 0 
+
+
+# material name: GenericInteriorWall_60PercentReflectance
+# material type: opaque 
+# comment: This is a purely diffuse reflector with a standard wall reflectivity of 60%.  
+# author: Luo Tao
+void plastic GenericInteriorWall_60PercentReflectance
+0
+0
+5 0.6 0.6 0.6 0 0 
+
+
+# material name: GenericInteriorWall_50PercentReflectance
+# material type: opaque 
+# comment: This is a purely diffuse reflector with a standard wall reflectivity of 60%.  
+# author: Christoph Reinhart
+void plastic GenericInteriorWall_50PercentReflectance
+0
+0
+5 0.5 0.5 0.5 0 0 
+
+
+# material name: OutsideFacade_35PercentReflectance
+# material type: opaque 
+# comment: This is a purely diffuse reflector with a standard floor reflectivity of 35%.  
+# author: Christoph Reinhart
+void plastic OutsideFacade_35PercentReflectance
+0 
+0 
+5 0.35 0.35 0.35   0 0
+
+
+# material name: OutsideGround_20PercentReflectance
+# material type: opaque 
+# comment: This is a purely diffuse reflector with a standard floor reflectivity of 20%.  
+# author: Christoph Reinhart
+void plastic OutsideGround_20PercentReflectance
+0 
+0 
+5 0.2 0.2 0.2   0 0
+
+# material name: aluminum_60PercentReflectance
+# material type: metal 
+# comment: This is a type of aluminum with reflectivity of 60%, 75% mirror reflectance.  
+# author: Luo Tao
+void metal aluminum_60PercentReflectance
+0 
+0 
+5 0.60 0.60 0.60 0.75 0
+
+# material name: aluminum_90PercentReflectance
+# material type: metal 
+# comment: This is a type of aluminum with reflectivity of 90%, 95% mirror reflectance.  
+# author: Luo Tao
+void metal aluminum_90PercentReflectance
+0 
+0 
+5 0.90 0.90 0.90 0.95 0
+
+# material name: GenericSingleGlazing_90VisualTransmittance
+# material type: single layer glazing
+# author: Luo Tao
+# comment: This is a generic, single layer 3mm glazing with a 
+#          visual transmittance of 90%.
+# visual transmittance: 90%
+# visual transmissivity: 98.1%
+void glass GenericSingleGlazing90_90VisualTransmittance
+0
+0
+3 0.981 0.981 0.981
+
+
+# material name: GenericDoubleGlazing_72VisualTransmittance
+# material type: double glazing spectrally selective
+# author: Christoph Reinhart
+# comment: This is a generic, spectrally selective double glazing with a 
+#          visual transmittance of 72%.
+# visual transmittance: 72%
+# visual transmissivity: 78%
+void glass GenericDoubleGlazing72_72VisualTransmittance
+0
+0
+3 0.784590 0.784590 0.784590
+
+
+# material name: GenericDoubleGlazing_65VisualTransmittance
+# material type: double glazing spectrally selective
+# author: Luo Tao
+# comment: This is a generic, spectrally selective double glazing with a 
+#          visual transmittance of 65%.
+# visual transmittance: 65%
+# visual transmissivity: 70.9%
+void glass GenericDoubleGlazing65_65VisualTransmittance
+0
+0
+3 0.709 0.709 0.709
+
+
+
+# material name: GenericDoubleGlazing_60VisualTransmittance
+# material type: double glazing spectrally selective
+# author: Luo Tao
+# comment: This is a generic, spectrally selective double glazing with a 
+#          visual transmittance of 60%.
+# visual transmittance: 60%
+# visual transmissivity: 65.4%
+void glass GenericDoubleGlazing60_60VisualTransmittance
+0
+0
+3 0.654 0.654 0.654
+
+
+# material name: GenericDoubleGlazing_55VisualTransmittance
+# material type: double glazing spectrally selective
+# author: Luo Tao
+# comment: This is a generic, spectrally selective double glazing with a 
+#          visual transmittance of 55%.
+# visual transmittance: 55%
+# visual transmissivity: 60%
+void glass GenericDoubleGlazing55_55VisualTransmittance
+0
+0
+3 0.60 0.60 0.60
+
+# material name: GenericDoubleGlazing_50VisualTransmittance
+# material type: double glazing spectrally selective
+# author: Luo Tao
+# comment: This is a generic, spectrally selective double glazing with a 
+#          visual transmittance of 50%.
+# visual transmittance: 50%
+# visual transmissivity: 54.2%
+void glass GenericDoubleGlazing50_50VisualTransmittance
+0
+0
+3 0.542 0.542 0.542
+
+
+# material name: GenericDoubleGlazing_45VisualTransmittance
+# material type: double glazing spectrally selective
+# author: Luo Tao
+# comment: This is a generic, spectrally selective double glazing with a 
+#          visual transmittance of 45%.
+# visual transmittance: 45%
+# visual transmissivity: 49.1%
+void glass GenericDoubleGlazing45_45VisualTransmittance
+0
+0
+3 0.491 0.491 0.491
+
+
+
+# material name: GenericDoubleGlazing_35VisualTransmittance
+# material type: double glazing spectrally selective
+# author: Luo Tao
+# comment: This is a generic, spectrally selective double glazing with a 
+#          visual transmittance of 35%.
+# visual transmittance: 35%
+# visual transmissivity: 38%
+void glass GenericDoubleGlazing35_35VisualTransmittance
+0
+0
+3 0.38 0.38 0.38
+
+
+# material name: GenericSingleGlazing_90VisualTransmittance
+# material type: single clear glazing
+# author: Christoph Reinhart
+# comment: This is a generic single glazing with a visual transmittance of 90%.
+#          A typical application for this kind of glazing is for an internal 
+#	   window or wall.
+# visual transmittance: 90%
+# visual transmissivity: 98%
+
+void glass GenericSingleGlazing_90VisualTransmittance
+0
+0
+3 0.980123 0.980123 0.980123
+
+
+# material name: GenericTranslucentPanel_20PercentTransmittance
+# material color: 175,200,200
+# material type: translucent panel
+# author: Christoph Reinhart
+# comment: This is a validated Radiance model of a translucent sandwiched panel with a
+#  	   direct normal transmittance of ~20%. 
+# 	   The Radiance model is based on goniophotometer measurements take at Ecole
+#	   Polytechnique Federale de Lausanne and integrating sphere measurements taken at
+#	   the Fraunhofer Institute for Solar Energy Systems, A description of the underlying 
+#	   model was published under in:
+#	   Reinhart C F, Andersen M, "Development and validation of a Radiance model for a 
+#	   translucent panel", Energy and Buildings 38:7 pp. 890-904, 2006
+#
+# 	   The model requires the following two files have been added to a directory included in your 
+#	   RAYPATH variable (c:\daysim\lib or C:\Radiance\lib): 
+#	   rang.cal & Translucent20.dat
+#		
+
+void transdata GenericTranslucentPanel_20PercentTransmittance
+4 noop GenericTranslucent20.dat rang.cal rang
+0
+6 0.40446 0.40446 0.40446 0.08 0.435635 1
+
+# material name: Custom1 (Custom Material 1)
+# material color: 250,250,125
+# material type: opaque 
+# comment: This is a purely default diffuse reflector which allows you to create your own material.  
+# author: you
+# default values 0.8 0.8 0.8 0 0
+
+
+void light MonitorScreenImage
+0
+0
+3 1.25 1.25 1.25
+
+void dielectric MonitorGlass
+0 
+0
+5 0.5 0.5 0.5 1.650 0

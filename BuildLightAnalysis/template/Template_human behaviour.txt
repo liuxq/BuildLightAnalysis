@@ -1,0 +1,18 @@
+#####################################################
+# Human behaviour template File           
+#####################################################
+# This file has been written by Luo Tao           	      
+# China Academy of Building Research                            
+#####################################################
+
+#This file defines the human behaviour patterns in the office
+#不同的行为习惯，分为开灯和关灯，E_standard为房间的标准照度值
+
+void Economic_type_on 0.5*E_standard 0.3*E_standard 6 
+void Economic_type_off 1 1 1.5*E_standard 0.6*E_standard 6
+
+void Common_type_on E_standard 0.5*E_standard 3 0.5
+void Common_type_off 0.5 1 2*E_standard E_standard 3
+
+void Comfortable_type_on 1
+void Comfortable_type_off 1
