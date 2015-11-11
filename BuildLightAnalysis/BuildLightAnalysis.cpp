@@ -28,6 +28,7 @@ ULONG_PTR    m_GdiplusToken;  //±£´æGDI+±»³õÊ¼»¯ºóÔÚÓ¦ÓÃ³ÌÐòÖÐµÄGDI+±êÊ¶,ÀàËÆÓÚ¾
 BEGIN_MESSAGE_MAP(CBuildLightAnalysisApp, CWinAppEx)
 	ON_COMMAND(ID_ABOUT, &CBuildLightAnalysisApp::OnAppAbout)
 	// Standard file based document commands
+	ON_COMMAND(ID_DOC, &CBuildLightAnalysisApp::OnDoc)
 END_MESSAGE_MAP()
 
 
@@ -181,14 +182,20 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
 END_MESSAGE_MAP()
 
-// App command to run the dialog
-void CBuildLightAnalysisApp::OnAppAbout()
+
+void CBuildLightAnalysisApp::OnDoc()
 {
-	/*CAboutDlg aboutDlg;
-	aboutDlg.DoModal();*/
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 	if (pMain)
 		ShellExecute(pMain->m_hWnd, L"open",L"help.doc" ,NULL, NULL, SW_SHOWDEFAULT);
+}
+
+// App command to run the dialog
+void CBuildLightAnalysisApp::OnAppAbout()
+{
+	CAboutDlg aboutDlg;
+	aboutDlg.DoModal();
+	
 }
 
 // CBuildLightAnalysisApp customization load/save methods
@@ -212,6 +219,8 @@ void CBuildLightAnalysisApp::SaveCustomState()
 }
 
 // CBuildLightAnalysisApp message handlers
+
+
 
 
 

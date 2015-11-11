@@ -93,6 +93,7 @@ struct Grid
 {
 	double offset;
 	double meshLen;
+	double height;
 	vector<GridPoint> points;
 };
 struct RoomType

@@ -660,6 +660,7 @@ void LumOutput(string lumFile, string controlFile, string personFile)
 		//第i个房间
 		for (unsigned int j = 0; j < controlSets[i].size(); j++)
 		{
+			//第j个控制分组
 			CMFCPropertyGridProperty* control = pMain->GetRoomProperty().getPropList()->GetProperty(i)->GetSubItem(ROOM_CONTROL_SET)->GetSubItem(j);
 			int keyGrid = -1;
 			vector<double> args;
@@ -673,6 +674,15 @@ void LumOutput(string lumFile, string controlFile, string personFile)
 						args.push_back(control->GetSubItem(k)->GetValue().dblVal);
 				}
 
+			}
+			vector<int> personIds;
+
+			for (unsigned int k = 0; k < persons[i].size(); k++)
+			{
+				if (find(persons[i][k].controlIds.begin(),persons[i][k].controlIds.end(),j) != persons[i][k].controlIds.end())
+				{
+					personIds.push_back(k);
+				}
 			}
 			//控制号j
 			//单个灯具
@@ -688,7 +698,12 @@ void LumOutput(string lumFile, string controlFile, string personFile)
 				lumOut << "void " << "lum_room"<< i << "_Single"<<lumIndex << " " << lumPath << " " << i << " " << j << " " 
 					<< p.x <<" "<< p.y << " " << ols.p.z << " " 
 					<< ols.np.x <<" "<< ols.np.y << " " << ols.np.z << " " 
-					<< CStringToString(CString(controlSets[i][j].type)) << endl;
+					<< CStringToString(CString(controlSets[i][j].type));
+				for (unsigned int m = 0; m < personIds.size(); m++)
+				{
+					lumOut << " " << personIds[m];
+				}
+				lumOut << endl;
 
 				//导出控制文件
 				controlOut << "lum_room" << i << "_Single"<< lumIndex << " " << CStringToString(CString(controlSets[i][j].type));
@@ -719,7 +734,12 @@ void LumOutput(string lumFile, string controlFile, string personFile)
 						<< lumPath << " " << i << " " << j << " " 
 						<< p.x <<" "<< p.y << " " << ols.z << " " 
 						<< ols.np.x <<" "<< ols.np.y << " " << ols.np.z << " " 
-						<< CStringToString(CString(controlSets[i][j].type)) << endl;
+						<< CStringToString(CString(controlSets[i][j].type));
+					for (unsigned int m = 0; m < personIds.size(); m++)
+					{
+						lumOut << " " << personIds[m];
+					}
+					lumOut << endl;
 
 					//导出控制文件
 					controlOut << "lum_room" << i << "_Set"<< lumIndex <<"_"<< m << " "
