@@ -668,10 +668,11 @@ void LumOutput(string lumFile, string controlFile, string personFile)
 			{
 				if (control->GetSubItem(k)->GetData() == CONTROL_SET_ARGS)
 				{
-					if (CString(control->GetSubItem(k)->GetName()) == _T("¹Ø¼üµã"))
-						keyGrid = control->GetSubItem(k)->GetValue().intVal;
-					else
-						args.push_back(control->GetSubItem(k)->GetValue().dblVal);
+					args.push_back(control->GetSubItem(k)->GetValue().dblVal);
+				}
+				else if (control->GetSubItem(k)->GetData() == CONTROL_SET_ARGS_KEYGRID)
+				{
+					keyGrid = control->GetSubItem(k)->GetValue().intVal;
 				}
 
 			}

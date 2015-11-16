@@ -1429,7 +1429,7 @@ void CRoomWnd::UpdateControlSetArgs(CMFCPropertyGridProperty* pControl, int keyG
 	for (int i = 0; i < pControl->GetSubItemsCount(); i++)
 	{
 		CMFCPropertyGridProperty* p = pControl->GetSubItem(i);
-		if (p->GetData() == CONTROL_SET_ARGS)
+		if (p->GetData() == CONTROL_SET_ARGS || p->GetData() == CONTROL_SET_ARGS_KEYGRID)
 		{
 			pControl->RemoveSubItem(p);
 			i--;
@@ -1453,7 +1453,7 @@ void CRoomWnd::UpdateControlSetArgs(CMFCPropertyGridProperty* pControl, int keyG
 		while(pCur->GetParent()) pCur = pCur->GetParent();
 		vector<int> keys;
 		GetKeyGrid(pCur, keys);
-		CMFCPropertyGridProperty* pKeyGrid = new CMFCPropertyGridProperty(_T("关键点"),(_variant_t)((keyGrid >= 0)?keyGrid:(keys.empty()?-1: keys[0])),_T("关键点"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pKeyGrid = new CMFCPropertyGridProperty(_T("关键点"),(_variant_t)((keyGrid >= 0)?keyGrid:(keys.empty()?-1: keys[0])),_T("关键点"), CONTROL_SET_ARGS_KEYGRID);
 		pKeyGrid->AllowEdit(FALSE);
 		CString keyStr;
 		for (int i = 0; i < keys.size(); i++)
@@ -1478,7 +1478,7 @@ void CRoomWnd::UpdateControlSetArgs(CMFCPropertyGridProperty* pControl, int keyG
 		while(pCur->GetParent()) pCur = pCur->GetParent();
 		vector<int> keys;
 		GetKeyGrid(pCur, keys);
-		CMFCPropertyGridProperty* pKeyGrid = new CMFCPropertyGridProperty(_T("关键点"),(_variant_t)((keyGrid >= 0)?keyGrid:(keys.empty()?-1: keys[0])),_T("关键点"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pKeyGrid = new CMFCPropertyGridProperty(_T("关键点"),(_variant_t)((keyGrid >= 0)?keyGrid:(keys.empty()?-1: keys[0])),_T("关键点"), CONTROL_SET_ARGS_KEYGRID );
 		pKeyGrid->AllowEdit(FALSE);
 		CString keyStr;
 		for (int i = 0; i < keys.size(); i++)
@@ -1501,7 +1501,7 @@ void CRoomWnd::UpdateControlSetArgs(CMFCPropertyGridProperty* pControl, int keyG
 		while(pCur->GetParent()) pCur = pCur->GetParent();
 		vector<int> keys;
 		GetKeyGrid(pCur, keys);
-		CMFCPropertyGridProperty* pKeyGrid = new CMFCPropertyGridProperty(_T("关键点"),(_variant_t)((keyGrid >= 0)?keyGrid:(keys.empty()?-1: keys[0])),_T("关键点"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pKeyGrid = new CMFCPropertyGridProperty(_T("关键点"),(_variant_t)((keyGrid >= 0)?keyGrid:(keys.empty()?-1: keys[0])),_T("关键点"), CONTROL_SET_ARGS_KEYGRID );
 		pKeyGrid->AllowEdit(FALSE);
 		CString keyStr;
 		for (int i = 0; i < keys.size(); i++)

@@ -83,6 +83,7 @@ enum
 	CONTROL_SET_TYPE,
 
 	CONTROL_SET_ARGS = 1001,//特殊！由于参数数量可变，用于设置data，不是索引
+	CONTROL_SET_ARGS_KEYGRID,//特殊！由于参数数量可变，用于设置data，不是索引
 };
 
 //人员
