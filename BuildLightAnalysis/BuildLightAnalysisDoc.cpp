@@ -1,6 +1,9 @@
+/**********************************************************************************************//**
+ * \file	BuildLightAnalysisDoc.cpp
+ *
+ * \brief	Implementation of the CBuildLightAnalysisDoc class
+ **************************************************************************************************/
 
-// BuildLightAnalysisDoc.cpp : implementation of the CBuildLightAnalysisDoc class
-//
 
 #include "stdafx.h"
 // SHARED_HANDLERS can be defined in an ATL project implementing preview, thumbnail
@@ -47,6 +50,15 @@ CBuildLightAnalysisDoc::CBuildLightAnalysisDoc():m_bIsOpen(false)
 	// TODO: add one-time construction code here
 
 }
+
+/**********************************************************************************************//**
+ * \fn	CBuildLightAnalysisDoc::~CBuildLightAnalysisDoc()
+ *
+ * \brief	Destructor.
+ *
+ * \author	Liuxq
+ * \date	2015/11/17
+ **************************************************************************************************/
 
 CBuildLightAnalysisDoc::~CBuildLightAnalysisDoc()
 {

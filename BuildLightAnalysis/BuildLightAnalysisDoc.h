@@ -1,6 +1,8 @@
-
-// BuildLightAnalysisDoc.h : interface of the CBuildLightAnalysisDoc class
-//
+/**********************************************************************************************//**
+ * \file	BuildLightAnalysisDoc.h
+ *
+ * \brief	Interface of the CBuildLightAnalysisDoc class
+ **************************************************************************************************/
 
 #pragma once
 
@@ -17,9 +19,9 @@ protected: // create from serialization only
 
 // Attributes
 public:
-	CString m_projectName;
-	CString m_projectLocation;
-	bool m_bIsOpen;
+	CString m_projectName;//工程名字
+	CString m_projectLocation;//工程路径
+	bool m_bIsOpen;//工程是否已经打开
 public:
 	vector<Material>& getMaterials()
 	{
@@ -73,11 +75,71 @@ public:
 #endif
 
 protected:
+
+	/**********************************************************************************************//**
+	 * \fn	void CBuildLightAnalysisDoc::clear();
+	 *
+	 * \brief	清除工程数据
+	 *
+	 * \author	Liuxq
+	 * \date	2015/11/17
+	 **************************************************************************************************/
 	void clear();
+
+	/**********************************************************************************************//**
+	 * \fn	void CBuildLightAnalysisDoc::load(ifstream& in);
+	 *
+	 * \brief	读取工程数据
+	 *
+	 * \author	Liuxq
+	 * \date	2015/11/17
+	 *
+	 * \param [in,out]	in	The in to load.
+	 **************************************************************************************************/
 	void load(ifstream& in);
+
+	/**********************************************************************************************//**
+	 * \fn	void CBuildLightAnalysisDoc::loadMaterial();
+	 *
+	 * \brief	读取材质数据
+	 *
+	 * \author	Liuxq
+	 * \date	2015/11/17
+	 **************************************************************************************************/
+
 	void loadMaterial();
+
+	/**********************************************************************************************//**
+	 * \fn	void CBuildLightAnalysisDoc::loadCity();
+	 *
+	 * \brief	读取城市数据
+	 *
+	 * \author	Liuxq
+	 * \date	2015/11/17
+	 **************************************************************************************************/
+
 	void loadCity();
+
+	/**********************************************************************************************//**
+	 * \fn	void CBuildLightAnalysisDoc::loadRoomType();
+	 *
+	 * \brief	读取房间类型信息
+	 *
+	 * \author	Liuxq
+	 * \date	2015/11/17
+	 **************************************************************************************************/
+
 	void loadRoomType();
+
+	/**********************************************************************************************//**
+	 * \fn	void CBuildLightAnalysisDoc::loadLumTems();
+	 *
+	 * \brief	读取灯具模板数据
+	 *
+	 * \author	Liuxq
+	 * \date	2015/11/17
+	 **************************************************************************************************/
+
 	void loadLumTems();
 	void loadControlSetTems();
 	void save(ofstream& out);
