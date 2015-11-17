@@ -502,37 +502,93 @@ void CBuildLightAnalysisDoc::save(ofstream& outputFile)
 
 }
 
+bool DeleteDirectory( CString DirName)
+{
+	CString PUBPATH;
+	PUBPATH = DirName;
+	CFileFind tempFind;
+	DirName += "\\*.*";
+	BOOL IsFinded=(BOOL)tempFind.FindFile(DirName);
+	while(IsFinded)
+	{
+		IsFinded=(BOOL)tempFind.FindNextFile();
+		if(!tempFind.IsDots())
+		{
+			CString strDirName;
+			strDirName+=PUBPATH;
+			strDirName+="\\";
+			strDirName+=tempFind.GetFileName();
+			if(tempFind.IsDirectory())
+			{
+				//strDirName += PUBPATH;
+				DeleteDirectory(strDirName);
+			}
+			else
+			{
+				SetFileAttributes(strDirName,FILE_ATTRIBUTE_NORMAL); //去掉文件的系统和隐藏属性
+				DeleteFile(strDirName);
+			}
+		}
+	}
+	tempFind.Close();
+	if(!RemoveDirectory(PUBPATH))
+	{
+		return false ;
+	}
+	return true;
+}
+
+
 void CBuildLightAnalysisDoc::OnFileOutput()
 {
 	string path = CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName);
-	fstream _file1, _file2, _file3, _file4, _file5, _file6;
+	fstream _file1, _file2, _file3;
 	_file1.open(path + "_geometry.rad",ios::in);
 	_file2.open(path + "_material.rad",ios::in);
 	_file3.open(path + "_room_info.txt",ios::in);
-	_file4.open(path + "_lighting_system.gx",ios::in);
-	_file5.open(path + "_control_system.ctl",ios::in);
-	_file6.open(path + "_occupany.occ",ios::in);
 
-	if(_file1 && _file2 && _file3 && _file4 && _file5 && _file6)
+	if(_file1 && _file2 && _file3)
 	{
 		int nRes = AfxMessageBox(_T("已经导出过，是否覆盖"), MB_YESNO|MB_ICONQUESTION);
 		if (nRes == IDNO)
 		{
+			_file1.close();
+			_file2.close();
+			_file3.close();
 			return;
 		}
 	}
-	
-	OnFileSave();
+	_file1.close();
+	_file2.close();
+	_file3.close();
 
+	OnFileSave();
+	CString roomInfo = m_projectLocation + _T("\\") + m_projectName + _T("_room_info.txt");
+	CString geometry = m_projectLocation + _T("\\") + m_projectName + _T("_geometry.rad");
+	CString material = m_projectLocation + _T("\\")+ m_projectName + _T("_material.rad");
+	if (!DeleteFile(roomInfo) || !DeleteFile(geometry) || !DeleteFile(material))
+	{
+		AfxMessageBox(_T("清空原来导出文件失败，查看是否已经打开或受保护！"));
+		return;
+	}
+	DeleteDirectory(m_projectLocation + _T("\\pts"));
+	DeleteDirectory(m_projectLocation + _T("\\gx"));
+	DeleteDirectory(m_projectLocation + _T("\\ctl"));
+	DeleteDirectory(m_projectLocation + _T("\\occ"));
+
+	CreateDirectory(m_projectLocation + "\\pts", NULL );
+	CreateDirectory(m_projectLocation + "\\gx", NULL );
+	CreateDirectory(m_projectLocation + "\\ctl", NULL );
+	CreateDirectory(m_projectLocation + "\\occ", NULL );
 	set<CString> mats;
 	set<Material> antiMaterials;
-	geometryOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_geometry.rad", mats, antiMaterials);
-	materialOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) + "_material.rad", m_material, mats, antiMaterials);
-	string gridfile = CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName);
-	RoomOutput(CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) +"_room_info.txt", gridfile);
-	string lumfile = CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) +"_lighting_system.gx";
-	string controlfile = CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) +"_control_system.ctl";
-	string personfile = CStringToString(m_projectLocation) + "\\"+ CStringToString(m_projectName) +"_occupancy.occ";
+	geometryOutput(CStringToString(geometry), mats, antiMaterials);
+	materialOutput(CStringToString(material), m_material, mats, antiMaterials);
+	string gridfile = CStringToString(m_projectLocation) + "\\pts\\"+ CStringToString(m_projectName);
+	RoomOutput(CStringToString(roomInfo), gridfile);
+	string lumfile = CStringToString(m_projectLocation) + "\\gx\\"+ CStringToString(m_projectName);
+	string controlfile = CStringToString(m_projectLocation) + "\\ctl\\"+ CStringToString(m_projectName);
+	string personfile = CStringToString(m_projectLocation) + "\\occ\\"+ CStringToString(m_projectName);
 	LumOutput(lumfile,controlfile, personfile);
 
 	AfxMessageBox(_T("导出成功"));

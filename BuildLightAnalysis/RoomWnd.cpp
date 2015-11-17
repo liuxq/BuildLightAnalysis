@@ -466,6 +466,15 @@ LRESULT CRoomWnd::OnPropertyChanged (WPARAM,LPARAM lParam)
 		pMain->GetActiveView()->Invalidate(); 
 		return 1;
 	}
+	if (pProp->GetData() == CONTROL_SET_ARGS_KEYGRID)
+	{
+		CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
+		if (!pMain)
+			return 0;
+		//¸üÐÂÊÓÍ¼     
+		pMain->GetActiveView()->Invalidate(); 
+		return 1;
+	}
 	return 0;
 }
 void CRoomWnd::OutputToRooms(vector<Room>& rooms)

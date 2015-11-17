@@ -632,19 +632,11 @@ void RoomOutToVector(vector<OutRoom>& outRooms, set<CString>& mats, set<Material
 	}
 }
 
-void LumOutput(string lumFile, string controlFile, string personFile)
+void LumOutput(string lumFilePre, string controlFilePre, string personFilePre)
 {
 	CMainFrame *pMain =(CMainFrame*)AfxGetMainWnd();
 	if (!pMain)
 		return;
-	ofstream lumOut(lumFile);
-	ofstream controlOut(controlFile);
-	ofstream personOut(personFile);
-	if (!lumOut.is_open() || !controlOut.is_open() || !personOut.is_open())
-	{
-		AfxMessageBox(_T("文件创建失败"));
-		return;
-	}
 
 	vector<vector<OutLumSingle>> lumSingles;
 	vector<vector<OutLumSet>> lumSets;
@@ -657,6 +649,15 @@ void LumOutput(string lumFile, string controlFile, string personFile)
 	double anglep = angle / 180 * PI;
 	for (unsigned int i = 0; i < controlSets.size(); i++)
 	{
+		string nameRoom = "_room";
+		nameRoom += '0'+i;
+		string lumFile = lumFilePre + nameRoom + "_lighting_system.gx";
+		string controlFile = controlFilePre + nameRoom + "_control_system.ctl";
+		string personFile = personFilePre + nameRoom + "_occupancy.occ";
+		ofstream lumOut(lumFile);
+		ofstream controlOut(controlFile);
+		ofstream personOut(personFile);
+		
 		//第i个房间
 		for (unsigned int j = 0; j < controlSets[i].size(); j++)
 		{
@@ -794,6 +795,25 @@ void LumOutput(string lumFile, string controlFile, string personFile)
 				personOut << "off_type " << 1 << endl;
 			}
 		}
+		
+		if ((size_t)lumOut.tellp() == 0)
+		{
+			lumOut.close();
+			DeleteFile(StringToCString(lumFile));
+		}
+		if ((size_t)controlOut.tellp() == 0)
+		{
+			controlOut.close();
+			DeleteFile(StringToCString(controlFile));
+		}
+		if ((size_t)personOut.tellp() == 0)
+		{
+			personOut.close();
+			DeleteFile(StringToCString(personFile));
+		}
+		lumOut.close();
+		controlOut.close();
+		personOut.close();
 	}
 }
 void RoomOutput(string roomFile, string gridDir)

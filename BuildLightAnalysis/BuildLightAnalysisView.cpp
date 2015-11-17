@@ -369,6 +369,8 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 		//包含：房间名，计算点，灯具
 		Gdiplus::Pen selectGridPen(Gdiplus::Color(180,GetRValue(keyGridColor),GetGValue(keyGridColor),GetBValue(keyGridColor)),3);
 		Gdiplus::Pen keyGridPen(Gdiplus::Color(255,GetRValue(keyGridColor),GetGValue(keyGridColor),GetBValue(keyGridColor)),3);
+		Gdiplus::Pen controlSetSelectKeyGridPen(Gdiplus::Color(255,0,255,0), 4);
+
 		Gdiplus::Pen roomPen(Gdiplus::Color(255,100,255,100), 20);
 		Gdiplus::Pen roomLinesPen(Gdiplus::Color(255,255,255,100), 4);
 		PropertyGridCtrl* pRoomlist = pMain->GetRoomProperty().getPropList();
@@ -446,9 +448,26 @@ void CBuildLightAnalysisView::OnDraw(CDC* pDC)
 					}
 					else if (_name.Left(3) == _T("关键点"))
 					{
-						graph->DrawLine(&keyGridPen, (float)p.x - 4, (float)p.y, (float)p.x + 4, (float)p.y);
-						graph->DrawLine(&keyGridPen, (float)p.x, (float)p.y - 4, (float)p.x, (float)p.y + 4);
+						bool flag = true;
+						if (pRoomlist->GetCurSel() && pRoomlist->GetCurSel()->GetData() == CONTROL_SET_ARGS_KEYGRID)//是否是控制分组中选取的关键点
+						{
+							CMFCPropertyGridProperty* curSel = pRoomlist->GetCurSel();
+							while(curSel->GetParent())
+								curSel = curSel->GetParent();
 
+							if (NamePost(curSel->GetName()) == i && pRoomlist->GetCurSel()->GetValue().lVal == j)
+							{
+								graph->DrawLine(&controlSetSelectKeyGridPen, (float)p.x - 4, (float)p.y, (float)p.x + 4, (float)p.y);
+								graph->DrawLine(&controlSetSelectKeyGridPen, (float)p.x, (float)p.y - 4, (float)p.x, (float)p.y + 4);
+								flag = false;
+							}
+							
+						}
+						if (flag)
+						{
+							graph->DrawLine(&keyGridPen, (float)p.x - 4, (float)p.y, (float)p.x + 4, (float)p.y);
+							graph->DrawLine(&keyGridPen, (float)p.x, (float)p.y - 4, (float)p.x, (float)p.y + 4);
+						}
 					}
 					else
 						graph->FillEllipse(&pointBrush, (float)p.x - 2, (float)p.y - 2, 4.0, 4.0);
