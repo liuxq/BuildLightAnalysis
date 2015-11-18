@@ -1,3 +1,9 @@
+/**********************************************************************************************//**
+ * \file	OptionWnd.h
+ *
+ * \brief	选项界面
+ **************************************************************************************************/
+
 #include "PropertyGridCtrl.h"
 #pragma once
 
@@ -82,11 +88,79 @@ public:
 		}
 		return tmp;
 	}
+
+	/**********************************************************************************************//**
+	 * \fn	void COptionWnd::loadMaterialTemplateAndCity();
+	 *
+	 * \brief	导出材料模板和城市模板文件
+	 *
+	 * \author	Liuxq
+	 * \date	2015/11/18
+	 **************************************************************************************************/
+
 	void loadMaterialTemplateAndCity();
+
+	/**********************************************************************************************//**
+	 * \fn	void COptionWnd::GetTransform(double s, double centerX, double centerY);
+	 *
+	 * \brief	将变换参数记录到选项中
+	 *
+	 * \author	Liuxq
+	 * \date	2015/11/18
+	 *
+	 * \param	s	   	scale
+	 * \param	centerX	The center x coordinate.
+	 * \param	centerY	The center y coordinate.
+	 **************************************************************************************************/
+
 	void GetTransform(double s, double centerX, double centerY);
+
+	/**********************************************************************************************//**
+	 * \fn	void COptionWnd::SetTransform();
+	 *
+	 * \brief	从选项中年读取变换参数
+	 *
+	 * \author	Liuxq
+	 * \date	2015/11/18
+	 **************************************************************************************************/
+
 	void SetTransform();
+
+	/**********************************************************************************************//**
+	 * \fn	void COptionWnd::save(ofstream& out);
+	 *
+	 * \brief	保存选项
+	 *
+	 * \author	Liuxq
+	 * \date	2015/11/18
+	 *
+	 * \param [in,out]	out	The out to save.
+	 **************************************************************************************************/
+
 	void save(ofstream& out);
+
+	/**********************************************************************************************//**
+	 * \fn	void COptionWnd::load(ifstream& in);
+	 *
+	 * \brief	记录选项
+	 *
+	 * \author	Liuxq
+	 * \date	2015/11/18
+	 *
+	 * \param [in,out]	in	The in to load.
+	 **************************************************************************************************/
+
 	void load(ifstream& in);
+
+	/**********************************************************************************************//**
+	 * \fn	void COptionWnd::ResetAllOption();
+	 *
+	 * \brief	刪除所有记录
+	 *
+	 * \author	Liuxq
+	 * \date	2015/11/18
+	 **************************************************************************************************/
+
 	void ResetAllOption();
 	
 
@@ -103,10 +177,6 @@ public:
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnExpandAllProperties();
-	afx_msg void OnUpdateExpandAllProperties(CCmdUI* pCmdUI);
-	afx_msg void OnSortProperties();
-	afx_msg void OnUpdateSortProperties(CCmdUI* pCmdUI);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 

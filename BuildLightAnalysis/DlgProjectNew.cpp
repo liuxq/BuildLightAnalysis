@@ -1,5 +1,8 @@
-// DlgProjectNew.cpp : implementation file
-//
+/**********************************************************************************************//**
+ * \file	DlgProjectNew.cpp
+ *
+ * \brief	Implements the dialog project new class.
+ **************************************************************************************************/
 
 #include "stdafx.h"
 #include "BuildLightAnalysis.h"

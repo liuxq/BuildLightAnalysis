@@ -1,6 +1,8 @@
-
-// BuildLightAnalysis.cpp : Defines the class behaviors for the application.
-//
+/**********************************************************************************************//**
+ * \file	BuildLightAnalysis.cpp
+ *
+ * \brief	Defines the class behaviors for the application
+ **************************************************************************************************/
 
 #include "stdafx.h"
 #include "afxwinappex.h"

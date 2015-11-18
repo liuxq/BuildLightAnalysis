@@ -1,3 +1,9 @@
+/**********************************************************************************************//**
+ * \file	MathUtility.h
+ *
+ * \brief	一些算法的封装，也有一些小工具函数
+ **************************************************************************************************/
+
 #pragma once
 
 #include <vector>
@@ -11,10 +17,12 @@ using namespace std;
 
 string CStringToString(CString& str);
 CString StringToCString(string& str);
+int NamePost(CString name);
 
 
 //按照交点优化线段，去掉多余的，补充缺失的，最后再按照交点分段
 void OptimizeLine(vector<sLine>& slines, vector<sLine>& outSlines, double wTh);
+
 //求点和线段的距离
 double lenOfLinePoint(sLine& line, Vec2d p);
 
@@ -36,4 +44,4 @@ double CalGirth(vector<Vec2d>& polygon);
 //旋转坐标
 Vec2d Rotate(Vec2d& p, double angle);
 
-int NamePost(CString name);
+

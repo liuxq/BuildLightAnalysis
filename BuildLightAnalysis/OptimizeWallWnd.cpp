@@ -80,24 +80,6 @@ void COptimizeWallWnd::OnSize(UINT nType, int cx, int cy)
 	AdjustLayout();
 }
 
-void COptimizeWallWnd::OnExpandAllProperties()
-{
-	m_wndPropList.ExpandAll();
-}
-
-void COptimizeWallWnd::OnUpdateExpandAllProperties(CCmdUI* /* pCmdUI */)
-{
-}
-
-void COptimizeWallWnd::OnSortProperties()
-{
-	m_wndPropList.SetAlphabeticMode(!m_wndPropList.IsAlphabeticMode());
-}
-
-void COptimizeWallWnd::OnUpdateSortProperties(CCmdUI* pCmdUI)
-{
-	pCmdUI->SetCheck(m_wndPropList.IsAlphabeticMode());
-}
 void COptimizeWallWnd::DeleteAllPos()
 {
 	CMFCPropertyGridProperty* pGroup = getCoodOutWallGroup();
@@ -162,42 +144,6 @@ void COptimizeWallWnd::InsertPos(bool isOutWall, double x, double y, double x1, 
 	m_wndPropList.AdjustLayout();
 }
 
-
-void COptimizeWallWnd::OnUpdateProperties1(CCmdUI* /*pCmdUI*/)
-{
-	// TODO: Add your command update UI handler code here
-}
-
-void COptimizeWallWnd::OnDeletePos()
-{
-	//CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
-	//if (selItem && selItem->GetParent() && selItem->GetParent()->GetData() == waiqiangID)
-	//{
-	//	m_wndPropList.DeleteProperty(selItem);
-
-	//	//重新设置一下坐标编号
-	//	CMFCPropertyGridProperty* pGroup = getCoodGroup();
-	//	if (!pGroup)
-	//		return;
-	//	
-	//	int count = pGroup->GetSubItemsCount();
-	//	CString strName;
-	//	for (int i = 0; i < count; i++)
-	//	{
-	//		strName.Format(_T("%d"),i+1);
-	//		pGroup->GetSubItem(i)->SetName(strName);
-	//	}
-	//}
-	//
-	////更新视图
-	//CMainFrame* pMain=(CMainFrame*)AfxGetApp()->m_pMainWnd;     
-	//pMain->GetActiveView()->Invalidate(); 
-}
-
-void COptimizeWallWnd::OnUpdateProperties2(CCmdUI* /*pCmdUI*/)
-{
-	// TODO: Add your command update UI handler code here
-}
 
 void COptimizeWallWnd::InitPropList()
 {

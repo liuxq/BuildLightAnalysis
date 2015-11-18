@@ -33,9 +33,9 @@ BEGIN_MESSAGE_MAP(CInWallWnd, CDockablePane)
 	ON_WM_SIZE()
 	
 	ON_COMMAND(IDC_IN_INSERT_BUTTON, OnInsertPos)
-	ON_UPDATE_COMMAND_UI(IDC_IN_INSERT_BUTTON, OnUpdateProperties2)
+	ON_UPDATE_COMMAND_UI(IDC_IN_INSERT_BUTTON, OnUpdateButton)
 	ON_COMMAND(IDC_IN_DELETE_BUTTON, OnDeletePos)
-	ON_UPDATE_COMMAND_UI(IDC_IN_DELETE_BUTTON, OnUpdateProperties2)
+	ON_UPDATE_COMMAND_UI(IDC_IN_DELETE_BUTTON, OnUpdateButton)
 	ON_WM_SETFOCUS()
 	ON_WM_SETTINGCHANGE()
 END_MESSAGE_MAP()
@@ -100,24 +100,6 @@ void CInWallWnd::OnSize(UINT nType, int cx, int cy)
 	AdjustLayout();
 }
 
-void CInWallWnd::OnExpandAllProperties()
-{
-	m_wndPropList.ExpandAll();
-}
-
-void CInWallWnd::OnUpdateExpandAllProperties(CCmdUI* /* pCmdUI */)
-{
-}
-
-void CInWallWnd::OnSortProperties()
-{
-	m_wndPropList.SetAlphabeticMode(!m_wndPropList.IsAlphabeticMode());
-}
-
-void CInWallWnd::OnUpdateSortProperties(CCmdUI* pCmdUI)
-{
-	pCmdUI->SetCheck(m_wndPropList.IsAlphabeticMode());
-}
 void CInWallWnd::InsertPos(double x, double y, double x1, double y1)
 {
 	CMFCPropertyGridProperty* pGroup = getCoodGroup();
@@ -164,7 +146,7 @@ void CInWallWnd::DeleteAllPos()
 void CInWallWnd::inputFromLines(vector<sLine>& sLines)
 {
 	DeleteAllPos();	
-	for (int i = 0; i < sLines.size(); i++)
+	for (unsigned int i = 0; i < sLines.size(); i++)
 	{
 		InsertPos(sLines[i].s.x, sLines[i].s.y, sLines[i].e.x, sLines[i].e.y);
 	}
@@ -198,10 +180,7 @@ void CInWallWnd::load(ifstream& in)
 	serializer<sLine>::read(in, &sLines);
 	inputFromLines(sLines);
 }
-void CInWallWnd::OnUpdateProperties1(CCmdUI* /*pCmdUI*/)
-{
-	// TODO: Add your command update UI handler code here
-}
+
 
 void CInWallWnd::OnDeletePos()
 {
@@ -235,7 +214,7 @@ void CInWallWnd::OnDeletePos()
 	pMain->GetActiveView()->Invalidate(); 
 }
 
-void CInWallWnd::OnUpdateProperties2(CCmdUI* /*pCmdUI*/)
+void CInWallWnd::OnUpdateButton(CCmdUI* /*pCmdUI*/)
 {
 	// TODO: Add your command update UI handler code here
 }

@@ -1,6 +1,8 @@
-
-// BuildLightAnalysisView.cpp : implementation of the CBuildLightAnalysisView class
-//
+/**********************************************************************************************//**
+ * \file	BuildLightAnalysisView.cpp
+ *
+ * \brief	Implements the build light analysis view class.
+ **************************************************************************************************/
 
 #include "stdafx.h"
 // SHARED_HANDLERS can be defined in an ATL project implementing preview, thumbnail

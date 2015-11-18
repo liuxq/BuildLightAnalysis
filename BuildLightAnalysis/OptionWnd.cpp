@@ -81,25 +81,6 @@ void COptionWnd::OnSize(UINT nType, int cx, int cy)
 	AdjustLayout();
 }
 
-void COptionWnd::OnExpandAllProperties()
-{
-	m_wndPropList.ExpandAll();
-}
-
-void COptionWnd::OnUpdateExpandAllProperties(CCmdUI* /* pCmdUI */)
-{
-}
-
-void COptionWnd::OnSortProperties()
-{
-	m_wndPropList.SetAlphabeticMode(!m_wndPropList.IsAlphabeticMode());
-}
-
-void COptionWnd::OnUpdateSortProperties(CCmdUI* pCmdUI)
-{
-	pCmdUI->SetCheck(m_wndPropList.IsAlphabeticMode());
-}
-
 void COptionWnd::InitPropList()
 {
 	SetPropListFont();

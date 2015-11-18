@@ -34,9 +34,9 @@ BEGIN_MESSAGE_MAP(CWindowWnd, CDockablePane)
 	ON_WM_SIZE()
 
 	ON_COMMAND(IDC_WINDOW_INSERT_BUTTON, OnNewWindow)
-	ON_UPDATE_COMMAND_UI(IDC_WINDOW_INSERT_BUTTON, OnUpdateProperties1)
+	ON_UPDATE_COMMAND_UI(IDC_WINDOW_INSERT_BUTTON, OnUpdateButton)
 	ON_COMMAND(IDC_WINDOW_DELETE_BUTTON, OnDeleteWindow)
-	ON_UPDATE_COMMAND_UI(IDC_WINDOW_DELETE_BUTTON, OnUpdateProperties1)
+	ON_UPDATE_COMMAND_UI(IDC_WINDOW_DELETE_BUTTON, OnUpdateButton)
 
 	ON_WM_SETFOCUS()
 	ON_WM_SETTINGCHANGE()
@@ -159,26 +159,7 @@ void CWindowWnd::OnSize(UINT nType, int cx, int cy)
 	AdjustLayout();
 }
 
-void CWindowWnd::OnExpandAllProperties()
-{
-	m_wndPropList.ExpandAll();
-}
-
-void CWindowWnd::OnUpdateExpandAllProperties(CCmdUI* /* pCmdUI */)
-{
-}
-
-void CWindowWnd::OnSortProperties()
-{
-	m_wndPropList.SetAlphabeticMode(!m_wndPropList.IsAlphabeticMode());
-}
-
-void CWindowWnd::OnUpdateSortProperties(CCmdUI* pCmdUI)
-{
-	pCmdUI->SetCheck(m_wndPropList.IsAlphabeticMode());
-}
-
-void CWindowWnd::OnUpdateProperties1(CCmdUI* pCmdUI)
+void CWindowWnd::OnUpdateButton(CCmdUI* pCmdUI)
 {
 
 }

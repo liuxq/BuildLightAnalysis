@@ -1,6 +1,9 @@
+/**********************************************************************************************//**
+ * \file	BuildLightAnalysis.h
+ *
+ * \brief	Main header file for the BuildLightAnalysis application
+ **************************************************************************************************/
 
-// BuildLightAnalysis.h : main header file for the BuildLightAnalysis application
-//
 #pragma once
 
 #ifndef __AFXWIN_H__
@@ -32,9 +35,29 @@ public:
 	virtual void LoadCustomState();
 	virtual void SaveCustomState();
 
+	/**********************************************************************************************//**
+	 * \fn	afx_msg void CBuildLightAnalysisApp::OnAppAbout();
+	 *
+	 * \brief	响应关于菜单，弹出版本信息
+	 *
+	 * \author	Liuxq
+	 * \date	2015/11/18
+	 **************************************************************************************************/
+
 	afx_msg void OnAppAbout();
-	DECLARE_MESSAGE_MAP()
+	
+	/**********************************************************************************************//**
+	 * \fn	afx_msg void CBuildLightAnalysisApp::OnDoc();
+	 *
+	 * \brief	调用help.doc帮助文件
+	 *
+	 * \author	Liuxq
+	 * \date	2015/11/18
+	 **************************************************************************************************/
+
 	afx_msg void OnDoc();
+
+	DECLARE_MESSAGE_MAP()
 };
 
 extern CBuildLightAnalysisApp theApp;

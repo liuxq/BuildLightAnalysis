@@ -37,9 +37,9 @@ BEGIN_MESSAGE_MAP(CRoomWnd, CDockablePane)
 	ON_WM_CONTEXTMENU()
 
 	ON_COMMAND(IDC_ROOM_INSERT_BUTTON, OnNewRoom)
-	ON_UPDATE_COMMAND_UI(IDC_ROOM_INSERT_BUTTON, OnUpdateProperties1)
+	ON_UPDATE_COMMAND_UI(IDC_ROOM_INSERT_BUTTON, OnUpdateButton)
 	ON_COMMAND(IDC_ROOM_DELETE_BUTTON, OnDeleteRoom)
-	ON_UPDATE_COMMAND_UI(IDC_ROOM_DELETE_BUTTON, OnUpdateProperties1)
+	ON_UPDATE_COMMAND_UI(IDC_ROOM_DELETE_BUTTON, OnUpdateButton)
 
 	ON_WM_SETFOCUS()
 	ON_WM_SETTINGCHANGE()
@@ -109,24 +109,6 @@ void CRoomWnd::OnSize(UINT nType, int cx, int cy)
 	AdjustLayout();
 }
 
-void CRoomWnd::OnExpandAllProperties()
-{
-	m_wndPropList.ExpandAll();
-}
-
-void CRoomWnd::OnUpdateExpandAllProperties(CCmdUI* /* pCmdUI */)
-{
-}
-
-void CRoomWnd::OnSortProperties()
-{
-	m_wndPropList.SetAlphabeticMode(!m_wndPropList.IsAlphabeticMode());
-}
-
-void CRoomWnd::OnUpdateSortProperties(CCmdUI* pCmdUI)
-{
-	pCmdUI->SetCheck(m_wndPropList.IsAlphabeticMode());
-}
 
 void CRoomWnd::InitPropList()
 {
@@ -315,7 +297,7 @@ void CRoomWnd::CalGrid(CMFCPropertyGridProperty* pGrid)
 	m_wndPropList.AdjustLayout();
 }
 
-void CRoomWnd::OnUpdateProperties1(CCmdUI* pCmdUI)
+void CRoomWnd::OnUpdateButton(CCmdUI* pCmdUI)
 {
 
 }
@@ -1447,16 +1429,16 @@ void CRoomWnd::UpdateControlSetArgs(CMFCPropertyGridProperty* pControl, int keyG
 	vector<ControlSetTem>& controlSetTems = pDoc->getControlSetTems();
 
 	CString controlSetType = pControl->GetSubItem(CONTROL_SET_TYPE)->GetValue().bstrVal;
-	if (controlSetType == CString(controlSetTems[0].type))
+	if (controlSetType == CString(controlSetTems[ControlSetTem::manual_on_off].type))
 	{
 		//没有参数
 	}
-	else if (controlSetType == CString(controlSetTems[1].type))
+	else if (controlSetType == CString(controlSetTems[ControlSetTem::mannual_on_auto_off].type))
 	{
-		CMFCPropertyGridProperty* pDelayTime = new CMFCPropertyGridProperty(_T("延时参数"),controlSetTems[1].args[0],_T("延时参数"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pDelayTime = new CMFCPropertyGridProperty(_T("延时参数"),controlSetTems[ControlSetTem::mannual_on_auto_off].args[0],_T("延时参数"), CONTROL_SET_ARGS );
 		pControl->AddSubItem(pDelayTime);
 	}
-	else if (controlSetType == CString(controlSetTems[2].type))
+	else if (controlSetType == CString(controlSetTems[ControlSetTem::light_sensor_on_off].type))
 	{
 		CMFCPropertyGridProperty* pCur = pControl;
 		while(pCur->GetParent()) pCur = pCur->GetParent();
@@ -1470,18 +1452,18 @@ void CRoomWnd::UpdateControlSetArgs(CMFCPropertyGridProperty* pControl, int keyG
 			keyStr.Format(_T("%d"), keys[i]);
 			pKeyGrid->AddOption(keyStr);
 		}
-		CMFCPropertyGridProperty* pOpen = new CMFCPropertyGridProperty(_T("开灯照度参数"),controlSetTems[2].args[0],_T("开灯照度参数"), CONTROL_SET_ARGS );
-		CMFCPropertyGridProperty* pClose = new CMFCPropertyGridProperty(_T("关灯照度参数"),controlSetTems[2].args[1],_T("关灯照度参数"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pOpen = new CMFCPropertyGridProperty(_T("开灯照度参数"),controlSetTems[ControlSetTem::light_sensor_on_off].args[0],_T("开灯照度参数"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pClose = new CMFCPropertyGridProperty(_T("关灯照度参数"),controlSetTems[ControlSetTem::light_sensor_on_off].args[1],_T("关灯照度参数"), CONTROL_SET_ARGS );
 		pControl->AddSubItem(pKeyGrid);
 		pControl->AddSubItem(pOpen);
 		pControl->AddSubItem(pClose);
 	}
-	else if (controlSetType == CString(controlSetTems[3].type))
+	else if (controlSetType == CString(controlSetTems[ControlSetTem::auto_on_off].type))
 	{
-		CMFCPropertyGridProperty* pDelayTime = new CMFCPropertyGridProperty(_T("延时参数"),controlSetTems[3].args[0],_T("延时参数"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pDelayTime = new CMFCPropertyGridProperty(_T("延时参数"),controlSetTems[ControlSetTem::auto_on_off].args[0],_T("延时参数"), CONTROL_SET_ARGS );
 		pControl->AddSubItem(pDelayTime);
 	}
-	else if (controlSetType == CString(controlSetTems[4].type))
+	else if (controlSetType == CString(controlSetTems[ControlSetTem::mannual_on_off_dimming].type))
 	{
 		CMFCPropertyGridProperty* pCur = pControl;
 		while(pCur->GetParent()) pCur = pCur->GetParent();
@@ -1496,15 +1478,15 @@ void CRoomWnd::UpdateControlSetArgs(CMFCPropertyGridProperty* pControl, int keyG
 			pKeyGrid->AddOption(keyStr);
 		}
 
-		CMFCPropertyGridProperty* pDown = new CMFCPropertyGridProperty(_T("照度下限"),controlSetTems[4].args[0],_T("照度下限"), CONTROL_SET_ARGS );
-		CMFCPropertyGridProperty* pUp = new CMFCPropertyGridProperty(_T("照度上限"),controlSetTems[4].args[1],_T("照度上限"), CONTROL_SET_ARGS );
-		CMFCPropertyGridProperty* pMinScale = new CMFCPropertyGridProperty(_T("最低输出比例"),controlSetTems[4].args[2],_T("最低输出比例"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pDown = new CMFCPropertyGridProperty(_T("照度下限"),controlSetTems[ControlSetTem::mannual_on_off_dimming].args[0],_T("照度下限"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pUp = new CMFCPropertyGridProperty(_T("照度上限"),controlSetTems[ControlSetTem::mannual_on_off_dimming].args[1],_T("照度上限"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pMinScale = new CMFCPropertyGridProperty(_T("最低输出比例"),controlSetTems[ControlSetTem::mannual_on_off_dimming].args[2],_T("最低输出比例"), CONTROL_SET_ARGS );
 		pControl->AddSubItem(pKeyGrid);
 		pControl->AddSubItem(pDown);
 		pControl->AddSubItem(pUp);
 		pControl->AddSubItem(pMinScale);
 	}
-	else if (controlSetType == CString(controlSetTems[5].type))
+	else if (controlSetType == CString(controlSetTems[ControlSetTem::mannual_on_auto_off_dimming].type))
 	{
 		CMFCPropertyGridProperty* pCur = pControl;
 		while(pCur->GetParent()) pCur = pCur->GetParent();
@@ -1519,24 +1501,24 @@ void CRoomWnd::UpdateControlSetArgs(CMFCPropertyGridProperty* pControl, int keyG
 			pKeyGrid->AddOption(keyStr);
 		}
 
-		CMFCPropertyGridProperty* pDelayTime = new CMFCPropertyGridProperty(_T("延时参数"),controlSetTems[5].args[0],_T("延时参数"), CONTROL_SET_ARGS );
-		CMFCPropertyGridProperty* pDown = new CMFCPropertyGridProperty(_T("照度下限"),controlSetTems[5].args[1],_T("照度下限"), CONTROL_SET_ARGS );
-		CMFCPropertyGridProperty* pUp = new CMFCPropertyGridProperty(_T("照度上限"),controlSetTems[5].args[2],_T("照度上限"), CONTROL_SET_ARGS );
-		CMFCPropertyGridProperty* pMinScale = new CMFCPropertyGridProperty(_T("最低输出比例"),controlSetTems[5].args[3],_T("最低输出比例"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pDelayTime = new CMFCPropertyGridProperty(_T("延时参数"),controlSetTems[ControlSetTem::mannual_on_auto_off_dimming].args[0],_T("延时参数"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pDown = new CMFCPropertyGridProperty(_T("照度下限"),controlSetTems[ControlSetTem::mannual_on_auto_off_dimming].args[1],_T("照度下限"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pUp = new CMFCPropertyGridProperty(_T("照度上限"),controlSetTems[ControlSetTem::mannual_on_auto_off_dimming].args[2],_T("照度上限"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pMinScale = new CMFCPropertyGridProperty(_T("最低输出比例"),controlSetTems[ControlSetTem::mannual_on_auto_off_dimming].args[3],_T("最低输出比例"), CONTROL_SET_ARGS );
 		pControl->AddSubItem(pKeyGrid);
 		pControl->AddSubItem(pDelayTime);
 		pControl->AddSubItem(pDown);
 		pControl->AddSubItem(pUp);
 		pControl->AddSubItem(pMinScale);
 	}
-	else if (controlSetType == CString(controlSetTems[6].type))
+	else if (controlSetType == CString(controlSetTems[ControlSetTem::time_table].type))
 	{
-		CMFCPropertyGridProperty* pTime1_on = new CMFCPropertyGridProperty(_T("第一次开灯的时刻"),controlSetTems[6].args[0],_T("第一次开灯的时刻"), CONTROL_SET_ARGS );
-		CMFCPropertyGridProperty* pTime1_off = new CMFCPropertyGridProperty(_T("第一次关灯的时刻"),controlSetTems[6].args[1],_T("第一次关灯的时刻"), CONTROL_SET_ARGS );
-		CMFCPropertyGridProperty* pK1_output = new CMFCPropertyGridProperty(_T("第一次光输出比例"),controlSetTems[6].args[2],_T("第一次光输出比例"), CONTROL_SET_ARGS );
-		CMFCPropertyGridProperty* pTime2_on = new CMFCPropertyGridProperty(_T("第二次开灯的时刻"),controlSetTems[6].args[3],_T("第二次开灯的时刻"), CONTROL_SET_ARGS );
-		CMFCPropertyGridProperty* pTime2_off = new CMFCPropertyGridProperty(_T("第二次关灯的时刻"),controlSetTems[6].args[4],_T("第二次关灯的时刻"), CONTROL_SET_ARGS );
-		CMFCPropertyGridProperty* pK2_output = new CMFCPropertyGridProperty(_T("第二次光输出比例"),controlSetTems[6].args[5],_T("第二次光输出比例"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pTime1_on = new CMFCPropertyGridProperty(_T("第一次开灯的时刻"),controlSetTems[ControlSetTem::time_table].args[0],_T("第一次开灯的时刻"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pTime1_off = new CMFCPropertyGridProperty(_T("第一次关灯的时刻"),controlSetTems[ControlSetTem::time_table].args[1],_T("第一次关灯的时刻"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pK1_output = new CMFCPropertyGridProperty(_T("第一次光输出比例"),controlSetTems[ControlSetTem::time_table].args[2],_T("第一次光输出比例"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pTime2_on = new CMFCPropertyGridProperty(_T("第二次开灯的时刻"),controlSetTems[ControlSetTem::time_table].args[3],_T("第二次开灯的时刻"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pTime2_off = new CMFCPropertyGridProperty(_T("第二次关灯的时刻"),controlSetTems[ControlSetTem::time_table].args[4],_T("第二次关灯的时刻"), CONTROL_SET_ARGS );
+		CMFCPropertyGridProperty* pK2_output = new CMFCPropertyGridProperty(_T("第二次光输出比例"),controlSetTems[ControlSetTem::time_table].args[5],_T("第二次光输出比例"), CONTROL_SET_ARGS );
 
 		pControl->AddSubItem(pTime1_on);
 		pControl->AddSubItem(pTime1_off);
