@@ -580,8 +580,11 @@ void CBuildLightAnalysisDoc::OnFileOutput()
 	CString material = m_projectLocation + _T("\\")+ m_projectName + _T("_material.rad");
 	if (!DeleteFile(roomInfo) || !DeleteFile(geometry) || !DeleteFile(material))
 	{
-		AfxMessageBox(_T("清空原来导出文件失败，查看是否已经打开或受保护！"));
-		return;
+		if (GetLastError() == 32)//如果是已打开或受保护的错误码
+		{
+			AfxMessageBox(_T("清空原来导出文件失败，查看是否已经打开或受保护！"));
+			return;
+		}
 	}
 	DeleteDirectory(m_projectLocation + _T("\\pts"));
 	DeleteDirectory(m_projectLocation + _T("\\gx"));
