@@ -421,6 +421,20 @@ public:
 	void DeleteControSetByIndex(CMFCPropertyGridProperty* pRoom, int index);
 
 	/**********************************************************************************************//**
+	* \fn	void CRoomWnd::DeleteControSetByIndex(CMFCPropertyGridProperty* pRoom, int index);
+	*
+	* \brief	按照索引删除人员
+	*
+	* \author	Liuxq
+	* \date	2015/11/18
+	*
+	* \param [in,out]	pRoom	If non-null, the room.
+	* \param	index		 	Zero-based index of the.
+	**************************************************************************************************/
+
+	void DeletePersonByIndex(CMFCPropertyGridProperty* pRoom, int index);
+
+	/**********************************************************************************************//**
 	 * \fn	void CRoomWnd::save(ofstream& out);
 	 *
 	 * \brief	保存房间信息到工程文件中

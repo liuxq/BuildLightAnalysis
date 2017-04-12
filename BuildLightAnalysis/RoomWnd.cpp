@@ -943,7 +943,7 @@ void CRoomWnd::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 			menu1.DestroyMenu();
 			if (selectI == MENU_CONTROL_SET0)//删除分组
 			{
-				DeleteControSetByIndex(curItem, NamePost(selItem->GetName()));
+				DeletePersonByIndex(curItem, NamePost(selItem->GetName()));
 			}
 			
 		}
@@ -1062,6 +1062,37 @@ void CRoomWnd::DeleteControSetByIndex(CMFCPropertyGridProperty* pRoom, int delIn
 		m_wndPropList.AdjustLayout();
 	}
 }
+
+void CRoomWnd::DeletePersonByIndex(CMFCPropertyGridProperty* pRoom, int delIndex)
+{
+	CMFCPropertyGridProperty* persons = pRoom->GetSubItem(ROOM_PERSON);
+
+	if (delIndex < 0 || delIndex >= persons->GetSubItemsCount())
+		return;
+
+	CMainFrame* pMain = (CMainFrame*)AfxGetApp()->m_pMainWnd;
+
+	CMFCPropertyGridProperty* delItem = persons->GetSubItem(delIndex);
+	if (delItem)
+	{
+		persons->RemoveSubItem(delItem);
+
+		//重新设置一下人员编号
+		int count = persons->GetSubItemsCount();
+		CString strName;
+		for (int i = 0; i < count; i++)
+		{
+			strName.Format(_T("%d"), i);
+			persons->GetSubItem(i)->SetName(strName);
+
+			if (i == delIndex)
+				m_wndPropList.SetCurSel(persons->GetSubItem(i));
+		}
+
+		m_wndPropList.AdjustLayout();
+	}
+}
+
 void CRoomWnd::OnRoomCalGrid()
 {
 	CMFCPropertyGridProperty* selItem = m_wndPropList.GetCurSel();
