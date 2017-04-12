@@ -929,6 +929,24 @@ void CRoomWnd::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 				m_wndPropList.AdjustLayout();
 			}
 		}
+		else if (selItem->GetData() == PERSON_DATA)//删除人员
+		{
+			CMFCPropertyGridProperty* curItem = selItem;
+			while (curItem->GetParent())
+				curItem = curItem->GetParent();
+			
+			CMenu menu1;
+			menu1.CreatePopupMenu();
+			menu1.AppendMenu(MF_STRING, MENU_CONTROL_SET0 + 0, _T("删除"));
+			
+			int selectI = menu1.TrackPopupMenu(TPM_RETURNCMD, point.x, point.y, this);
+			menu1.DestroyMenu();
+			if (selectI == MENU_CONTROL_SET0)//删除分组
+			{
+				DeleteControSetByIndex(curItem, NamePost(selItem->GetName()));
+			}
+			
+		}
 		else
 			theApp.GetContextMenuManager()->ShowPopupMenu(IDR_MENU_ROOM, point.x, point.y, this, TRUE);
 
@@ -1575,7 +1593,7 @@ void CRoomWnd::AddPerson(CMFCPropertyGridProperty* pPerson, WCHAR schedule_type[
 	CString strCount;
 	strCount.Format(_T("%d"),count);
 
-	PropertyGridProperty* pPersoni = new PropertyGridProperty(strCount,0, FALSE);
+	PropertyGridProperty* pPersoni = new PropertyGridProperty(strCount, PERSON_DATA, FALSE);
 
 	PropertyGridProperty* pSchedule = new PropertyGridProperty(_T("作息类型"), schedule_type, _T("作息类型"));
 	PropertyGridProperty* pBehavior = new PropertyGridProperty(_T("行为类型"), behavior_type, _T("行为类型"));
